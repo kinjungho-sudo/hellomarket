@@ -373,4 +373,59 @@ function setupEventListeners() {
   })
 }
 
+// ── 실시간 자동 갱신 ──────────────────────────────────────────────
+// 1) Supabase Realtime: 새 주문 INSERT 즉시 감지
+// 2) 5초 폴링: 웹소켓 끊김 대비 보완
+function setupRealtimeSync() {
+  let lastOrderId = null   // 중복 토스트 방지용
+  let pollTimer = null
+
+  // 상단 알림 토스트
+  function showToast(msg) {
+    let toast = document.getElementById('order-toast')
+    if (!toast) {
+      toast = document.createElement('div')
+      toast.id = 'order-toast'
+      toast.style.cssText = [
+        'position:fixed; top:20px; right:24px; z-index:9999;',
+        'background:var(--color-primary); color:#fff;',
+        'padding:12px 20px; border-radius:10px;',
+        'font-size:14px; font-weight:700;',
+        'box-shadow:0 4px 16px rgba(0,0,0,0.18);',
+        'opacity:0; transition:opacity 0.3s;',
+        'pointer-events:none;',
+      ].join('')
+      document.body.appendChild(toast)
+    }
+    toast.textContent = msg
+    toast.style.opacity = '1'
+    clearTimeout(toast._timer)
+    toast._timer = setTimeout(() => { toast.style.opacity = '0' }, 4000)
+  }
+
+  // Realtime 구독 — hgm_orders INSERT 감지
+  supabase
+    .channel('admin-orders-realtime')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'hgm_orders' }, (payload) => {
+      const newOrder = payload.new
+      if (newOrder.id === lastOrderId) return
+      lastOrderId = newOrder.id
+      loadOrders()
+      showToast(`🛒 새 주문 도착! ${newOrder.order_number}`)
+    })
+    .subscribe()
+
+  // 5초 폴링 — 현재 1페이지 필터 기준으로 갱신 (모달 열려있을 때는 건너뜀)
+  pollTimer = setInterval(() => {
+    const modalOpen = document.getElementById('order-modal')?.classList.contains('open')
+    if (!modalOpen) loadOrders()
+  }, 5000)
+
+  // 페이지 떠날 때 정리
+  window.addEventListener('beforeunload', () => {
+    clearInterval(pollTimer)
+    supabase.removeAllChannels()
+  })
+}
+
 initPage()
