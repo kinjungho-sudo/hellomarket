@@ -2,7 +2,6 @@
 import { requireAdmin, signOut } from '/js/auth.js'
 import { supabase } from '/js/config.js'
 import { getPosts, createPost, updatePost, deletePost } from '/js/api/posts.js'
-import { getProducts } from '/js/api/products.js'
 
 // 관리자 접근 제어
 await requireAdmin()
@@ -32,7 +31,6 @@ let deleteTargetId = null
 let currentTypeFilter = ''
 
 async function initPage() {
-  await loadProductsForSelect()
   await loadPosts()
   setupEventListeners()
 }
@@ -65,7 +63,7 @@ async function loadPosts() {
 
     if (!posts || posts.length === 0) {
       const tr = tbody.insertRow(); const td = tr.insertCell()
-      td.colSpan = 7; td.textContent = '등록된 포스트가 없습니다.'
+      td.colSpan = 8; td.textContent = '등록된 포스트가 없습니다.'
       td.style.cssText = 'text-align:center; padding:40px; color:var(--color-text-light)'
       return
     }
@@ -91,8 +89,15 @@ async function loadPosts() {
       const tdType = tr.insertCell()
       const typeTag = document.createElement('span')
       typeTag.textContent = p.type === 'new_arrival' ? '입고 소식' : '가드닝 가이드'
-      typeTag.style.cssText = 'font-size:12px; background:#f0f0f0; padding:2px 8px; border-radius:99px;'
+      typeTag.style.cssText = p.type === 'new_arrival'
+        ? 'font-size:12px; background:#e8f5e9; color:#2d5a3d; padding:2px 8px; border-radius:99px;'
+        : 'font-size:12px; background:#fff3e0; color:#e65100; padding:2px 8px; border-radius:99px;'
       tdType.appendChild(typeTag)
+
+      // 연결 상품
+      const tdProduct = tr.insertCell()
+      tdProduct.textContent = p.product_id ? '연결됨' : '—'
+      tdProduct.style.cssText = 'font-size:12px; color:var(--color-text-sub);'
 
       // 발행 여부
       const tdPublish = tr.insertCell()
@@ -126,7 +131,7 @@ async function loadPosts() {
     console.error('[posts] 포스트 로딩 실패:', err)
     tbody.textContent = ''
     const tr = tbody.insertRow(); const td = tr.insertCell()
-    td.colSpan = 7; td.textContent = '데이터 로딩 실패'
+    td.colSpan = 8; td.textContent = '데이터 로딩 실패'
     td.style.cssText = 'text-align:center; padding:40px; color:var(--color-danger)'
   }
 }
@@ -192,7 +197,7 @@ function openEditModal(post) {
   set('pt-title', post.title)
   set('pt-content', post.content)
   set('pt-image-url', post.image_url ?? post.thumbnail)
-  set('pt-product', post.product_id)
+  set('pt-product-id', post.product_id)
   const el = document.getElementById('pt-is-published'); if (el) el.checked = !!post.is_published
   const preview = document.getElementById('pt-image-preview')
   const imgUrl = post.image_url ?? post.thumbnail
@@ -245,7 +250,7 @@ async function savePost() {
       title: document.getElementById('pt-title')?.value?.trim(),
       content: document.getElementById('pt-content')?.value?.trim(),
       image_url: document.getElementById('pt-image-url')?.value,
-      product_id: document.getElementById('pt-product')?.value || null,
+      product_id: document.getElementById('pt-product-id')?.value || null,
       is_published: document.getElementById('pt-is-published')?.checked ?? false,
     }
     if (!postData.title) { alert('제목은 필수입니다.'); return }

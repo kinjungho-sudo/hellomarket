@@ -26,6 +26,28 @@
     }
     .page-hero p { font-size: 16px; color: rgba(255,255,255,0.72); }
 
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .section-header h2 {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: var(--color-text);
+    }
+    .section-header p {
+      font-size: 14px;
+      color: var(--color-text-light);
+    }
+
+    .guide-section {
+      padding: 64px 0 80px;
+      background: var(--color-bg-section);
+    }
+
     .posts-section { padding: 64px 0 80px; }
     .posts-grid {
       display: grid;
@@ -153,7 +175,26 @@
 
 <section class="posts-section">
   <div class="container">
+    <div class="section-header">
+      <h2>🌱 새로 들어왔어요</h2>
+      <p>가장 먼저 입고된 식물 소식</p>
+    </div>
     <div id="posts-container">
+      <div class="state-box">
+        <div class="icon">🌿</div>
+        <p>불러오는 중...</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="guide-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>📖 가드닝 가이드</h2>
+      <p>식물을 더 잘 키우는 방법</p>
+    </div>
+    <div id="guides-container">
       <div class="state-box">
         <div class="icon">🌿</div>
         <p>불러오는 중...</p>
@@ -214,7 +255,7 @@
     return str ? str.replace(/<[^>]*>/g, '') : ''
   }
 
-  function createPostCard(post) {
+  function createPostCard(post, fallbackEmoji = '🌿') {
     const card = document.createElement('div')
     card.className = 'post-card'
 
@@ -226,10 +267,10 @@
       img.src = cardImgSrc
       img.alt = post.title || ''
       img.loading = 'lazy'
-      img.onerror = () => { imgWrap.textContent = '🌿' }
+      img.onerror = () => { imgWrap.textContent = fallbackEmoji }
       imgWrap.appendChild(img)
     } else {
-      imgWrap.textContent = '🌿'
+      imgWrap.textContent = fallbackEmoji
     }
 
     const body = document.createElement('div')
@@ -257,8 +298,9 @@
     return card
   }
 
-  function renderPosts(posts) {
-    const container = document.getElementById('posts-container')
+  function renderPostsToContainer(containerId, posts, fallbackEmoji = '🌿', emptyMsg = '아직 등록된 게시글이 없어요') {
+    const container = document.getElementById(containerId)
+    if (!container) return
     container.textContent = ''
 
     if (!posts || posts.length === 0) {
@@ -266,9 +308,9 @@
       box.className = 'state-box'
       const icon = document.createElement('div')
       icon.className = 'icon'
-      icon.textContent = '🌱'
+      icon.textContent = fallbackEmoji
       const msg = document.createElement('p')
-      msg.textContent = '아직 등록된 게시글이 없어요'
+      msg.textContent = emptyMsg
       box.appendChild(icon)
       box.appendChild(msg)
       container.appendChild(box)
@@ -277,8 +319,16 @@
 
     const grid = document.createElement('div')
     grid.className = 'posts-grid'
-    posts.forEach(post => grid.appendChild(createPostCard(post)))
+    posts.forEach(post => grid.appendChild(createPostCard(post, fallbackEmoji)))
     container.appendChild(grid)
+  }
+
+  function renderPosts(posts) {
+    renderPostsToContainer('posts-container', posts, '🌱', '아직 등록된 입고 소식이 없어요')
+  }
+
+  function renderGuides(posts) {
+    renderPostsToContainer('guides-container', posts, '📖', '아직 등록된 가이드가 없어요')
   }
 
   function openModal(post) {
@@ -288,6 +338,8 @@
     const titleEl = document.getElementById('modal-title')
     const contentEl = document.getElementById('modal-content')
     const actionsEl = document.getElementById('modal-actions')
+    const isGuide = post.type === 'guide'
+    const fallback = isGuide ? '📖' : '🌿'
 
     imageEl.textContent = ''
     const modalImgSrc = post.image_url || post.thumbnail
@@ -295,10 +347,10 @@
       const img = document.createElement('img')
       img.src = modalImgSrc
       img.alt = post.title || ''
-      img.onerror = () => { imageEl.textContent = '🌿' }
+      img.onerror = () => { imageEl.textContent = fallback }
       imageEl.appendChild(img)
     } else {
-      imageEl.textContent = '🌿'
+      imageEl.textContent = fallback
     }
 
     metaEl.textContent = formatDate(post.created_at)
@@ -329,27 +381,35 @@
   })
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal() })
 
+  function showError(containerId, fallbackEmoji = '⚠️') {
+    const container = document.getElementById(containerId)
+    if (!container) return
+    container.textContent = ''
+    const box = document.createElement('div')
+    box.className = 'state-box'
+    const icon = document.createElement('div')
+    icon.className = 'icon'
+    icon.textContent = fallbackEmoji
+    const msg = document.createElement('p')
+    msg.textContent = '게시글을 불러오지 못했어요. 잠시 후 다시 시도해주세요.'
+    box.appendChild(icon)
+    box.appendChild(msg)
+    container.appendChild(box)
+  }
+
   async function loadPosts() {
     const result = await getPosts({ type: 'new_arrival', limit: 20 })
-    if (result && result.error) {
-      const container = document.getElementById('posts-container')
-      container.textContent = ''
-      const box = document.createElement('div')
-      box.className = 'state-box'
-      const icon = document.createElement('div')
-      icon.className = 'icon'
-      icon.textContent = '⚠️'
-      const msg = document.createElement('p')
-      msg.textContent = '게시글을 불러오지 못했어요. 잠시 후 다시 시도해주세요.'
-      box.appendChild(icon)
-      box.appendChild(msg)
-      container.appendChild(box)
-      return
-    }
+    if (result && result.error) { showError('posts-container'); return }
     renderPosts(Array.isArray(result) ? result : [])
   }
 
-  loadPosts()
+  async function loadGuides() {
+    const result = await getPosts({ type: 'guide', limit: 20 })
+    if (result && result.error) { showError('guides-container', '⚠️'); return }
+    renderGuides(Array.isArray(result) ? result : [])
+  }
+
+  Promise.all([loadPosts(), loadGuides()])
 </script>
 </body>
 </html>
