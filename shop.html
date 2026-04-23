@@ -402,7 +402,7 @@
     updateCartBadge()
 
     // ---- 상수 ----
-    const CATEGORIES = ['전체','관엽식물','다육식물','꽃나무','화분/용기','희귀식물','토양/비료','공기정화','구근식물']
+    const CATEGORIES = ['전체','관엽식물','다육식물','꽃나무','허브','화분/용기','희귀식물','토양/비료','공기정화','구근식물']
     const PAGE_SIZE = 12
 
     // ---- 필터 상태 ----
@@ -491,7 +491,8 @@
         .range(state.offset, state.offset + PAGE_SIZE - 1)
 
       const { data, error } = await query
-      if (error) { console.error('[shop] 상품 조회 실패:', error); return [] }
+      if (error) { console.error('[shop] 상품 조회 실패:', error.message, error.details, error.hint); return [] }
+      console.log('[shop] 상품 조회 성공:', data?.length, '개')
       return data || []
     }
 
@@ -661,21 +662,32 @@
         countEl.textContent = ''
       }
 
-      const data = await fetchProducts()
-      renderActiveFilters()
+      try {
+        const data = await fetchProducts()
+        renderActiveFilters()
 
-      if (!append) {
+        if (!append) {
+          countEl.textContent = ''
+          const strong = document.createElement('strong')
+          strong.textContent = data.length >= PAGE_SIZE ? PAGE_SIZE + '+' : String(data.length)
+          countEl.appendChild(document.createTextNode('상품 '))
+          countEl.appendChild(strong)
+          countEl.appendChild(document.createTextNode('개'))
+        }
+
+        renderProducts(data, append)
+      } catch (err) {
+        console.error('[shop] loadProducts 오류:', err)
+        grid.textContent = ''
+        const errEl = document.createElement('div')
+        errEl.style.cssText = 'grid-column:1/-1;text-align:center;padding:60px 24px;color:var(--color-text-sub);font-size:15px;'
+        errEl.textContent = '상품을 불러오는 중 오류가 발생했습니다. 페이지를 새로고침해 주세요.'
+        grid.appendChild(errEl)
         countEl.textContent = ''
-        const strong = document.createElement('strong')
-        strong.textContent = data.length >= PAGE_SIZE ? PAGE_SIZE + '+' : String(data.length)
-        countEl.appendChild(document.createTextNode('상품 '))
-        countEl.appendChild(strong)
-        countEl.appendChild(document.createTextNode('개'))
+      } finally {
+        state.loading = false
+        document.getElementById('btn-load-more').disabled = false
       }
-
-      renderProducts(data, append)
-      state.loading = false
-      document.getElementById('btn-load-more').disabled = false
     }
 
     // ---- 카테고리 탭 ----
