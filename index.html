@@ -13,111 +13,86 @@
   <link rel="stylesheet" href="/css/components.css" />
   <style>
     /* ====================================================
-       브랜드 배너 — 크림 배경 + 로고 캐릭터 + 브랜드명
+       브랜드 배너 — 가로 로고타입 (hello! 말풍선 + 텍스트 + 캐릭터)
     ==================================================== */
     .brand-banner {
-      background: linear-gradient(180deg, #fff9e3 0%, #fef0b0 100%);
+      background: linear-gradient(180deg, #fffcf0 0%, #fff5cc 100%);
       border-bottom: 3px solid #f5c842;
-      overflow: hidden;
-      position: relative;
+      padding: 18px 0 14px;
     }
     .brand-banner__inner {
       max-width: 760px;
       margin: 0 auto;
-      padding: 20px 32px 0;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 16px;
-      position: relative;
-    }
-    /* 텍스트 영역 */
-    .brand-banner__text {
-      flex: 1;
-      text-align: center;
-      position: relative;
-      z-index: 2;
-      padding-bottom: 20px;
-    }
-    .brand-banner__sub {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--color-green);
-      letter-spacing: 0.04em;
-      margin-bottom: 6px;
+      padding: 0 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 12px;
     }
-    .brand-banner__title {
-      font-family: var(--font-main);
-      font-size: clamp(28px, 6vw, 52px);
-      font-weight: 900;
-      color: var(--color-green-dark);
-      line-height: 1.1;
-      letter-spacing: -0.03em;
+    /* hello! 말풍선 */
+    .brand-banner__bubble {
       position: relative;
-      display: inline-block;
+      background: #f5c842;
+      border: 3px solid #2d7a3d;
+      border-radius: 18px 18px 18px 4px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 900;
+      color: #1a3d28;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      line-height: 1.3;
     }
-    /* 타이틀 아래 노란 밑줄 강조 */
-    .brand-banner__title::after {
+    .brand-banner__bubble::after {
       content: '';
       position: absolute;
-      bottom: 2px;
-      left: 0; right: 0;
-      height: 6px;
-      background: var(--color-yellow);
-      border-radius: 3px;
-      z-index: -1;
-      transform: skewX(-2deg);
+      bottom: -10px;
+      left: 12px;
+      border: 7px solid transparent;
+      border-top-color: #2d7a3d;
+      border-bottom: none;
     }
-    /* 반짝이 장식 */
-    .sp {
+    .brand-banner__bubble::before {
+      content: '';
       position: absolute;
-      pointer-events: none;
-      z-index: 3;
-      line-height: 1;
-      animation: sp-bounce 2.5s ease-in-out infinite;
+      bottom: -6px;
+      left: 14px;
+      border: 5px solid transparent;
+      border-top-color: #f5c842;
+      border-bottom: none;
+      z-index: 1;
     }
-    .sp-1 { font-size: 28px; top: 24px; left: 6%;  animation-delay: 0s; }
-    .sp-2 { font-size: 20px; top: 16px; right: 8%; animation-delay: 0.6s; }
-    .sp-3 { font-size: 16px; top: 56px; left: 18%; animation-delay: 1.2s; }
-    .sp-4 { font-size: 22px; top: 40px; right: 22%; animation-delay: 0.9s; }
-    @keyframes sp-bounce {
-      0%,100% { transform: scale(1) rotate(0deg);   opacity: 1; }
-      50%      { transform: scale(1.25) rotate(15deg); opacity: 0.75; }
+    /* 브랜드명 — 외곽선 텍스트 스타일 */
+    .brand-banner__title {
+      font-family: var(--font-main);
+      font-size: clamp(30px, 6.5vw, 56px);
+      font-weight: 900;
+      /* 흰 채움 + 주황/노란 외곽선 — 첨부 이미지 스타일 */
+      color: #fff;
+      -webkit-text-stroke: clamp(3px, 0.6vw, 5px) #f5a623;
+      paint-order: stroke fill;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      white-space: nowrap;
+      /* 두께감을 위한 텍스트 섀도우 */
+      text-shadow:
+        2px 2px 0 #e07a00,
+        -1px -1px 0 #e07a00,
+        1px -1px 0 #e07a00,
+        -1px 1px 0 #e07a00;
     }
-    /* 로고 캐릭터 이미지 */
+    /* 캐릭터 로고 */
     .brand-banner__logo {
-      width: clamp(80px, 14vw, 130px);
+      width: clamp(52px, 9vw, 80px);
       flex-shrink: 0;
-      position: relative;
-      z-index: 2;
-      align-self: flex-end;
-      filter: drop-shadow(0 -3px 8px rgba(245,200,66,0.3));
+      filter: drop-shadow(0 2px 6px rgba(245,200,66,0.4));
       animation: logo-float 3.5s ease-in-out infinite;
     }
     @keyframes logo-float {
-      0%,100% { transform: translateY(0); }
-      50%      { transform: translateY(-6px); }
+      0%,100% { transform: translateY(0) rotate(-2deg); }
+      50%      { transform: translateY(-5px) rotate(2deg); }
     }
-    /* 배경 잎 데코 */
-    .brand-banner__deco {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .deco-leaf {
-      position: absolute;
-      font-size: 60px;
-      opacity: 0.13;
-      line-height: 1;
-    }
-    .dl-1 { top: -8px;  left: -12px;  transform: rotate(-25deg); }
-    .dl-2 { top: -8px;  right: -12px; transform: rotate(20deg) scaleX(-1); }
-    .dl-3 { bottom: 0;  left: 42%;    transform: rotate(8deg);  font-size: 40px; opacity: 0.09; }
 
     /* ====================================================
        히어로 — 매장 실사 풀스크린
@@ -452,16 +427,15 @@
       .store-grid { grid-template-columns: 1fr; gap: 28px; }
       .section-new, .section-best, .section-guide, .section-store { padding: 52px 0; }
       .cta-banner { padding: 60px 24px; }
-      .brand-banner__inner { padding: 16px 20px 0; gap: 8px; }
-      .sp-1, .sp-3 { left: 3%; }
-      .sp-2, .sp-4 { right: 3%; }
+      .brand-banner__inner { gap: 8px; }
+      .brand-banner__title { white-space: normal; text-align: center; }
     }
     @media (max-width: 480px) {
       .guide-grid { grid-template-columns: 1fr; }
       .hero__cta { flex-direction: column; align-items: flex-start; }
       .hero__cta .btn { width: 100%; max-width: 280px; }
-      .brand-banner__inner { padding: 14px 16px 0; }
-      .sp-1, .sp-2, .sp-3, .sp-4 { display: none; }
+      .brand-banner__bubble { font-size: 11px; padding: 5px 10px; }
+      .brand-banner__logo { width: 44px; }
     }
   </style>
 </head>
@@ -505,25 +479,10 @@
 
   <!-- 브랜드 배너 -->
   <section class="brand-banner">
-    <div class="brand-banner__deco">
-      <span class="deco-leaf dl-1">🌿</span>
-      <span class="deco-leaf dl-2">🌿</span>
-      <span class="deco-leaf dl-3">🌱</span>
-    </div>
-    <span class="sp sp-1">✦</span>
-    <span class="sp sp-2">✦</span>
-    <span class="sp sp-3">✦</span>
-    <span class="sp sp-4">✦</span>
     <div class="brand-banner__inner">
-      <div class="brand-banner__text">
-        <p class="brand-banner__sub">고양 가든센터, 합리적인 식물 쇼핑!</p>
-        <h2 class="brand-banner__title">헬로우가든마켓</h2>
-      </div>
-      <img
-        src="/assets/logo/logo.png"
-        alt="헬로우가든마켓 캐릭터"
-        class="brand-banner__logo"
-      />
+      <div class="brand-banner__bubble">hello!</div>
+      <h2 class="brand-banner__title">헬로우가든마켓</h2>
+      <img src="/assets/logo/logo.png" alt="헬로우가든마켓 캐릭터" class="brand-banner__logo" />
     </div>
   </section>
 
