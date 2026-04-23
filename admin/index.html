@@ -108,6 +108,39 @@
         <canvas id="chart-weekly" height="100"></canvas>
       </div>
 
+      <!-- 제품별 판매량 -->
+      <div class="admin-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <div class="admin-card-title" style="margin-bottom:0;">제품별 판매량 TOP 20</div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span style="font-size:12px; color:var(--color-text-light);">정렬:</span>
+            <select id="product-sales-sort" style="height:30px; padding:0 10px; border:1.5px solid #ddd; border-radius:var(--radius-sm); font-size:12px; cursor:pointer;">
+              <option value="qty">판매 수량순</option>
+              <option value="revenue">매출순</option>
+              <option value="order_count">주문 건수순</option>
+            </select>
+          </div>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="product-sales-table">
+            <thead>
+              <tr>
+                <th style="width:36px;">#</th>
+                <th>상품명</th>
+                <th>카테고리</th>
+                <th style="text-align:right;">판매 수량</th>
+                <th style="text-align:right;">주문 건수</th>
+                <th style="text-align:right;">매출</th>
+                <th style="width:80px;"></th>
+              </tr>
+            </thead>
+            <tbody id="product-sales-body">
+              <tr><td colspan="7" style="text-align:center; padding:32px; color:var(--color-text-light);">로딩 중...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- 최근 주문 테이블 -->
       <div class="admin-card">
         <div class="admin-card-title">최근 주문 (10건)</div>

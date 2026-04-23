@@ -3,7 +3,7 @@ import { requireAdmin, signOut } from '/js/auth.js'
 import { supabase } from '/js/config.js'
 import { getOrderStats, getAllOrders } from '/js/api/orders.js'
 import { getUserCount } from '/js/api/users.js'
-import { getTodayVisitors, getWeeklyRevenueStats, getCategoryStats, getHourlyOrderStats } from '/js/api/analytics.js'
+import { getTodayVisitors, getWeeklyRevenueStats, getCategoryStats, getHourlyOrderStats, getProductSalesStats } from '/js/api/analytics.js'
 import { getQnaList } from '/js/api/qna.js'
 
 // 관리자 접근 제어 — 비관리자는 index.html로 리다이렉트
@@ -54,7 +54,7 @@ function setText(id, text) {
 
 // 메인 초기화 — 병렬로 모든 데이터 로드
 async function initPage() {
-  await Promise.all([loadStats(), loadCharts(), loadRecentOrders(), loadOutOfStock()])
+  await Promise.all([loadStats(), loadCharts(), loadRecentOrders(), loadOutOfStock(), loadProductSales()])
 }
 
 // 통계 카드 렌더링
@@ -157,7 +157,7 @@ async function loadRecentOrders() {
       const c0 = tr.insertCell(); c0.textContent = o.order_number ?? '—'; c0.style.fontWeight = '600'
       const c1 = tr.insertCell(); c1.textContent = o.receiver_name ?? '—'
       const c2 = tr.insertCell(); c2.textContent = itemSummary
-      const c3 = tr.insertCell(); c3.textContent = fmt(o.total_amount) + '원'
+      const c3 = tr.insertCell(); c3.textContent = fmt(o.total_price) + '원'
       const c4 = tr.insertCell()
       const badge = document.createElement('span')
       badge.className = 'status-badge ' + (STATUS_CLASS[o.status] ?? 'status-pending')
@@ -174,6 +174,119 @@ async function loadRecentOrders() {
     td.style.cssText = 'text-align:center; padding:32px; color:var(--color-danger)'
   }
 }
+
+// 제품별 판매량 테이블
+let productSalesData = []
+
+async function loadProductSales() {
+  const tbody = document.getElementById('product-sales-body')
+  if (!tbody) return
+  try {
+    const data = await getProductSalesStats(20)
+    if (data.error) throw new Error(data.error)
+    productSalesData = data
+    renderProductSales('qty')
+  } catch (err) {
+    console.error('[dashboard] 제품별 판매량 로딩 실패:', err)
+    if (tbody) {
+      tbody.textContent = ''
+      const tr = tbody.insertRow(); const td = tr.insertCell()
+      td.colSpan = 7; td.textContent = '데이터 로딩 실패'
+      td.style.cssText = 'text-align:center; padding:32px; color:var(--color-danger)'
+    }
+  }
+}
+
+function renderProductSales(sortKey) {
+  const tbody = document.getElementById('product-sales-body')
+  if (!tbody) return
+  tbody.textContent = ''
+
+  const sorted = [...productSalesData].sort((a, b) => b[sortKey] - a[sortKey])
+
+  if (sorted.length === 0) {
+    const tr = tbody.insertRow(); const td = tr.insertCell()
+    td.colSpan = 7; td.textContent = '판매 데이터가 없습니다.'
+    td.style.cssText = 'text-align:center; padding:32px; color:var(--color-text-light)'
+    return
+  }
+
+  const maxQty = Math.max(...productSalesData.map(x => x.qty)) || 1
+
+  sorted.forEach(function(p, i) {
+    const tr = tbody.insertRow()
+
+    // 순위
+    const cRank = tr.insertCell()
+    cRank.style.cssText = 'font-size:12px; font-weight:700; color:var(--color-text-light); text-align:center;'
+    cRank.textContent = i < 3 ? ['🥇','🥈','🥉'][i] : String(i + 1)
+
+    // 상품명 (썸네일 + 이름)
+    const cName = tr.insertCell()
+    const nameWrap = document.createElement('div')
+    nameWrap.style.cssText = 'display:flex; align-items:center; gap:8px;'
+    if (p.image_url) {
+      const img = document.createElement('img')
+      img.src = p.image_url; img.alt = p.product_name
+      img.style.cssText = 'width:32px; height:32px; border-radius:4px; object-fit:cover; flex-shrink:0;'
+      img.onerror = function() { img.style.display = 'none' }
+      nameWrap.appendChild(img)
+    }
+    const nameText = document.createElement('span')
+    nameText.textContent = p.product_name
+    nameText.style.cssText = 'font-size:13px; font-weight:600;'
+    nameWrap.appendChild(nameText)
+    cName.appendChild(nameWrap)
+
+    // 카테고리
+    const cCat = tr.insertCell()
+    const catBadge = document.createElement('span')
+    catBadge.textContent = p.category
+    catBadge.style.cssText = 'font-size:11px; background:#f0f7f0; color:#2d5a3d; border-radius:4px; padding:2px 7px; font-weight:600;'
+    cCat.appendChild(catBadge)
+
+    // 판매 수량 (바 + 숫자)
+    const cQty = tr.insertCell(); cQty.style.textAlign = 'right'
+    const qtyWrap = document.createElement('div')
+    qtyWrap.style.cssText = 'display:flex; align-items:center; gap:8px; justify-content:flex-end;'
+    const barWrap = document.createElement('div')
+    barWrap.style.cssText = 'width:60px; height:6px; background:#eee; border-radius:3px; overflow:hidden;'
+    const bar = document.createElement('div')
+    bar.style.cssText = 'height:100%; background:#4c794b; border-radius:3px; width:' + Math.round((p.qty / maxQty) * 100) + '%;'
+    barWrap.appendChild(bar)
+    qtyWrap.appendChild(barWrap)
+    const qtyText = document.createElement('span')
+    qtyText.style.cssText = 'font-size:13px; font-weight:700; min-width:28px;'
+    qtyText.textContent = fmt(p.qty) + '개'
+    qtyWrap.appendChild(qtyText)
+    cQty.appendChild(qtyWrap)
+
+    // 주문 건수
+    const cOrder = tr.insertCell()
+    cOrder.textContent = fmt(p.order_count) + '건'
+    cOrder.style.cssText = 'text-align:right; font-size:13px; color:var(--color-text-sub);'
+
+    // 매출
+    const cRev = tr.insertCell()
+    cRev.textContent = fmt(p.revenue) + '원'
+    cRev.style.cssText = 'text-align:right; font-size:13px; font-weight:700; color:var(--color-primary);'
+
+    // 상품 보기 링크
+    const cLink = tr.insertCell()
+    if (p.product_id) {
+      const a = document.createElement('a')
+      a.href = '/product.html?id=' + p.product_id
+      a.textContent = '보기'
+      a.target = '_blank'
+      a.style.cssText = 'font-size:12px; color:var(--color-primary); text-decoration:none;'
+      cLink.appendChild(a)
+    }
+  })
+}
+
+document.getElementById('product-sales-sort')?.addEventListener('change', function(e) {
+  renderProductSales(e.target.value)
+})
 
 // 품절/시즌한정 상품 목록 (DOM API)
 async function loadOutOfStock() {

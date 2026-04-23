@@ -135,6 +135,48 @@ export async function getCategoryStats() {
 }
 
 /**
+ * 제품별 판매량 통계 (관리자 대시보드용)
+ * 주문 상품 기준으로 제품별 판매 수량, 매출, 주문 건수를 집계
+ * @param {number} [limit=20] - 상위 N개 반환
+ */
+export async function getProductSalesStats(limit = 20) {
+  try {
+    const { data, error } = await supabase
+      .from('hgm_order_items')
+      .select('product_id, product_name, quantity, price, hgm_products(name, category, image_url)')
+
+    if (error) throw error
+
+    // 제품별 집계
+    const statsMap = {}
+    data.forEach((item) => {
+      const key = item.product_id || item.product_name
+      if (!statsMap[key]) {
+        statsMap[key] = {
+          product_id:   item.product_id,
+          product_name: item.hgm_products?.name || item.product_name,
+          category:     item.hgm_products?.category || '—',
+          image_url:    item.hgm_products?.image_url || null,
+          qty:          0,
+          revenue:      0,
+          order_count:  0,
+        }
+      }
+      statsMap[key].qty         += item.quantity || 0
+      statsMap[key].revenue     += (item.price || 0) * (item.quantity || 0)
+      statsMap[key].order_count += 1
+    })
+
+    return Object.values(statsMap)
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, limit)
+  } catch (err) {
+    console.error('[getProductSalesStats] 제품별 판매량 조회 실패:', err)
+    return { error: err.message }
+  }
+}
+
+/**
  * 최근 7일 매출 통계 (관리자 대시보드용)
  * 오늘부터 7일 전까지 날짜별 주문 수와 매출을 반환
  */
