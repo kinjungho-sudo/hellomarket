@@ -12,132 +12,175 @@
   <link rel="stylesheet" href="/css/common.css" />
   <link rel="stylesheet" href="/css/components.css" />
   <style>
-    .page-hero {
-      background: linear-gradient(135deg, #1a3d28 0%, #2d5a3d 60%, #4a7c59 100%);
-      color: #fff; padding: 64px 0 56px; text-align: center;
-    }
-    .page-hero h1 { font-size: clamp(26px, 5vw, 44px); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 6px; }
-    .page-hero p { font-size: 15px; color: rgba(255,255,255,0.65); }
+    /* ── 페이지 전체 배경 ── */
+    .mypage-bg { background: var(--color-bg); min-height: calc(100vh - 64px); padding: 40px 0 80px; }
 
-    .mypage-section { padding: 48px 0 80px; }
-    .mypage-layout { display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start; }
-    @media (max-width: 900px) { .mypage-layout { grid-template-columns: 1fr; } }
-
-    /* 사이드바 — 회원 정보 카드 */
-    .profile-card {
-      background: #fff; border-radius: var(--radius-md);
-      border: 1.5px solid rgba(0,0,0,0.07); padding: 28px 24px;
-      box-shadow: var(--shadow-sm); text-align: center;
+    /* ── 프로필 헤더 카드 ── */
+    .profile-header {
+      background: #fff;
+      border-radius: var(--radius-md);
+      border: 1.5px solid rgba(0,0,0,0.07);
+      box-shadow: var(--shadow-sm);
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 24px;
+      position: relative;
     }
     .profile-avatar {
-      width: 72px; height: 72px; border-radius: 50%;
+      width: 64px; height: 64px;
+      border-radius: 50%;
       background: var(--color-bg-section);
       display: flex; align-items: center; justify-content: center;
-      font-size: 32px; margin: 0 auto 16px; overflow: hidden;
+      font-size: 28px; flex-shrink: 0; overflow: hidden;
+      border: 2px solid rgba(0,0,0,0.07);
     }
-    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .profile-name { font-size: 17px; font-weight: 800; color: var(--color-text); margin-bottom: 4px; }
-    .profile-email { font-size: 13px; color: var(--color-text-light); margin-bottom: 4px; }
-    .profile-meta { font-size: 12px; color: var(--color-text-light); margin-bottom: 20px; }
-    .provider-badge {
-      display: inline-block; padding: 2px 10px;
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-info { flex: 1; min-width: 0; }
+    .profile-name { font-size: 18px; font-weight: 900; color: var(--color-text); letter-spacing: -0.02em; margin-bottom: 4px; }
+    .profile-email { font-size: 13px; color: var(--color-text-sub); margin-bottom: 6px; }
+    .profile-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .profile-badge {
+      display: inline-block; padding: 3px 10px;
       border-radius: var(--radius-full); font-size: 11px; font-weight: 700;
-      background: #e8f5e9; color: var(--color-primary); margin-bottom: 20px;
+      background: #e8f5e9; color: var(--color-primary);
     }
+    .profile-badge.join { background: var(--color-bg-section); color: var(--color-text-light); }
+    /* 로그아웃 — 우측 상단 */
     .logout-btn {
-      width: 100%; height: 38px;
+      position: absolute; top: 24px; right: 28px;
+      height: 34px; padding: 0 16px;
       background: none; border: 1.5px solid rgba(0,0,0,0.14);
       border-radius: var(--radius-sm); font-size: 13px; font-weight: 600;
       color: var(--color-text-sub); cursor: pointer; transition: all 0.2s;
+      white-space: nowrap;
     }
     .logout-btn:hover { border-color: var(--color-danger); color: var(--color-danger); }
+    @media (max-width: 600px) {
+      .profile-header { flex-wrap: wrap; padding: 20px; }
+      .logout-btn { position: static; margin-top: 8px; width: 100%; }
+    }
 
-    /* 메인 콘텐츠 */
-    .mypage-main { display: flex; flex-direction: column; gap: 0; }
-
-    /* 탭 네비게이션 */
+    /* ── 탭 네비게이션 ── */
     .tab-nav {
       display: flex; gap: 0;
-      border-bottom: 2px solid rgba(0,0,0,0.08);
-      margin-bottom: 32px;
+      background: #fff;
+      border-radius: var(--radius-md);
+      border: 1.5px solid rgba(0,0,0,0.07);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+      overflow: hidden;
     }
     .tab-btn {
-      height: 44px; padding: 0 20px;
-      background: none; border: none; border-bottom: 2px solid transparent;
-      margin-bottom: -2px; font-size: 14px; font-weight: 700;
-      color: var(--color-text-sub); cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      flex: 1; height: 48px;
+      background: none; border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 14px; font-weight: 700;
+      color: var(--color-text-sub); cursor: pointer;
+      transition: all 0.2s; white-space: nowrap;
     }
-    .tab-btn:hover { color: var(--color-primary); }
-    .tab-btn.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+    .tab-btn:hover { color: var(--color-primary); background: var(--color-bg-section); }
+    .tab-btn.active { color: var(--color-primary); border-bottom-color: var(--color-primary); background: #f0f7f2; }
 
-    /* 탭 패널 */
+    /* ── 탭 패널 ── */
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* 주문 상태 탭 */
-    .order-status-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-    .order-status-tab {
-      height: 32px; padding: 0 14px;
+    /* ── 주문 상태 필터 ── */
+    .order-filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .order-filter-btn {
+      height: 30px; padding: 0 14px;
       border-radius: var(--radius-full);
       border: 1.5px solid rgba(0,0,0,0.12);
       background: #fff; color: var(--color-text-sub);
       font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
     }
-    .order-status-tab:hover { border-color: var(--color-primary); color: var(--color-primary); }
-    .order-status-tab.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+    .order-filter-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .order-filter-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
 
-    /* 주문 카드 */
+    /* ── 주문 카드 ── */
     .order-card {
       background: #fff; border-radius: var(--radius-md);
-      border: 1.5px solid rgba(0,0,0,0.07); padding: 20px 22px;
-      margin-bottom: 14px; box-shadow: var(--shadow-sm);
+      border: 1.5px solid rgba(0,0,0,0.07);
+      padding: 18px 22px; margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
     }
-    .order-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .order-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; flex-wrap: wrap; gap: 6px;
+    }
     .order-number { font-size: 13px; font-weight: 700; color: var(--color-text); }
-    .order-date { font-size: 12px; color: var(--color-text-light); }
+    .order-date { font-size: 12px; color: var(--color-text-light); margin-top: 2px; }
     .order-status-badge {
       display: inline-block; padding: 3px 10px;
       border-radius: var(--radius-full); font-size: 11px; font-weight: 700;
     }
-    .status-pending { background: #fff3e0; color: #e65100; }
-    .status-confirmed { background: #e3f2fd; color: #1565c0; }
-    .status-shipping { background: #e8f5e9; color: #2e7d32; }
-    .status-delivered { background: #f3e5f5; color: #6a1b9a; }
-    .status-cancelled { background: #f5f5f5; color: #757575; }
-    .order-items { font-size: 14px; color: var(--color-text-sub); margin-bottom: 10px; }
-    .order-total { font-size: 15px; font-weight: 800; color: var(--color-text); }
+    .badge-pending  { background: #fff3e0; color: #e65100; }
+    .badge-paid     { background: #e3f2fd; color: #1565c0; }
+    .badge-shipping { background: #e8f5e9; color: #2e7d32; }
+    .badge-done     { background: #f3e5f5; color: #6a1b9a; }
+    .badge-cancel   { background: #f5f5f5; color: #757575; }
+    .order-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 10px 0; }
+    .order-items-text { font-size: 14px; color: var(--color-text-sub); margin-bottom: 8px; line-height: 1.5; }
+    .order-total { font-size: 16px; font-weight: 900; color: var(--color-text); }
 
-    /* 위시리스트 그리드 */
-    .wishlist-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    @media (max-width: 480px) { .wishlist-grid { grid-template-columns: 1fr; } }
+    /* ── 위시리스트 그리드 ── */
+    .wishlist-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 700px) { .wishlist-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 420px) { .wishlist-grid { grid-template-columns: 1fr; } }
     .wishlist-card {
       background: #fff; border-radius: var(--radius-md);
-      border: 1.5px solid rgba(0,0,0,0.07);
-      box-shadow: var(--shadow-sm); overflow: hidden;
+      border: 1.5px solid rgba(0,0,0,0.07); box-shadow: var(--shadow-sm);
+      overflow: hidden; transition: box-shadow 0.2s;
+      cursor: pointer;
     }
-    .wishlist-card-image {
-      width: 100%; aspect-ratio: 4/3;
-      background: #e8f0eb; display: flex;
-      align-items: center; justify-content: center; font-size: 36px; overflow: hidden;
+    .wishlist-card:hover { box-shadow: var(--shadow-md); }
+    .wishlist-img {
+      width: 100%; aspect-ratio: 1/1;
+      background: var(--color-bg-section);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; overflow: hidden;
     }
-    .wishlist-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .wishlist-card-body { padding: 14px; }
-    .wishlist-product-name { font-size: 14px; font-weight: 700; color: var(--color-text); margin-bottom: 6px; }
-    .wishlist-product-price { font-size: 13px; color: var(--color-text-sub); margin-bottom: 12px; }
-    .wishlist-actions { display: flex; gap: 8px; }
-    .wishlist-actions .btn { flex: 1; height: 34px; font-size: 12px; padding: 0; }
+    .wishlist-img img { width: 100%; height: 100%; object-fit: cover; }
+    .wishlist-body { padding: 12px 14px 14px; }
+    .wishlist-name { font-size: 13px; font-weight: 700; color: var(--color-text); margin-bottom: 4px; line-height: 1.4; }
+    .wishlist-price { font-size: 14px; font-weight: 800; color: var(--color-primary); margin-bottom: 10px; }
+    .wishlist-actions { display: flex; gap: 6px; }
+    .wishlist-actions .btn-remove {
+      flex: 1; height: 32px; background: none;
+      border: 1.5px solid rgba(0,0,0,0.12); border-radius: var(--radius-sm);
+      font-size: 12px; font-weight: 600; color: var(--color-text-sub);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .wishlist-actions .btn-remove:hover { border-color: var(--color-danger); color: var(--color-danger); }
+    .wishlist-actions .btn-cart {
+      flex: 2; height: 32px;
+      background: var(--color-primary); border: none;
+      border-radius: var(--radius-sm);
+      font-size: 12px; font-weight: 700; color: #fff;
+      cursor: pointer; transition: background-color 0.2s;
+    }
+    .wishlist-actions .btn-cart:hover { background: var(--color-primary-dark); }
 
-    /* 알림 설정 */
-    .notify-form { display: flex; flex-direction: column; gap: 0; }
+    /* ── 알림 설정 ── */
+    .notify-card {
+      background: #fff; border-radius: var(--radius-md);
+      border: 1.5px solid rgba(0,0,0,0.07); box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
     .notify-item {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.07);
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
     }
     .notify-item:last-of-type { border-bottom: none; }
-    .notify-label { font-size: 15px; font-weight: 700; color: var(--color-text); }
-    .notify-desc { font-size: 13px; color: var(--color-text-sub); margin-top: 2px; }
-
-    /* 토글 스위치 */
+    .notify-label { font-size: 15px; font-weight: 700; color: var(--color-text); margin-bottom: 2px; }
+    .notify-desc { font-size: 13px; color: var(--color-text-sub); }
     .toggle-wrap { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
     .toggle-wrap input { opacity: 0; width: 0; height: 0; }
     .toggle-slider {
@@ -151,14 +194,14 @@
     }
     .toggle-wrap input:checked + .toggle-slider { background: var(--color-primary); }
     .toggle-wrap input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .notify-save-row { padding: 20px 24px; background: var(--color-bg-section); display: flex; justify-content: flex-end; }
 
-    .notify-save-row { margin-top: 24px; display: flex; justify-content: flex-end; }
+    /* ── 빈 상태 ── */
+    .empty-state { text-align: center; padding: 56px 24px; color: var(--color-text-light); }
+    .empty-state .empty-icon { font-size: 44px; margin-bottom: 14px; }
+    .empty-state p { font-size: 14px; }
 
-    /* 상태 박스 */
-    .state-box { text-align: center; padding: 60px 24px; color: var(--color-text-light); }
-    .state-box .icon { font-size: 40px; margin-bottom: 14px; }
-    .state-box p { font-size: 14px; }
-
+    /* 장바구니 뱃지 */
     .cart-badge {
       position: absolute; top: -6px; right: -8px;
       background: var(--color-danger); color: #fff;
@@ -205,96 +248,85 @@
   </div>
 </header>
 
-<section class="page-hero">
+<div class="mypage-bg">
   <div class="container">
-    <h1>마이페이지</h1>
-    <p id="hero-sub">반갑습니다!</p>
-  </div>
-</section>
 
-<section class="mypage-section">
-  <div class="container">
-    <div class="mypage-layout">
-
-      <!-- 사이드바: 회원 정보 -->
-      <aside>
-        <div class="profile-card">
-          <div class="profile-avatar" id="profile-avatar">👤</div>
-          <div class="profile-name" id="profile-name">-</div>
-          <div class="profile-email" id="profile-email">-</div>
-          <div class="profile-meta" id="profile-meta"></div>
-          <div class="provider-badge" id="provider-badge">구글</div>
-          <button class="logout-btn" id="logout-btn">로그아웃</button>
+    <!-- 프로필 헤더 -->
+    <div class="profile-header">
+      <div class="profile-avatar" id="profile-avatar">👤</div>
+      <div class="profile-info">
+        <div class="profile-name" id="profile-name">-</div>
+        <div class="profile-email" id="profile-email">-</div>
+        <div class="profile-badges">
+          <span class="profile-badge" id="provider-badge">구글 계정</span>
+          <span class="profile-badge join" id="join-date"></span>
         </div>
-      </aside>
+      </div>
+      <button class="logout-btn" id="logout-btn">로그아웃</button>
+    </div>
 
-      <!-- 메인: 탭 -->
-      <div class="mypage-main">
-        <nav class="tab-nav">
-          <button class="tab-btn active" data-tab="orders">주문 내역</button>
-          <button class="tab-btn" data-tab="wishlist">위시리스트</button>
-          <button class="tab-btn" data-tab="notify">알림 설정</button>
-        </nav>
+    <!-- 탭 네비게이션 -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="orders">📦 주문 내역</button>
+      <button class="tab-btn" data-tab="wishlist">♥ 위시리스트</button>
+      <button class="tab-btn" data-tab="notify">🔔 알림 설정</button>
+    </div>
 
-        <!-- 주문 내역 탭 -->
-        <div class="tab-panel active" id="tab-orders">
-          <div class="order-status-tabs">
-            <button class="order-status-tab active" data-status="">전체</button>
-            <button class="order-status-tab" data-status="pending">주문완료</button>
-            <button class="order-status-tab" data-status="shipping">배송중</button>
-            <button class="order-status-tab" data-status="delivered">배송완료</button>
-          </div>
-          <div id="orders-list">
-            <div class="state-box">
-              <div class="icon">📦</div>
-              <p>불러오는 중...</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 위시리스트 탭 -->
-        <div class="tab-panel" id="tab-wishlist">
-          <div id="wishlist-list">
-            <div class="state-box">
-              <div class="icon">🌿</div>
-              <p>불러오는 중...</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 알림 설정 탭 -->
-        <div class="tab-panel" id="tab-notify">
-          <form class="notify-form" id="notify-form">
-            <div class="notify-item">
-              <div>
-                <div class="notify-label">신상 입고 알림</div>
-                <div class="notify-desc">새로운 식물이 입고되면 알려드려요</div>
-              </div>
-              <label class="toggle-wrap">
-                <input type="checkbox" id="notify-new" />
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-            <div class="notify-item">
-              <div>
-                <div class="notify-label">할인 이벤트 알림</div>
-                <div class="notify-desc">할인 이벤트 및 쿠폰 소식을 알려드려요</div>
-              </div>
-              <label class="toggle-wrap">
-                <input type="checkbox" id="notify-sale" />
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-            <div class="notify-save-row">
-              <button type="submit" class="btn btn-primary">저장</button>
-            </div>
-          </form>
-        </div>
-
+    <!-- 주문 내역 탭 -->
+    <div class="tab-panel active" id="tab-orders">
+      <div class="order-filter-row">
+        <button class="order-filter-btn active" data-status="">전체</button>
+        <button class="order-filter-btn" data-status="주문완료">주문완료</button>
+        <button class="order-filter-btn" data-status="결제완료">결제완료</button>
+        <button class="order-filter-btn" data-status="배송중">배송중</button>
+        <button class="order-filter-btn" data-status="배송완료">배송완료</button>
+        <button class="order-filter-btn" data-status="취소">취소</button>
+      </div>
+      <div id="orders-list">
+        <div class="empty-state"><div class="empty-icon">📦</div><p>불러오는 중...</p></div>
       </div>
     </div>
+
+    <!-- 위시리스트 탭 -->
+    <div class="tab-panel" id="tab-wishlist">
+      <div id="wishlist-list">
+        <div class="empty-state"><div class="empty-icon">🌿</div><p>불러오는 중...</p></div>
+      </div>
+    </div>
+
+    <!-- 알림 설정 탭 -->
+    <div class="tab-panel" id="tab-notify">
+      <form id="notify-form">
+        <div class="notify-card">
+          <div class="notify-item">
+            <div>
+              <div class="notify-label">신상 입고 알림</div>
+              <div class="notify-desc">새로운 식물이 입고되면 알려드려요</div>
+            </div>
+            <label class="toggle-wrap">
+              <input type="checkbox" id="notify-new" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-item">
+            <div>
+              <div class="notify-label">할인 이벤트 알림</div>
+              <div class="notify-desc">할인 이벤트 및 쿠폰 소식을 알려드려요</div>
+            </div>
+            <label class="toggle-wrap">
+              <input type="checkbox" id="notify-sale" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-save-row">
+            <button type="submit" class="btn btn-primary">저장</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
   </div>
-</section>
+</div>
 
 <footer class="footer">
   <div class="container">
@@ -310,7 +342,7 @@
 
 <script type="module">
   import { updateCartBadge, addToCart } from '/js/utils/cart.js'
-  import { requireLogin, signOut, getSession } from '/js/auth.js'
+  import { requireLogin, signOut, getSession, updateNavAuth } from '/js/auth.js'
   import { getCurrentUser, updateUser, getWishlist, removeFromWishlist } from '/js/api/users.js'
   import { getOrdersByUser } from '/js/api/orders.js'
 
@@ -322,16 +354,15 @@
   })
 
   updateCartBadge()
+  updateNavAuth()
 
-  // 로그인 필수
   await requireLogin()
 
   const { session } = await getSession()
   if (!session) return
-
   const userId = session.user.id
 
-  // ===== 회원 정보 표시 =====
+  // ── 회원 정보 표시 ──
   const userInfo = await getCurrentUser()
   if (userInfo && !userInfo.error) {
     const name = userInfo.profile?.name || userInfo.user_metadata?.full_name || '회원'
@@ -340,15 +371,14 @@
     const provider = userInfo.app_metadata?.provider || 'google'
     const joinedAt = userInfo.created_at ? new Date(userInfo.created_at).toLocaleDateString('ko-KR') : ''
 
-    document.getElementById('hero-sub').textContent = name + '님, 반갑습니다!'
     document.getElementById('profile-name').textContent = name
     document.getElementById('profile-email').textContent = email
 
-    const metaEl = document.getElementById('profile-meta')
-    metaEl.textContent = joinedAt ? '가입일: ' + joinedAt : ''
-
     const badgeEl = document.getElementById('provider-badge')
     badgeEl.textContent = provider === 'google' ? '구글 계정' : (provider === 'naver' ? '네이버 계정' : '소셜 계정')
+
+    const joinEl = document.getElementById('join-date')
+    if (joinedAt) { joinEl.textContent = joinedAt + ' 가입' } else { joinEl.style.display = 'none' }
 
     if (avatarUrl) {
       const avatarEl = document.getElementById('profile-avatar')
@@ -359,69 +389,51 @@
       avatarEl.appendChild(img)
     }
 
-    // 알림 설정 초기화
     if (userInfo.profile) {
       document.getElementById('notify-new').checked = !!userInfo.profile.notify_new
       document.getElementById('notify-sale').checked = !!userInfo.profile.notify_sale
     }
   }
 
-  // ===== 로그아웃 =====
+  // ── 로그아웃 ──
   document.getElementById('logout-btn').addEventListener('click', async () => {
     await signOut()
     window.location.href = '/index.html'
   })
 
-  // ===== 탭 전환 =====
-  const tabBtns = document.querySelectorAll('.tab-btn')
-  const tabPanels = document.querySelectorAll('.tab-panel')
-
-  tabBtns.forEach(btn => {
+  // ── 탭 전환 ──
+  document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'))
-      tabPanels.forEach(p => p.classList.remove('active'))
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
       btn.classList.add('active')
       document.getElementById('tab-' + btn.dataset.tab).classList.add('active')
     })
   })
 
-  // ===== 주문 내역 =====
+  // ── 주문 내역 ──
   let allOrders = []
-  let currentOrderStatus = ''
+  let currentStatus = ''
 
-  function formatDate(iso) {
-    if (!iso) return ''
-    const d = new Date(iso)
-    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`
+  const STATUS_BADGE = {
+    '주문완료': 'badge-pending',
+    '결제완료': 'badge-paid',
+    '배송준비': 'badge-paid',
+    '배송중':   'badge-shipping',
+    '배송완료': 'badge-done',
+    '취소':     'badge-cancel',
   }
 
-  const STATUS_MAP = {
-    pending: { cls: 'status-pending', label: '주문완료' },
-    confirmed: { cls: 'status-confirmed', label: '결제확인' },
-    shipping: { cls: 'status-shipping', label: '배송중' },
-    delivered: { cls: 'status-delivered', label: '배송완료' },
-    cancelled: { cls: 'status-cancelled', label: '취소됨' },
-  }
-
-  function renderOrders(orders) {
+  function renderOrders() {
     const list = document.getElementById('orders-list')
     list.textContent = ''
+    const filtered = currentStatus ? allOrders.filter(o => o.status === currentStatus) : allOrders
 
-    const filtered = currentOrderStatus
-      ? orders.filter(o => o.status === currentOrderStatus)
-      : orders
-
-    if (!filtered || filtered.length === 0) {
-      const box = document.createElement('div')
-      box.className = 'state-box'
-      const icon = document.createElement('div')
-      icon.className = 'icon'
-      icon.textContent = '📦'
-      const msg = document.createElement('p')
-      msg.textContent = '주문 내역이 없어요'
-      box.appendChild(icon)
-      box.appendChild(msg)
-      list.appendChild(box)
+    if (!filtered.length) {
+      const s = document.createElement('div'); s.className = 'empty-state'
+      const i = document.createElement('div'); i.className = 'empty-icon'; i.textContent = '📦'
+      const p = document.createElement('p'); p.textContent = '주문 내역이 없어요'
+      s.appendChild(i); s.appendChild(p); list.appendChild(s)
       return
     }
 
@@ -429,57 +441,61 @@
       const card = document.createElement('div')
       card.className = 'order-card'
 
+      // 헤더: 주문번호 + 날짜 / 상태뱃지
       const header = document.createElement('div')
       header.className = 'order-card-header'
 
-      const numDate = document.createElement('div')
+      const left = document.createElement('div')
       const numEl = document.createElement('div')
       numEl.className = 'order-number'
       numEl.textContent = order.order_number || ('주문 #' + order.id)
       const dateEl = document.createElement('div')
       dateEl.className = 'order-date'
-      dateEl.textContent = formatDate(order.created_at)
-      numDate.appendChild(numEl)
-      numDate.appendChild(dateEl)
+      dateEl.textContent = order.created_at ? new Date(order.created_at).toLocaleDateString('ko-KR') : ''
+      left.appendChild(numEl)
+      left.appendChild(dateEl)
 
-      const statusInfo = STATUS_MAP[order.status] || { cls: 'status-pending', label: order.status }
       const statusEl = document.createElement('span')
-      statusEl.className = 'order-status-badge ' + statusInfo.cls
-      statusEl.textContent = statusInfo.label
+      statusEl.className = 'order-status-badge ' + (STATUS_BADGE[order.status] || 'badge-pending')
+      statusEl.textContent = order.status || '주문완료'
 
-      header.appendChild(numDate)
+      header.appendChild(left)
       header.appendChild(statusEl)
 
+      // 구분선
+      const div = document.createElement('div'); div.className = 'order-divider'
+
+      // 상품 요약
       const itemsEl = document.createElement('div')
-      itemsEl.className = 'order-items'
+      itemsEl.className = 'order-items-text'
       const items = order.hgm_order_items || []
       if (items.length > 0) {
         const first = items[0].product_name || '상품'
-        itemsEl.textContent = items.length > 1
-          ? first + ' 외 ' + (items.length - 1) + '건'
-          : first
+        itemsEl.textContent = items.length > 1 ? first + ' 외 ' + (items.length - 1) + '건' : first
       } else {
         itemsEl.textContent = '상품 정보 없음'
       }
 
+      // 결제금액
       const totalEl = document.createElement('div')
       totalEl.className = 'order-total'
-      totalEl.textContent = Number(order.total_amount || 0).toLocaleString('ko-KR') + '원'
+      totalEl.textContent = Number(order.total_price || 0).toLocaleString('ko-KR') + '원'
 
       card.appendChild(header)
+      card.appendChild(div)
       card.appendChild(itemsEl)
       card.appendChild(totalEl)
       list.appendChild(card)
     })
   }
 
-  // 주문 상태 필터 탭
-  document.querySelectorAll('.order-status-tab').forEach(btn => {
+  // 상태 필터 탭
+  document.querySelectorAll('.order-filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.order-status-tab').forEach(b => b.classList.remove('active'))
+      document.querySelectorAll('.order-filter-btn').forEach(b => b.classList.remove('active'))
       btn.classList.add('active')
-      currentOrderStatus = btn.dataset.status
-      renderOrders(allOrders)
+      currentStatus = btn.dataset.status
+      renderOrders()
     })
   })
 
@@ -488,55 +504,31 @@
     if (result && result.error) {
       const list = document.getElementById('orders-list')
       list.textContent = ''
-      const box = document.createElement('div')
-      box.className = 'state-box'
-      const icon = document.createElement('div')
-      icon.className = 'icon'
-      icon.textContent = '⚠️'
-      const msg = document.createElement('p')
-      msg.textContent = '주문 내역을 불러오지 못했어요'
-      box.appendChild(icon)
-      box.appendChild(msg)
-      list.appendChild(box)
+      const s = document.createElement('div'); s.className = 'empty-state'
+      const i = document.createElement('div'); i.className = 'empty-icon'; i.textContent = '⚠️'
+      const p = document.createElement('p'); p.textContent = '주문 내역을 불러오지 못했어요'
+      s.appendChild(i); s.appendChild(p); list.appendChild(s)
       return
     }
     allOrders = Array.isArray(result) ? result : []
-    renderOrders(allOrders)
+    renderOrders()
   }
 
-  // ===== 위시리스트 =====
+  // ── 위시리스트 ──
   async function loadWishlist() {
     const result = await getWishlist(userId)
     const listEl = document.getElementById('wishlist-list')
     listEl.textContent = ''
 
-    if (result && result.error) {
-      const box = document.createElement('div')
-      box.className = 'state-box'
-      const icon = document.createElement('div')
-      icon.className = 'icon'
-      icon.textContent = '⚠️'
-      const msg = document.createElement('p')
-      msg.textContent = '위시리스트를 불러오지 못했어요'
-      box.appendChild(icon)
-      box.appendChild(msg)
-      listEl.appendChild(box)
-      return
-    }
-
     const items = Array.isArray(result) ? result : []
 
-    if (items.length === 0) {
-      const box = document.createElement('div')
-      box.className = 'state-box'
-      const icon = document.createElement('div')
-      icon.className = 'icon'
-      icon.textContent = '🌱'
-      const msg = document.createElement('p')
-      msg.textContent = '위시리스트가 비어있어요'
-      box.appendChild(icon)
-      box.appendChild(msg)
-      listEl.appendChild(box)
+    if (!items.length || (result && result.error)) {
+      const s = document.createElement('div'); s.className = 'empty-state'
+      const i = document.createElement('div'); i.className = 'empty-icon'
+      i.textContent = result && result.error ? '⚠️' : '🌱'
+      const p = document.createElement('p')
+      p.textContent = result && result.error ? '위시리스트를 불러오지 못했어요' : '위시리스트가 비어있어요'
+      s.appendChild(i); s.appendChild(p); listEl.appendChild(s)
       return
     }
 
@@ -547,37 +539,40 @@
       const product = item.hgm_products || {}
       const card = document.createElement('div')
       card.className = 'wishlist-card'
+      card.addEventListener('click', e => {
+        if (e.target.closest('button')) return
+        window.location.href = '/product.html?id=' + product.id
+      })
 
       const imgWrap = document.createElement('div')
-      imgWrap.className = 'wishlist-card-image'
+      imgWrap.className = 'wishlist-img'
       if (product.image_url) {
         const img = document.createElement('img')
         img.src = product.image_url
         img.alt = product.name || ''
         img.loading = 'lazy'
+        img.onerror = () => { imgWrap.textContent = '🌿' }
         imgWrap.appendChild(img)
       } else {
         imgWrap.textContent = '🌿'
       }
 
       const body = document.createElement('div')
-      body.className = 'wishlist-card-body'
+      body.className = 'wishlist-body'
 
       const name = document.createElement('div')
-      name.className = 'wishlist-product-name'
+      name.className = 'wishlist-name'
       name.textContent = product.name || '상품명 없음'
 
       const price = document.createElement('div')
-      price.className = 'wishlist-product-price'
-      price.textContent = product.price
-        ? Number(product.price).toLocaleString('ko-KR') + '원'
-        : '가격 정보 없음'
+      price.className = 'wishlist-price'
+      price.textContent = product.price ? Number(product.price).toLocaleString('ko-KR') + '원' : '-'
 
       const actions = document.createElement('div')
       actions.className = 'wishlist-actions'
 
       const removeBtn = document.createElement('button')
-      removeBtn.className = 'btn btn-outline btn-sm'
+      removeBtn.className = 'btn-remove'
       removeBtn.textContent = '제거'
       removeBtn.addEventListener('click', async () => {
         await removeFromWishlist(userId, product.id)
@@ -585,18 +580,11 @@
       })
 
       const cartBtn = document.createElement('button')
-      cartBtn.className = 'btn btn-primary btn-sm'
-      cartBtn.textContent = '장바구니'
+      cartBtn.className = 'btn-cart'
+      cartBtn.textContent = '🛒 담기'
       cartBtn.addEventListener('click', () => {
         if (product.id && product.name && product.price) {
-          addToCart({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            delivery: product.delivery_fee || 3000,
-            imageUrl: product.image_url || '',
-          })
-          alert('장바구니에 담았어요!')
+          addToCart({ id: product.id, name: product.name, price: product.price, delivery: product.delivery ?? 3000, imageUrl: product.image_url || '' })
         }
       })
 
@@ -613,38 +601,24 @@
     listEl.appendChild(grid)
   }
 
-  // ===== 알림 설정 저장 =====
-  document.getElementById('notify-form').addEventListener('submit', async (e) => {
+  // ── 알림 설정 저장 ──
+  document.getElementById('notify-form').addEventListener('submit', async e => {
     e.preventDefault()
-    const notifyNew = document.getElementById('notify-new').checked
-    const notifySale = document.getElementById('notify-sale').checked
-
     const submitBtn = e.target.querySelector('[type="submit"]')
     submitBtn.disabled = true
     submitBtn.textContent = '저장 중...'
-
     const result = await updateUser(userId, {
-      notify_new: notifyNew,
-      notify_sale: notifySale,
+      notify_new: document.getElementById('notify-new').checked,
+      notify_sale: document.getElementById('notify-sale').checked,
     })
-
     submitBtn.disabled = false
     submitBtn.textContent = '저장'
-
-    if (result && result.error) {
-      alert('저장에 실패했어요. 다시 시도해주세요.')
-    } else {
-      alert('알림 설정이 저장되었어요!')
-    }
+    alert(result && result.error ? '저장에 실패했어요. 다시 시도해주세요.' : '알림 설정이 저장되었어요!')
   })
 
-  // ===== 초기 로드 =====
+  // ── 초기 로드 ──
   loadOrders()
   loadWishlist()
-
-  // 헤더 auth 업데이트
-  const { updateNavAuth } = await import('/js/auth.js')
-  updateNavAuth()
 </script>
 </body>
 </html>
