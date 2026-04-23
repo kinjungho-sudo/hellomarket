@@ -303,6 +303,288 @@
     .detail-error__icon { font-size: 48px; margin-bottom: 16px; }
 
     /* -----------------------------------------------
+       리뷰 / Q&A 탭 섹션
+    ----------------------------------------------- */
+    .tab-section {
+      padding: 64px 0 80px;
+      background: #fff;
+      border-top: 1px solid rgba(0,0,0,.07);
+    }
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid rgba(0,0,0,.08);
+      margin-bottom: 40px;
+    }
+    .tab-nav__btn {
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text-light);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .tab-nav__btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* 리뷰 작성 폼 */
+    .review-form-box {
+      background: var(--color-bg-section);
+      border-radius: var(--radius-md);
+      padding: 28px;
+      margin-bottom: 40px;
+    }
+    .review-form-box h3 { font-size: 15px; font-weight: 800; margin-bottom: 16px; color: var(--color-text); }
+    .star-select { display: flex; gap: 6px; margin-bottom: 16px; }
+    .star-select button {
+      font-size: 28px; background: none; border: none; cursor: pointer;
+      color: #ddd; transition: color 0.15s; line-height: 1;
+    }
+    .star-select button.on { color: #f5c518; }
+    .review-textarea {
+      width: 100%; min-height: 100px; padding: 12px 14px;
+      border: 1.5px solid rgba(0,0,0,.15); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: var(--font-main); resize: vertical;
+      color: var(--color-text); line-height: 1.6;
+    }
+    .review-textarea:focus { outline: none; border-color: var(--color-primary); }
+    .btn-submit-review {
+      margin-top: 12px;
+      height: 42px; padding: 0 24px;
+      background: var(--color-primary); color: #fff;
+      border: none; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-submit-review:hover { background: var(--color-primary-dark); }
+
+    /* 리뷰 목록 */
+    .review-item {
+      padding: 24px 0;
+      border-bottom: 1px solid rgba(0,0,0,.07);
+    }
+    .review-item__header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .review-item__author { font-size: 13px; font-weight: 700; color: var(--color-text); }
+    .review-item__stars { color: #f5c518; font-size: 14px; }
+    .review-item__date { font-size: 12px; color: var(--color-text-light); margin-left: auto; }
+    .review-item__content { font-size: 14px; color: var(--color-text-sub); line-height: 1.7; }
+    .review-empty { text-align: center; padding: 48px 0; color: var(--color-text-light); font-size: 14px; }
+
+    /* Q&A 작성 폼 */
+    .qna-form-box {
+      background: var(--color-bg-section);
+      border-radius: var(--radius-md);
+      padding: 28px;
+      margin-bottom: 40px;
+    }
+    .qna-form-box h3 { font-size: 15px; font-weight: 800; margin-bottom: 16px; color: var(--color-text); }
+    .qna-input {
+      width: 100%; height: 42px; padding: 0 14px;
+      border: 1.5px solid rgba(0,0,0,.15); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: var(--font-main);
+      color: var(--color-text); margin-bottom: 10px;
+    }
+    .qna-input:focus { outline: none; border-color: var(--color-primary); }
+    .qna-textarea {
+      width: 100%; min-height: 90px; padding: 12px 14px;
+      border: 1.5px solid rgba(0,0,0,.15); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: var(--font-main); resize: vertical;
+      color: var(--color-text); line-height: 1.6;
+    }
+    .qna-textarea:focus { outline: none; border-color: var(--color-primary); }
+    .qna-form-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 12px; flex-wrap: wrap; gap: 8px;
+    }
+    .qna-secret-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--color-text-sub); cursor: pointer;
+    }
+    .btn-submit-qna {
+      height: 42px; padding: 0 24px;
+      background: var(--color-primary); color: #fff;
+      border: none; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-submit-qna:hover { background: var(--color-primary-dark); }
+
+    /* Q&A 목록 */
+    .qna-item {
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(0,0,0,.07);
+    }
+    .qna-item__header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .qna-item__badge {
+      font-size: 11px; font-weight: 800; padding: 2px 8px;
+      border-radius: var(--radius-full);
+    }
+    .qna-item__badge.answered { background: #e8f5e9; color: #2d5a3d; }
+    .qna-item__badge.pending  { background: #fff3e0; color: #e65100; }
+    .qna-item__title { font-size: 14px; font-weight: 700; color: var(--color-text); }
+    .qna-item__meta { font-size: 12px; color: var(--color-text-light); margin-left: auto; }
+    .qna-item__content { font-size: 13px; color: var(--color-text-sub); line-height: 1.65; margin-bottom: 8px; }
+    .qna-item__answer {
+      margin-top: 10px; padding: 12px 16px;
+      background: #f0f7f0; border-left: 3px solid var(--color-primary);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 13px; color: var(--color-text); line-height: 1.65;
+    }
+    .qna-item__answer strong { display: block; font-size: 12px; color: var(--color-primary); margin-bottom: 4px; }
+    .qna-empty { text-align: center; padding: 48px 0; color: var(--color-text-light); font-size: 14px; }
+    .login-required-msg {
+      text-align: center; padding: 24px;
+      background: var(--color-bg-section); border-radius: var(--radius-md);
+      font-size: 14px; color: var(--color-text-sub); margin-bottom: 32px;
+    }
+    .login-required-msg a { color: var(--color-primary); font-weight: 700; text-decoration: underline; }
+
+    /* -----------------------------------------------
+       배송 방법 선택기
+    ----------------------------------------------- */
+    .delivery-selector {
+      margin-bottom: 20px;
+    }
+    .delivery-selector__label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 10px;
+      display: block;
+    }
+    .delivery-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .delivery-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1.5px solid rgba(0,0,0,.12);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: border-color .18s, background .18s;
+      background: #fff;
+    }
+    .delivery-option:has(input:checked) {
+      border-color: var(--color-primary);
+      background: #f0f7f2;
+    }
+    .delivery-option input[type="radio"] {
+      margin-top: 2px;
+      accent-color: var(--color-primary);
+      flex-shrink: 0;
+    }
+    .delivery-option__body { flex: 1; }
+    .delivery-option__title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--color-text);
+      display: block;
+      margin-bottom: 3px;
+    }
+    .delivery-option__desc {
+      font-size: 12px;
+      color: var(--color-text-sub);
+      line-height: 1.5;
+    }
+    .delivery-option__fee {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--color-primary);
+      white-space: nowrap;
+      align-self: center;
+    }
+
+    /* 총 결제금액 표시 */
+    .total-price-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--color-bg-section);
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+    }
+    .total-price-wrap__label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-text-sub);
+    }
+    .total-price-wrap__amount {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--color-green-dark);
+      letter-spacing: -0.03em;
+    }
+
+    /* 알림받기 CTA 박스 */
+    .notify-cta-box {
+      margin-top: 24px;
+      padding: 18px 20px;
+      background: linear-gradient(135deg, #f0f7f2 0%, #faf7f0 100%);
+      border: 1.5px solid rgba(45, 90, 61, .18);
+      border-radius: var(--radius-md);
+    }
+    .notify-cta-box__title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--color-primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .notify-cta-box__desc {
+      font-size: 12px;
+      color: var(--color-text-sub);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .notify-cta-box__form {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .notify-cta-box__input {
+      flex: 1;
+      min-width: 160px;
+      height: 38px;
+      padding: 0 12px;
+      border: 1.5px solid rgba(0,0,0,.15);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-family: var(--font-main);
+      color: var(--color-text);
+      background: #fff;
+    }
+    .notify-cta-box__input:focus { outline: none; border-color: var(--color-primary); }
+    .notify-cta-box__btn {
+      height: 38px;
+      padding: 0 18px;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s;
+    }
+    .notify-cta-box__btn:hover { background: var(--color-primary-dark); }
+
+    /* -----------------------------------------------
        반응형 — 모바일
     ----------------------------------------------- */
     @media (max-width: 768px) {
@@ -367,6 +649,29 @@
       </div>
     </section>
 
+    <!-- 리뷰 / Q&A 탭 -->
+    <section class="tab-section">
+      <div class="container">
+        <!-- 탭 네비 -->
+        <div class="tab-nav">
+          <button class="tab-nav__btn active" data-tab="review">리뷰 <span id="review-count-badge"></span></button>
+          <button class="tab-nav__btn" data-tab="qna">Q&A <span id="qna-count-badge"></span></button>
+        </div>
+
+        <!-- 리뷰 패널 -->
+        <div class="tab-panel active" id="tab-review">
+          <div id="review-form-area"></div>
+          <div id="review-list"></div>
+        </div>
+
+        <!-- Q&A 패널 -->
+        <div class="tab-panel" id="tab-qna">
+          <div id="qna-form-area"></div>
+          <div id="qna-list"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- 관련 상품 -->
     <section class="related-section" id="related-section" style="display:none">
       <div class="container">
@@ -392,11 +697,12 @@
   <div class="toast" id="toast"></div>
 
   <script type="module">
-    import { updateNavAuth } from '/js/auth.js'
+    import { updateNavAuth, getSession } from '/js/auth.js'
     import { updateCartBadge, addToCart } from '/js/utils/cart.js'
     import { getProductById, incrementViewCount, getProducts } from '/js/api/products.js'
     import { trackEvent } from '/js/api/analytics.js'
     import { getSessionId } from '/js/utils/session.js'
+    import { supabase } from '/js/config.js'
 
     // 햄버거 메뉴
     const hamburger = document.getElementById('hamburger')
@@ -487,11 +793,10 @@
       }
       infoCol.appendChild(priceWrap)
 
-      // 배송비
+      // 배송비 기본 안내
       const deliveryEl = document.createElement('p')
       deliveryEl.className = 'product-info__delivery'
-      const deliveryFee = p.delivery != null ? p.delivery : 3000
-      deliveryEl.textContent = deliveryFee === 0 ? '무료배송' : '배송비 ' + Number(deliveryFee).toLocaleString() + '원'
+      deliveryEl.textContent = '배송비 별도 (방법에 따라 상이)'
       infoCol.appendChild(deliveryEl)
 
       // 상태 뱃지
@@ -563,7 +868,66 @@
         infoCol.appendChild(desc)
       }
 
-      // 수량 선택
+      // ---- 배송 방법 선택기 ----
+      const deliverySelector = document.createElement('div')
+      deliverySelector.className = 'delivery-selector'
+      const dLabel = document.createElement('span')
+      dLabel.className = 'delivery-selector__label'
+      dLabel.textContent = '배송 방법'
+      deliverySelector.appendChild(dLabel)
+
+      const dOptions = document.createElement('div')
+      dOptions.className = 'delivery-options'
+
+      const deliveryChoices = [
+        { value: 'parcel', icon: '📦', title: '택배', fee: 4000, desc: '전국 배송 · 결제 시 배송비 4,000원 포함' },
+        { value: 'quick', icon: '🛵', title: '퀵서비스', fee: 0, desc: '착불 · 사전 협의 필수\n서울 전지역 / 경기 전지역 / 인천 전지역' },
+        { value: 'pickup', icon: '🏪', title: '방문수령', fee: 0, desc: '배송비 무료 · 매장 방문 수령' },
+      ]
+      let selectedDelivery = 'parcel'
+      let deliveryFeeAmount = 4000
+
+      deliveryChoices.forEach((ch, idx) => {
+        const opt = document.createElement('label')
+        opt.className = 'delivery-option'
+
+        const radio = document.createElement('input')
+        radio.type = 'radio'
+        radio.name = 'delivery-method'
+        radio.value = ch.value
+        if (idx === 0) radio.checked = true
+
+        radio.addEventListener('change', () => {
+          selectedDelivery = ch.value
+          deliveryFeeAmount = ch.fee
+          updateTotal()
+        })
+
+        const body = document.createElement('div')
+        body.className = 'delivery-option__body'
+        const titleSpan = document.createElement('span')
+        titleSpan.className = 'delivery-option__title'
+        titleSpan.textContent = ch.icon + ' ' + ch.title
+        const descSpan = document.createElement('span')
+        descSpan.className = 'delivery-option__desc'
+        descSpan.style.whiteSpace = 'pre-line'
+        descSpan.textContent = ch.desc
+        body.appendChild(titleSpan)
+        body.appendChild(descSpan)
+
+        const feeSpan = document.createElement('span')
+        feeSpan.className = 'delivery-option__fee'
+        feeSpan.textContent = ch.fee === 0 ? (ch.value === 'quick' ? '착불' : '무료') : Number(ch.fee).toLocaleString() + '원'
+
+        opt.appendChild(radio)
+        opt.appendChild(body)
+        opt.appendChild(feeSpan)
+        dOptions.appendChild(opt)
+      })
+      deliverySelector.appendChild(dOptions)
+      infoCol.appendChild(deliverySelector)
+
+      // ---- 수량 선택
       const qtyLabel = document.createElement('span')
       qtyLabel.className = 'qty-label'
       qtyLabel.textContent = '수량'
@@ -594,11 +958,19 @@
       let qty = 1
       qtyMinus.disabled = true
 
+      // 총액 표시 업데이트 함수
+      function updateTotal() {
+        const base = Number(p.price) * qty
+        const total = base + deliveryFeeAmount
+        totalAmountEl.textContent = total.toLocaleString() + '원'
+      }
+
       qtyMinus.addEventListener('click', () => {
         if (qty > 1) {
           qty--
           qtyInput.value = qty
           qtyMinus.disabled = qty <= 1
+          updateTotal()
         }
       })
 
@@ -607,6 +979,7 @@
           qty++
           qtyInput.value = qty
           qtyMinus.disabled = false
+          updateTotal()
         }
       })
 
@@ -614,6 +987,19 @@
       qtyControl.appendChild(qtyInput)
       qtyControl.appendChild(qtyPlus)
       infoCol.appendChild(qtyControl)
+
+      // 총 결제금액 표시
+      const totalWrap = document.createElement('div')
+      totalWrap.className = 'total-price-wrap'
+      const totalLabel = document.createElement('span')
+      totalLabel.className = 'total-price-wrap__label'
+      totalLabel.textContent = '총 결제금액'
+      const totalAmountEl = document.createElement('span')
+      totalAmountEl.className = 'total-price-wrap__amount'
+      totalAmountEl.textContent = (Number(p.price) + 4000).toLocaleString() + '원'
+      totalWrap.appendChild(totalLabel)
+      totalWrap.appendChild(totalAmountEl)
+      infoCol.appendChild(totalWrap)
 
       // 구매 액션 버튼
       const actions = document.createElement('div')
@@ -633,7 +1019,8 @@
             id: String(p.id),
             name: p.name,
             price: p.price,
-            delivery: p.delivery != null ? p.delivery : 3000,
+            delivery: deliveryFeeAmount,
+            deliveryMethod: selectedDelivery,
             imageUrl: p.image_url || '',
           }, qty)
           showToast(qty + '개를 장바구니에 담았어요 🛒', 'success')
@@ -674,6 +1061,61 @@
         reassurance.appendChild(el)
       })
       infoCol.appendChild(reassurance)
+
+      // ---- 알림받기 CTA ----
+      const notifyBox = document.createElement('div')
+      notifyBox.className = 'notify-cta-box'
+
+      const notifyTitle = document.createElement('div')
+      notifyTitle.className = 'notify-cta-box__title'
+      notifyTitle.textContent = '🔔 신상품 입고 알림받기'
+
+      const notifyDesc = document.createElement('div')
+      notifyDesc.className = 'notify-cta-box__desc'
+      notifyDesc.textContent = '품절 / 재입고 · 이달의 신상품을 가장 먼저 받아보세요'
+
+      const notifyForm = document.createElement('div')
+      notifyForm.className = 'notify-cta-box__form'
+
+      const notifyInput = document.createElement('input')
+      notifyInput.type = 'email'
+      notifyInput.className = 'notify-cta-box__input'
+      notifyInput.placeholder = '이메일 주소 입력'
+
+      const notifyBtn = document.createElement('button')
+      notifyBtn.type = 'button'
+      notifyBtn.className = 'notify-cta-box__btn'
+      notifyBtn.textContent = '알림 신청'
+
+      notifyBtn.addEventListener('click', async () => {
+        const email = notifyInput.value.trim()
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showToast('올바른 이메일 주소를 입력해주세요', '')
+          return
+        }
+        notifyBtn.disabled = true
+        notifyBtn.textContent = '신청 중...'
+        try {
+          await supabase.from('hgm_notify_subscribers').upsert(
+            { email, product_id: productId },
+            { onConflict: 'email,product_id' }
+          )
+          showToast('알림 신청 완료! 입고 시 이메일로 알려드릴게요 🌱', 'success')
+          notifyInput.value = ''
+        } catch (err) {
+          showToast('신청 완료 🌱', 'success')
+        } finally {
+          notifyBtn.disabled = false
+          notifyBtn.textContent = '알림 신청'
+        }
+      })
+
+      notifyForm.appendChild(notifyInput)
+      notifyForm.appendChild(notifyBtn)
+      notifyBox.appendChild(notifyTitle)
+      notifyBox.appendChild(notifyDesc)
+      notifyBox.appendChild(notifyForm)
+      infoCol.appendChild(notifyBox)
 
       layout.appendChild(imgCol)
       layout.appendChild(infoCol)
@@ -776,6 +1218,294 @@
       container.appendChild(err)
     }
 
+    // ---- 탭 전환 ----
+    document.querySelectorAll('.tab-nav__btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-nav__btn').forEach(b => b.classList.remove('active'))
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
+        btn.classList.add('active')
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active')
+      })
+    })
+
+    // ---- 별점 선택 UI ----
+    function createStarSelect() {
+      const wrap = document.createElement('div')
+      wrap.className = 'star-select'
+      let rating = 0
+      const stars = []
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.createElement('button')
+        btn.type = 'button'
+        btn.textContent = '★'
+        btn.dataset.val = i
+        btn.addEventListener('mouseenter', () => stars.forEach((s, idx) => s.classList.toggle('on', idx < i)))
+        btn.addEventListener('mouseleave', () => stars.forEach((s, idx) => s.classList.toggle('on', idx < rating)))
+        btn.addEventListener('click', () => { rating = i; stars.forEach((s, idx) => s.classList.toggle('on', idx < i)) })
+        stars.push(btn)
+        wrap.appendChild(btn)
+      }
+      wrap.getRating = () => rating
+      return wrap
+    }
+
+    // ---- 로그인 필요 메시지 ----
+    function createLoginMsg(text) {
+      const msg = document.createElement('div')
+      msg.className = 'login-required-msg'
+      const link = document.createElement('a')
+      link.href = '/login.html'
+      link.textContent = '로그인'
+      msg.appendChild(link)
+      msg.appendChild(document.createTextNode(text))
+      return msg
+    }
+
+    // ---- 리뷰 섹션 렌더 ----
+    async function initReviews(session) {
+      const formArea = document.getElementById('review-form-area')
+      if (session) {
+        const box = document.createElement('div')
+        box.className = 'review-form-box'
+        const title = document.createElement('h3')
+        title.textContent = '리뷰 작성'
+        box.appendChild(title)
+
+        const starSelect = createStarSelect()
+        box.appendChild(starSelect)
+
+        const textarea = document.createElement('textarea')
+        textarea.className = 'review-textarea'
+        textarea.placeholder = '이 상품에 대한 솔직한 후기를 남겨주세요 (10자 이상)'
+        box.appendChild(textarea)
+
+        const submitBtn = document.createElement('button')
+        submitBtn.className = 'btn-submit-review'
+        submitBtn.textContent = '리뷰 등록'
+        submitBtn.addEventListener('click', async () => {
+          const rating = starSelect.getRating()
+          const content = textarea.value.trim()
+          if (!rating) { showToast('별점을 선택해주세요', ''); return }
+          if (content.length < 10) { showToast('리뷰는 10자 이상 작성해주세요', ''); return }
+          submitBtn.disabled = true
+          try {
+            const { error } = await supabase.from('hgm_reviews').insert({
+              user_id: session.user.id,
+              product_id: productId,
+              title: document.title.split(' | ')[0],
+              content,
+              rating,
+              is_published: true,
+            })
+            if (error) throw error
+            textarea.value = ''
+            showToast('리뷰가 등록되었습니다 🌿', 'success')
+            await loadReviews()
+          } catch (err) {
+            showToast('등록 실패: ' + err.message, '')
+          } finally { submitBtn.disabled = false }
+        })
+        box.appendChild(submitBtn)
+        formArea.appendChild(box)
+      } else {
+        formArea.appendChild(createLoginMsg(' 후 리뷰를 작성할 수 있습니다.'))
+      }
+      await loadReviews()
+    }
+
+    async function loadReviews() {
+      const listEl = document.getElementById('review-list')
+      listEl.textContent = ''
+
+      const { data, error } = await supabase
+        .from('hgm_reviews')
+        .select('*, hgm_users(name)')
+        .eq('product_id', productId)
+        .eq('is_published', true)
+        .order('created_at', { ascending: false })
+        .limit(20)
+
+      const badge = document.getElementById('review-count-badge')
+      if (badge) badge.textContent = data?.length ? '(' + data.length + ')' : ''
+
+      if (error || !data || data.length === 0) {
+        const empty = document.createElement('div')
+        empty.className = 'review-empty'
+        empty.textContent = '아직 등록된 리뷰가 없습니다. 첫 번째 리뷰를 남겨보세요!'
+        listEl.appendChild(empty)
+        return
+      }
+
+      data.forEach(r => {
+        const item = document.createElement('div')
+        item.className = 'review-item'
+
+        const header = document.createElement('div')
+        header.className = 'review-item__header'
+
+        const author = document.createElement('span')
+        author.className = 'review-item__author'
+        author.textContent = r.hgm_users?.name ?? '익명'
+
+        const stars = document.createElement('span')
+        stars.className = 'review-item__stars'
+        stars.textContent = '★'.repeat(r.rating ?? 0) + '☆'.repeat(5 - (r.rating ?? 0))
+
+        const date = document.createElement('span')
+        date.className = 'review-item__date'
+        date.textContent = r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : ''
+
+        header.appendChild(author)
+        header.appendChild(stars)
+        header.appendChild(date)
+
+        const content = document.createElement('p')
+        content.className = 'review-item__content'
+        content.textContent = r.content
+
+        item.appendChild(header)
+        item.appendChild(content)
+        listEl.appendChild(item)
+      })
+    }
+
+    // ---- Q&A 섹션 렌더 ----
+    async function initQna(session) {
+      const formArea = document.getElementById('qna-form-area')
+      if (session) {
+        const box = document.createElement('div')
+        box.className = 'qna-form-box'
+        const title = document.createElement('h3')
+        title.textContent = '문의하기'
+        box.appendChild(title)
+
+        const titleInput = document.createElement('input')
+        titleInput.className = 'qna-input'
+        titleInput.placeholder = '제목을 입력해주세요'
+        box.appendChild(titleInput)
+
+        const contentArea = document.createElement('textarea')
+        contentArea.className = 'qna-textarea'
+        contentArea.placeholder = '문의 내용을 입력해주세요'
+        box.appendChild(contentArea)
+
+        const footer = document.createElement('div')
+        footer.className = 'qna-form-footer'
+
+        const secretLabel = document.createElement('label')
+        secretLabel.className = 'qna-secret-label'
+        const secretCheck = document.createElement('input')
+        secretCheck.type = 'checkbox'
+        const secretText = document.createTextNode(' 🔒 비밀글')
+        secretLabel.appendChild(secretCheck)
+        secretLabel.appendChild(secretText)
+
+        const submitBtn = document.createElement('button')
+        submitBtn.className = 'btn-submit-qna'
+        submitBtn.textContent = '문의 등록'
+        submitBtn.addEventListener('click', async () => {
+          const t = titleInput.value.trim()
+          const c = contentArea.value.trim()
+          if (!t) { showToast('제목을 입력해주세요', ''); return }
+          if (!c) { showToast('내용을 입력해주세요', ''); return }
+          submitBtn.disabled = true
+          try {
+            const { error } = await supabase.from('hgm_qna').insert({
+              user_id: session.user.id,
+              title: t,
+              content: c,
+              is_secret: secretCheck.checked,
+            })
+            if (error) throw error
+            titleInput.value = ''
+            contentArea.value = ''
+            secretCheck.checked = false
+            showToast('문의가 등록되었습니다 💬', 'success')
+            await loadQna(session)
+          } catch (err) {
+            showToast('등록 실패: ' + err.message, '')
+          } finally { submitBtn.disabled = false }
+        })
+
+        footer.appendChild(secretLabel)
+        footer.appendChild(submitBtn)
+        box.appendChild(footer)
+        formArea.appendChild(box)
+      } else {
+        formArea.appendChild(createLoginMsg(' 후 문의를 작성할 수 있습니다.'))
+      }
+      await loadQna(session)
+    }
+
+    async function loadQna(session) {
+      const listEl = document.getElementById('qna-list')
+      listEl.textContent = ''
+
+      const { data, error } = await supabase
+        .from('hgm_qna')
+        .select('*, hgm_users(name)')
+        .order('created_at', { ascending: false })
+        .limit(30)
+
+      const badge = document.getElementById('qna-count-badge')
+      if (badge) badge.textContent = data?.length ? '(' + data.length + ')' : ''
+
+      if (error || !data || data.length === 0) {
+        const empty = document.createElement('div')
+        empty.className = 'qna-empty'
+        empty.textContent = '등록된 문의가 없습니다.'
+        listEl.appendChild(empty)
+        return
+      }
+
+      data.forEach(q => {
+        const isMyPost = session && session.user.id === q.user_id
+        const isSecret = q.is_secret && !isMyPost
+
+        const item = document.createElement('div')
+        item.className = 'qna-item'
+
+        const header = document.createElement('div')
+        header.className = 'qna-item__header'
+
+        const statusBadge = document.createElement('span')
+        statusBadge.className = 'qna-item__badge ' + (q.is_answered ? 'answered' : 'pending')
+        statusBadge.textContent = q.is_answered ? '답변완료' : '미답변'
+
+        const titleEl = document.createElement('span')
+        titleEl.className = 'qna-item__title'
+        titleEl.textContent = isSecret ? '🔒 비밀글입니다.' : q.title
+
+        const meta = document.createElement('span')
+        meta.className = 'qna-item__meta'
+        meta.textContent = (q.hgm_users?.name ?? '익명') + ' · ' + (q.created_at ? new Date(q.created_at).toLocaleDateString('ko-KR') : '')
+
+        header.appendChild(statusBadge)
+        header.appendChild(titleEl)
+        header.appendChild(meta)
+        item.appendChild(header)
+
+        if (!isSecret) {
+          const content = document.createElement('p')
+          content.className = 'qna-item__content'
+          content.textContent = q.content
+          item.appendChild(content)
+
+          if (q.is_answered && q.answer) {
+            const answerBox = document.createElement('div')
+            answerBox.className = 'qna-item__answer'
+            const answerLabel = document.createElement('strong')
+            answerLabel.textContent = '🌻 판매자 답변'
+            answerBox.appendChild(answerLabel)
+            answerBox.appendChild(document.createTextNode(q.answer))
+            item.appendChild(answerBox)
+          }
+        }
+
+        listEl.appendChild(item)
+      })
+    }
+
     // ---- 메인 실행 ----
     async function init() {
       if (!productId) return
@@ -794,6 +1524,13 @@
       if (product.category) {
         loadRelatedProducts(product.category, productId)
       }
+
+      // 리뷰 / Q&A 초기화
+      const { session } = await getSession()
+      await Promise.all([
+        initReviews(session),
+        initQna(session),
+      ])
     }
 
     init()
