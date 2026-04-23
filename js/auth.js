@@ -21,9 +21,12 @@ export async function getSession() {
  */
 export async function signInWithGoogle() {
   try {
+    // 프로덕션 URL 고정 — localhost에서 열어도 Vercel로 리다이렉트
+    const isProd = !window.location.hostname.includes('localhost')
+    const baseUrl = isProd ? 'https://hellowgardenmarket.vercel.app' : window.location.origin
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/login.html?callback=1' }
+      options: { redirectTo: baseUrl + '/login.html?callback=1' }
     })
     if (error) throw error
     return { data, error: null }

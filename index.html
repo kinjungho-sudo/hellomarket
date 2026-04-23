@@ -12,161 +12,181 @@
   <link rel="stylesheet" href="/css/common.css" />
   <link rel="stylesheet" href="/css/components.css" />
   <style>
+    /* ---- 히어로 ---- */
     .hero {
-      min-height: 600px;
-      background: linear-gradient(135deg, #1a3d28 0%, #2d5a3d 60%, #4a7c59 100%);
+      min-height: 560px;
+      background:
+        linear-gradient(160deg, rgba(26,61,40,0.92) 0%, rgba(45,90,61,0.85) 60%, rgba(74,124,89,0.80) 100%),
+        url('/assets/images/hero-bg.jpg') center/cover no-repeat;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      color: #ffffff;
+      color: #fff;
       padding: 80px 24px;
     }
-    .hero__inner { max-width: 720px; }
-    .hero__headline {
-      font-family: var(--font-serif);
-      font-size: clamp(32px, 5vw, 60px);
-      font-weight: 700;
-      line-height: 1.25;
-      letter-spacing: -0.03em;
+    .hero__inner { max-width: 680px; }
+    .hero__label {
+      display: inline-block;
+      background: var(--color-accent);
+      color: #333;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: var(--radius-full);
       margin-bottom: 20px;
     }
+    .hero__headline {
+      font-family: var(--font-serif);
+      font-size: clamp(32px, 5vw, 58px);
+      font-weight: 700;
+      line-height: 1.22;
+      letter-spacing: -0.03em;
+      margin-bottom: 18px;
+    }
     .hero__sub {
-      font-size: clamp(15px, 2vw, 18px);
-      line-height: 1.65;
-      color: rgba(255,255,255,.82);
+      font-size: clamp(14px, 2vw, 17px);
+      line-height: 1.7;
+      color: rgba(255,255,255,.78);
       margin-bottom: 36px;
     }
     .hero__cta {
       display: flex;
-      gap: 16px;
+      gap: 12px;
       justify-content: center;
       flex-wrap: wrap;
-      margin-bottom: 24px;
-    }
-    .hero__cta .btn-lg { height: 52px; padding: 0 40px; font-size: 16px; }
-    .btn-outline-white {
-      background-color: transparent;
-      color: #ffffff;
-      border: 2px solid rgba(255,255,255,.8);
-    }
-    .btn-outline-white:hover {
-      background-color: rgba(255,255,255,.15);
-      border-color: #ffffff;
+      margin-bottom: 28px;
     }
     .hero__reassurance {
-      font-size: 13px;
-      color: rgba(255,255,255,.6);
       display: flex;
       gap: 20px;
       justify-content: center;
       flex-wrap: wrap;
+      font-size: 12.5px;
+      color: rgba(255,255,255,.58);
     }
-    .hero__reassurance span { display: flex; align-items: center; gap: 6px; }
+    .hero__reassurance span { display: flex; align-items: center; gap: 5px; }
 
+    /* ---- 섹션 공통 ---- */
     .section-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: 36px;
+      margin-bottom: 28px;
     }
     .section-header__link {
       font-size: 13px;
-      font-weight: 600;
-      color: var(--color-primary);
+      font-weight: 700;
+      color: var(--color-green);
       text-decoration: none;
       flex-shrink: 0;
-    }
-    .section-header__link:hover { text-decoration: underline; }
-
-    .section-new { padding: 80px 0; }
-    .section-best { padding: 80px 0; background: var(--color-bg-section); }
-
-    .product-card__actions {
-      padding: 0 16px 16px;
       display: flex;
-      gap: 8px;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.8;
+      transition: opacity var(--transition-fast);
     }
-    .product-card__actions .btn { flex: 1; font-size: 13px; height: 36px; }
+    .section-header__link:hover { opacity: 1; text-decoration: underline; }
 
+    .section-new  { padding: 72px 0; }
+    .section-best { padding: 72px 0; background: var(--color-bg-section); }
+    .section-guide { padding: 72px 0; }
+    .section-store { padding: 72px 0; background: var(--color-bg-section); }
+
+    /* ---- 매장 방문 CTA 배너 ---- */
     .cta-banner {
-      background: linear-gradient(135deg, #2d5a3d 0%, #1a3d28 100%);
+      background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
       padding: 80px 24px;
       text-align: center;
-      color: #ffffff;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-banner::before {
+      content: '🌿';
+      position: absolute;
+      font-size: 200px;
+      opacity: 0.05;
+      top: -30px;
+      right: -20px;
+      line-height: 1;
+    }
+    .cta-banner__label {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.9);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: var(--radius-full);
+      margin-bottom: 18px;
     }
     .cta-banner__headline {
       font-family: var(--font-serif);
-      font-size: clamp(26px, 4vw, 44px);
+      font-size: clamp(24px, 4vw, 42px);
       font-weight: 700;
       line-height: 1.3;
       letter-spacing: -0.03em;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     .cta-banner__sub {
       font-size: 15px;
-      line-height: 1.65;
-      color: rgba(255,255,255,.75);
+      line-height: 1.7;
+      color: rgba(255,255,255,.7);
       margin-bottom: 32px;
-      max-width: 560px;
+      max-width: 520px;
       margin-left: auto;
       margin-right: auto;
     }
-    .cta-banner .btn-accent {
-      background: var(--color-accent);
-      color: var(--color-text);
-      height: 52px;
-      padding: 0 40px;
-      font-size: 16px;
-      font-weight: 800;
-      border-radius: var(--radius-sm);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      transition: background-color 0.2s ease;
-    }
-    .cta-banner .btn-accent:hover { background: var(--color-accent-dark); }
 
-    .section-guide { padding: 80px 0; }
+    /* ---- 가이드 카드 ---- */
     .guide-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+      gap: 20px;
     }
     .guide-card {
       background: var(--color-bg-card);
       border-radius: var(--radius-md);
-      border: 1.5px solid rgba(0,0,0,.08);
+      border: 1px solid var(--color-border);
       overflow: hidden;
-      transition: box-shadow 0.25s ease, transform 0.25s ease;
+      transition: box-shadow var(--transition-base), transform var(--transition-base);
       text-decoration: none;
       color: inherit;
       display: block;
+      box-shadow: var(--shadow-xs);
     }
-    .guide-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .guide-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
     .guide-card__thumb {
       aspect-ratio: 16 / 9;
-      background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+      background: linear-gradient(135deg, #d4edda, #b8dfc3);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 48px;
+      font-size: 44px;
     }
-    .guide-card__body { padding: 20px; }
+    .guide-card__body { padding: 18px 16px; }
     .guide-card__type {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--color-primary);
-      margin-bottom: 8px;
-      display: block;
+      color: var(--color-text-on-yellow);
+      background: var(--color-yellow);
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      margin-bottom: 10px;
     }
     .guide-card__title {
       font-weight: 700;
-      font-size: 15px;
+      font-size: 14px;
       color: var(--color-text);
-      line-height: 1.45;
+      line-height: 1.5;
       margin-bottom: 8px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -175,34 +195,37 @@
     }
     .guide-card__date { font-size: 12px; color: var(--color-text-light); }
 
+    /* ---- 인스타그램 배너 ---- */
     .instagram-banner {
-      background: #e8f5e9;
+      background: var(--color-bg-warm);
       padding: 56px 24px;
       text-align: center;
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
     }
-    .instagram-banner__icon { font-size: 40px; margin-bottom: 12px; }
+    .instagram-banner__icon { font-size: 36px; margin-bottom: 10px; }
     .instagram-banner__text {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
       color: var(--color-text);
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .btn-instagram {
       background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-      color: #ffffff;
+      color: #fff;
       display: inline-flex;
       align-items: center;
-      height: 48px;
-      padding: 0 32px;
-      border-radius: var(--radius-sm);
+      height: 46px;
+      padding: 0 28px;
+      border-radius: var(--radius-full);
       font-weight: 800;
-      font-size: 15px;
+      font-size: 14px;
       text-decoration: none;
-      transition: opacity 0.2s ease;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
     }
-    .btn-instagram:hover { opacity: 0.9; }
+    .btn-instagram:hover { opacity: 0.88; transform: translateY(-1px); }
 
-    .section-store { padding: 80px 0; background: var(--color-bg-section); }
+    /* ---- 매장 정보 ---- */
     .store-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -211,63 +234,80 @@
     }
     .store-info__title {
       font-family: var(--font-serif);
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--color-text);
       margin-bottom: 24px;
+      letter-spacing: -0.02em;
     }
     .store-info__row {
       display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 14px;
+      margin-bottom: 18px;
       align-items: flex-start;
     }
-    .store-info__icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+    .store-info__icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      width: 28px;
+      height: 28px;
+      background: var(--color-yellow-bg2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
     .store-info__label {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--color-text-light);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.07em;
       margin-bottom: 4px;
     }
-    .store-info__value { font-size: 15px; color: var(--color-text); line-height: 1.55; }
+    .store-info__value { font-size: 14px; color: var(--color-text); line-height: 1.6; }
     .store-info__value .closed { color: var(--color-danger); font-weight: 600; }
     .map-placeholder {
       border-radius: var(--radius-md);
-      background: #d1d5db;
+      background: var(--color-bg-section);
+      border: 1px dashed var(--color-border-strong);
       height: 280px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      gap: 12px;
-      color: #6b7280;
+      gap: 10px;
+      color: var(--color-text-light);
     }
-    .map-placeholder__icon { font-size: 40px; }
-    .map-placeholder__text { font-size: 14px; font-weight: 500; }
+    .map-placeholder__icon { font-size: 36px; }
+    .map-placeholder__text { font-size: 13px; font-weight: 500; }
 
+    /* ---- 로딩 / 빈 상태 ---- */
     .products-empty {
       text-align: center;
       padding: 60px 24px;
       color: var(--color-text-light);
+      grid-column: 1 / -1;
     }
     .products-loading {
       display: flex;
       justify-content: center;
       padding: 60px 24px;
+      grid-column: 1 / -1;
     }
 
     @media (max-width: 768px) {
-      .guide-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
-      .store-grid { grid-template-columns: 1fr; gap: 32px; }
-      .section-new, .section-best, .section-guide, .section-store { padding: 56px 0; }
-      .cta-banner { padding: 56px 24px; }
+      .guide-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .store-grid { grid-template-columns: 1fr; gap: 28px; }
+      .section-new, .section-best, .section-guide, .section-store { padding: 52px 0; }
+      .cta-banner { padding: 60px 24px; }
     }
     @media (max-width: 480px) {
       .guide-grid { grid-template-columns: 1fr; }
       .hero__cta { flex-direction: column; align-items: center; }
-      .hero__cta .btn-lg { width: 100%; max-width: 320px; }
+      .hero__cta .btn { width: 100%; max-width: 300px; }
     }
   </style>
 </head>
@@ -275,7 +315,7 @@
 
   <header class="header">
     <nav class="container">
-      <a href="/index.html" class="nav-logo">🌻 Hello Garden Market</a>
+      <a href="/index.html" class="nav-logo"><span class="logo-icon">🌻</span> Hello Garden Market</a>
       <ul class="nav-links">
         <li><a href="/index.html">홈</a></li>
         <li><a href="/shop.html">쇼핑하기</a></li>
@@ -309,16 +349,17 @@
   <!-- 섹션 1: 히어로 -->
   <section class="hero">
     <div class="hero__inner">
-      <h1 class="hero__headline">일상에 초록을,<br>헬로우가든마켓</h1>
-      <p class="hero__sub">수백 종의 식물을 한눈에 — 온라인 쇼핑부터 매장 방문까지</p>
+      <span class="hero__label">🌻 헬로우가든마켓</span>
+      <h1 class="hero__headline">고향 가든센터,<br>합리적인 식물 쇼핑</h1>
+      <p class="hero__sub">수백 종의 식물을 온라인에서 구경하고<br>마음에 드는 건 매장에서 직접 만나보세요</p>
       <div class="hero__cta">
-        <a href="/shop.html" class="btn btn-primary btn-lg">쇼핑하기</a>
+        <a href="/shop.html" class="btn btn-primary btn-lg">쇼핑하기 →</a>
         <a href="/gallery.html" class="btn btn-outline-white btn-lg">매장 구경하기</a>
       </div>
       <div class="hero__reassurance">
-        <span>✓ 전국 배송</span>
-        <span>✓ 안전한 포장</span>
-        <span>✓ 식물 전문가 상담</span>
+        <span>🚚 전국 배송</span>
+        <span>📦 안전한 포장</span>
+        <span>🌿 식물 전문가 상담</span>
       </div>
     </div>
   </section>
@@ -358,9 +399,10 @@
   <!-- 섹션 4: 매장 방문 유도 CTA -->
   <section class="cta-banner">
     <div class="container">
-      <h2 class="cta-banner__headline">온라인에 없는 수백 종이<br>매장에 있어요</h2>
-      <p class="cta-banner__sub">직접 보고 골라가세요. 헬로우가든마켓 오프라인 매장에서 만나요.</p>
-      <a href="/gallery.html" class="btn-accent">매장 구경하기 📍</a>
+      <div class="cta-banner__label">VISIT US</div>
+      <h2 class="cta-banner__headline">온라인에 없는 수백 종이<br>매장에 있어요 🌿</h2>
+      <p class="cta-banner__sub">직접 보고 고르는 재미가 있어요.<br>헬로우가든마켓 오프라인 매장을 구경해보세요.</p>
+      <a href="/gallery.html" class="btn btn-accent btn-lg">매장 구경하기 📍</a>
     </div>
   </section>
 
@@ -436,7 +478,7 @@
 
   <footer class="footer">
     <div class="container">
-      <div class="nav-logo" style="margin-bottom:12px;">🌻 Hello Garden Market</div>
+      <div class="nav-logo" style="margin-bottom:12px;"><span class="logo-icon">🌻</span> Hello Garden Market</div>
       <div class="footer-links">
         <a href="/about.html">매장 소개</a>
         <a href="#">개인정보처리방침</a>

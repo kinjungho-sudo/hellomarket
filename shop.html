@@ -13,25 +13,8 @@
   <link rel="stylesheet" href="/css/components.css" />
   <style>
     /* -----------------------------------------------
-       페이지 타이틀 배너
+       페이지 타이틀 배너 — common.css의 .page-hero 사용
     ----------------------------------------------- */
-    .page-hero {
-      background: linear-gradient(135deg, #1a3d28, #2d5a3d);
-      padding: 56px 24px 48px;
-      text-align: center;
-      color: #ffffff;
-    }
-    .page-hero__title {
-      font-family: var(--font-serif);
-      font-size: clamp(28px, 4vw, 44px);
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      margin-bottom: 8px;
-    }
-    .page-hero__sub {
-      font-size: 15px;
-      color: rgba(255,255,255,.72);
-    }
 
     /* -----------------------------------------------
        필터 영역
@@ -71,10 +54,10 @@
       transition: color 0.2s ease, border-color 0.2s ease;
       margin-bottom: -1px;
     }
-    .category-tab:hover { color: var(--color-primary); }
+    .category-tab:hover { color: var(--color-green); }
     .category-tab.active {
-      color: var(--color-primary);
-      border-bottom-color: var(--color-primary);
+      color: var(--color-green-dark);
+      border-bottom-color: var(--color-yellow);
       font-weight: 700;
     }
 
@@ -101,11 +84,12 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
-    .status-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .status-btn:hover { border-color: var(--color-yellow); color: var(--color-text-on-yellow); background: var(--color-yellow-bg); }
     .status-btn.active {
-      background: var(--color-primary);
-      color: #ffffff;
-      border-color: var(--color-primary);
+      background: var(--color-yellow);
+      color: var(--color-text-on-yellow);
+      border-color: var(--color-yellow);
+      font-weight: 700;
     }
 
     .sort-select {
@@ -119,7 +103,7 @@
       cursor: pointer;
       font-family: var(--font-main);
     }
-    .sort-select:focus { outline: none; border-color: var(--color-primary); }
+    .sort-select:focus { outline: none; border-color: var(--color-yellow); box-shadow: 0 0 0 3px rgba(245,200,66,0.18); }
 
     /* -----------------------------------------------
        상품 목록 영역
@@ -134,34 +118,11 @@
       margin-bottom: 24px;
     }
     .products-count strong {
-      color: var(--color-primary);
+      color: var(--color-green);
       font-weight: 700;
     }
 
-    /* 카드 하단 액션 */
-    .product-card__actions {
-      padding: 0 16px 16px;
-      display: flex;
-      gap: 8px;
-    }
-    .product-card__actions .btn-cart {
-      flex: 1;
-      height: 36px;
-      font-size: 13px;
-      background: var(--color-primary);
-      color: #ffffff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-    .product-card__actions .btn-cart:hover { background: var(--color-primary-light); }
-    .product-card__actions .btn-cart:disabled {
-      background: #e0e0e0;
-      color: #999;
-      cursor: not-allowed;
-    }
+    /* 카드 하단 액션 — components.css의 .product-card__actions 사용 */
 
     /* 더 보기 버튼 */
     .load-more-wrap {
@@ -172,15 +133,15 @@
       height: 48px;
       padding: 0 48px;
       background: #ffffff;
-      border: 2px solid var(--color-primary);
-      color: var(--color-primary);
+      border: 2px solid var(--color-yellow);
+      color: var(--color-text-on-yellow);
       font-size: 15px;
       font-weight: 700;
       border-radius: var(--radius-sm);
       cursor: pointer;
       transition: all 0.2s ease;
     }
-    .btn-load-more:hover { background: var(--color-primary); color: #ffffff; }
+    .btn-load-more:hover { background: var(--color-yellow); color: var(--color-text-on-yellow); box-shadow: var(--shadow-yellow); }
     .btn-load-more:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* 빈 상태 */
@@ -210,7 +171,7 @@
 
   <header class="header">
     <nav class="container">
-      <a href="/index.html" class="nav-logo">🌻 Hello Garden Market</a>
+      <a href="/index.html" class="nav-logo"><span class="logo-icon">🌻</span> Hello Garden Market</a>
       <ul class="nav-links">
         <li><a href="/index.html">홈</a></li>
         <li><a href="/shop.html">쇼핑하기</a></li>
@@ -282,7 +243,7 @@
 
   <footer class="footer">
     <div class="container">
-      <div class="nav-logo" style="margin-bottom:12px;">🌻 Hello Garden Market</div>
+      <div class="nav-logo" style="margin-bottom:12px;"><span class="logo-icon">🌻</span> Hello Garden Market</div>
       <div class="footer-links">
         <a href="/about.html">매장 소개</a>
         <a href="#">개인정보처리방침</a>
