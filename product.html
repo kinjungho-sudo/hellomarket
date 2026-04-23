@@ -381,15 +381,47 @@
     }
     .btn-submit-review:hover { background: var(--color-primary-dark); }
 
+    /* 별점 요약 (상품 정보 영역) */
+    .product-rating-summary {
+      display: flex; align-items: center; gap: 10px;
+      margin: 6px 0 14px;
+    }
+    .product-rating-summary__stars { color: #f5c518; font-size: 18px; letter-spacing: 1px; line-height: 1; }
+    .product-rating-summary__score { font-size: 20px; font-weight: 900; color: #2c2c2c; }
+    .product-rating-summary__count { font-size: 13px; color: var(--color-text-sub); }
+    .product-rating-summary__link {
+      font-size: 12px; color: var(--color-primary); text-decoration: underline;
+      cursor: pointer; background: none; border: none; padding: 0; font-family: inherit;
+    }
+
+    /* 리뷰 요약 헤더 (리뷰 탭 상단) */
+    .review-summary-header {
+      display: flex; align-items: center; gap: 24px;
+      background: var(--color-bg-section); border-radius: var(--radius-md);
+      padding: 24px 28px; margin-bottom: 32px;
+    }
+    .review-summary-header__big { text-align: center; min-width: 80px; }
+    .review-summary-header__score { font-size: 48px; font-weight: 900; color: var(--color-text); line-height: 1; }
+    .review-summary-header__stars { font-size: 22px; color: #f5c518; margin: 6px 0 4px; }
+    .review-summary-header__count { font-size: 12px; color: var(--color-text-sub); }
+    .review-summary-header__bars { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+    .rating-bar-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-text-sub); }
+    .rating-bar-row__label { min-width: 24px; text-align: right; }
+    .rating-bar-row__track { flex: 1; height: 8px; background: #e8e0d0; border-radius: 9999px; overflow: hidden; }
+    .rating-bar-row__fill { height: 100%; background: #f5c518; border-radius: 9999px; transition: width 0.4s ease; }
+    .rating-bar-row__pct { min-width: 28px; text-align: right; }
+
     /* 리뷰 목록 */
     .review-item {
       padding: 24px 0;
       border-bottom: 1px solid rgba(0,0,0,.07);
     }
-    .review-item__header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .review-item__header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
     .review-item__author { font-size: 13px; font-weight: 700; color: var(--color-text); }
-    .review-item__stars { color: #f5c518; font-size: 14px; }
+    .review-item__stars { color: #f5c518; font-size: 15px; letter-spacing: 1px; }
     .review-item__date { font-size: 12px; color: var(--color-text-light); margin-left: auto; }
+    .review-item__rating-text { font-size: 12px; font-weight: 700; color: #f5c518; }
+    .review-item__title { font-size: 14px; font-weight: 700; color: var(--color-text); margin-bottom: 4px; }
     .review-item__content { font-size: 14px; color: var(--color-text-sub); line-height: 1.7; }
     .review-item__img {
       width: 80px; height: 80px; object-fit: cover;
@@ -682,7 +714,7 @@
       <div class="container">
         <!-- 탭 네비 -->
         <div class="tab-nav">
-          <button class="tab-nav__btn active" data-tab="review">리뷰 <span id="review-count-badge"></span></button>
+          <button class="tab-nav__btn active" data-tab="review" id="tab-review-btn">리뷰 <span id="review-count-badge"></span></button>
           <button class="tab-nav__btn" data-tab="qna">Q&A <span id="qna-count-badge"></span></button>
         </div>
 
@@ -806,6 +838,41 @@
       nameEl.className = 'product-info__name'
       nameEl.textContent = p.name
       infoCol.appendChild(nameEl)
+
+      // 별점 요약 (avg_rating / review_count)
+      const ratingRow = document.createElement('div')
+      ratingRow.className = 'product-rating-summary'
+      ratingRow.id = 'product-rating-summary'
+      const avg = parseFloat(p.avg_rating ?? 0)
+      const cnt = parseInt(p.review_count ?? 0)
+
+      const starsEl = document.createElement('span')
+      starsEl.className = 'product-rating-summary__stars'
+      starsEl.textContent = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg))
+
+      const scoreEl = document.createElement('span')
+      scoreEl.className = 'product-rating-summary__score'
+      scoreEl.textContent = avg > 0 ? avg.toFixed(1) : '–'
+
+      const countEl = document.createElement('span')
+      countEl.className = 'product-rating-summary__count'
+      countEl.textContent = '리뷰 ' + cnt + '개'
+
+      ratingRow.appendChild(starsEl)
+      ratingRow.appendChild(scoreEl)
+      ratingRow.appendChild(countEl)
+
+      if (cnt > 0) {
+        const linkBtn = document.createElement('button')
+        linkBtn.className = 'product-rating-summary__link'
+        linkBtn.textContent = '리뷰 보기 ↓'
+        linkBtn.addEventListener('click', () => {
+          document.getElementById('tab-review-btn')?.click()
+          document.querySelector('.tab-section')?.scrollIntoView({ behavior: 'smooth' })
+        })
+        ratingRow.appendChild(linkBtn)
+      }
+      infoCol.appendChild(ratingRow)
 
       // 가격
       const priceWrap = document.createElement('div')
@@ -1457,6 +1524,77 @@
         return
       }
 
+      // ---- 별점 분포 요약 헤더 ----
+      const ratings = data.map(r => r.rating ?? 0).filter(r => r > 0)
+      const avgR = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0
+      const distMap = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+      ratings.forEach(r => { if (distMap[r] !== undefined) distMap[r]++ })
+
+      const summaryHeader = document.createElement('div')
+      summaryHeader.className = 'review-summary-header'
+
+      const bigEl = document.createElement('div')
+      bigEl.className = 'review-summary-header__big'
+
+      const bigScore = document.createElement('div')
+      bigScore.className = 'review-summary-header__score'
+      bigScore.textContent = avgR.toFixed(1)
+
+      const bigStars = document.createElement('div')
+      bigStars.className = 'review-summary-header__stars'
+      bigStars.textContent = '★'.repeat(Math.round(avgR)) + '☆'.repeat(5 - Math.round(avgR))
+
+      const bigCount = document.createElement('div')
+      bigCount.className = 'review-summary-header__count'
+      bigCount.textContent = ratings.length + '개 리뷰'
+
+      bigEl.appendChild(bigScore)
+      bigEl.appendChild(bigStars)
+      bigEl.appendChild(bigCount)
+      summaryHeader.appendChild(bigEl)
+
+      const barsEl = document.createElement('div')
+      barsEl.className = 'review-summary-header__bars'
+      ;[5, 4, 3, 2, 1].forEach(star => {
+        const row = document.createElement('div')
+        row.className = 'rating-bar-row'
+
+        const lbl = document.createElement('span')
+        lbl.className = 'rating-bar-row__label'
+        lbl.textContent = star + '★'
+
+        const track = document.createElement('div')
+        track.className = 'rating-bar-row__track'
+        const fill = document.createElement('div')
+        fill.className = 'rating-bar-row__fill'
+        const pct = ratings.length ? Math.round((distMap[star] / ratings.length) * 100) : 0
+        fill.style.width = pct + '%'
+        track.appendChild(fill)
+
+        const pctEl = document.createElement('span')
+        pctEl.className = 'rating-bar-row__pct'
+        pctEl.textContent = distMap[star] + '건'
+
+        row.appendChild(lbl)
+        row.appendChild(track)
+        row.appendChild(pctEl)
+        barsEl.appendChild(row)
+      })
+      summaryHeader.appendChild(barsEl)
+      listEl.appendChild(summaryHeader)
+
+      // 상품 정보 영역의 별점 요약도 실제 리뷰 데이터로 갱신
+      const summaryEl = document.getElementById('product-rating-summary')
+      if (summaryEl) {
+        const starsEl = summaryEl.querySelector('.product-rating-summary__stars')
+        const scoreEl = summaryEl.querySelector('.product-rating-summary__score')
+        const countEl = summaryEl.querySelector('.product-rating-summary__count')
+        if (starsEl) starsEl.textContent = '★'.repeat(Math.round(avgR)) + '☆'.repeat(5 - Math.round(avgR))
+        if (scoreEl) scoreEl.textContent = avgR > 0 ? avgR.toFixed(1) : '–'
+        if (countEl) countEl.textContent = '리뷰 ' + data.length + '개'
+      }
+
+      // ---- 리뷰 카드 목록 ----
       data.forEach(r => {
         const item = document.createElement('div')
         item.className = 'review-item'
@@ -1472,19 +1610,26 @@
         stars.className = 'review-item__stars'
         stars.textContent = '★'.repeat(r.rating ?? 0) + '☆'.repeat(5 - (r.rating ?? 0))
 
+        const ratingText = document.createElement('span')
+        ratingText.className = 'review-item__rating-text'
+        ratingText.textContent = r.rating ? r.rating + '.0' : ''
+
         const date = document.createElement('span')
         date.className = 'review-item__date'
         date.textContent = r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : ''
 
         header.appendChild(author)
         header.appendChild(stars)
+        header.appendChild(ratingText)
         header.appendChild(date)
-
-        const content = document.createElement('p')
-        content.className = 'review-item__content'
-        content.textContent = r.content
-
         item.appendChild(header)
+
+        if (r.title) {
+          const titleEl = document.createElement('p')
+          titleEl.className = 'review-item__title'
+          titleEl.textContent = r.title
+          item.appendChild(titleEl)
+        }
 
         // 리뷰 이미지 (있으면)
         if (r.image_url) {
@@ -1497,7 +1642,11 @@
           item.appendChild(revImg)
         }
 
+        const content = document.createElement('p')
+        content.className = 'review-item__content'
+        content.textContent = r.content
         item.appendChild(content)
+
         listEl.appendChild(item)
       })
     }

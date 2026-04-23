@@ -518,25 +518,14 @@
       }
     }
 
-    // 별점 평균 캐시 { productId: { avg, count } }
+    // 별점 캐시 — hgm_products.avg_rating / review_count 컬럼 직접 사용
     let ratingCache = {}
 
-    async function loadRatings(productIds) {
-      if (!productIds.length) return
-      const { data } = await supabase
-        .from('hgm_reviews')
-        .select('product_id, rating')
-        .in('product_id', productIds)
-        .eq('is_published', true)
-      if (!data) return
-      const map = {}
-      data.forEach(r => {
-        if (!map[r.product_id]) map[r.product_id] = { sum: 0, count: 0 }
-        map[r.product_id].sum += r.rating || 0
-        map[r.product_id].count += 1
-      })
-      Object.entries(map).forEach(([id, v]) => {
-        ratingCache[id] = { avg: v.sum / v.count, count: v.count }
+    function buildRatingCache(products) {
+      products.forEach(p => {
+        if (p.avg_rating > 0 || p.review_count > 0) {
+          ratingCache[p.id] = { avg: parseFloat(p.avg_rating ?? 0), count: parseInt(p.review_count ?? 0) }
+        }
       })
     }
 
@@ -853,9 +842,8 @@
           countEl.appendChild(document.createTextNode('개'))
         }
 
-        // 별점 데이터 로드 (캐시 없는 것만)
-        const uncached = data.map(p => p.id).filter(id => !(id in ratingCache))
-        if (uncached.length) await loadRatings(uncached)
+        // 별점 — hgm_products.avg_rating 컬럼에서 직접 읽기
+        buildRatingCache(data)
 
         renderProducts(data, append)
       } catch (err) {

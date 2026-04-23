@@ -898,6 +898,32 @@
         priceEl.appendChild(orig)
       }
       body.appendChild(nameEl)
+
+      // 별점 표시 (avg_rating / review_count)
+      const avg = parseFloat(p.avg_rating ?? 0)
+      const cnt = parseInt(p.review_count ?? 0)
+      if (avg > 0 || cnt > 0) {
+        const ratingEl = document.createElement('div')
+        ratingEl.className = 'product-card__rating'
+        const filled = document.createElement('span')
+        filled.className = 'star-filled'
+        filled.textContent = '★'.repeat(Math.round(avg))
+        const empty = document.createElement('span')
+        empty.className = 'star-empty'
+        empty.textContent = '★'.repeat(5 - Math.round(avg))
+        const num = document.createElement('span')
+        num.className = 'rating-num'
+        num.textContent = avg.toFixed(1)
+        const cnt2 = document.createElement('span')
+        cnt2.className = 'rating-cnt'
+        cnt2.textContent = ' (' + cnt + ')'
+        ratingEl.appendChild(filled)
+        ratingEl.appendChild(empty)
+        ratingEl.appendChild(num)
+        ratingEl.appendChild(cnt2)
+        body.appendChild(ratingEl)
+      }
+
       body.appendChild(priceEl)
       card.appendChild(body)
 
