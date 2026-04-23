@@ -166,6 +166,56 @@ export async function isWishlisted(userId, productId) {
 }
 
 /**
+ * 주문자 배송 정보 저장 (로그인 회원 전용)
+ * @param {string} userId
+ * @param {{ name, phone, zipcode, address, addressDetail, deliveryMemo }} info
+ */
+export async function saveShippingInfo(userId, info) {
+  try {
+    const { data, error } = await supabase
+      .from('hgm_users')
+      .update({
+        name: info.name,
+        phone: info.phone,
+        default_zipcode: info.zipcode,
+        default_address: info.address,
+        default_address_detail: info.addressDetail,
+        default_delivery_memo: info.deliveryMemo,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  } catch (err) {
+    console.error('[saveShippingInfo] 배송 정보 저장 실패:', err)
+    return { error: err.message }
+  }
+}
+
+/**
+ * 저장된 배송 정보 조회 (로그인 회원 전용)
+ * @param {string} userId
+ */
+export async function getShippingInfo(userId) {
+  try {
+    const { data, error } = await supabase
+      .from('hgm_users')
+      .select('name, phone, default_zipcode, default_address, default_address_detail, default_delivery_memo')
+      .eq('id', userId)
+      .single()
+
+    if (error && error.code !== 'PGRST116') throw error
+    return data || null
+  } catch (err) {
+    console.error('[getShippingInfo] 배송 정보 조회 실패:', err)
+    return null
+  }
+}
+
+/**
  * 전체 회원 수 조회 (관리자 대시보드용)
  */
 export async function getUserCount() {

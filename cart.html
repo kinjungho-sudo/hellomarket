@@ -337,6 +337,7 @@
     import { formatPrice } from '/js/utils/format.js'
     import { getSession } from '/js/auth.js'
     import { updateNavAuth } from '/js/auth.js'
+    import { saveShippingInfo, getShippingInfo } from '/js/api/users.js'
 
     // TossPayments 클라이언트 키 (테스트)
     const TOSS_CLIENT_KEY = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eo8'
@@ -528,6 +529,32 @@
     })
 
     /* --------------------------------------------------
+       저장된 배송 정보를 폼에 자동 채움
+    -------------------------------------------------- */
+    function fillShippingForm(info) {
+      if (!info) return
+      const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val }
+      set('receiver-name', info.name)
+      set('receiver-phone', info.phone)
+      set('receiver-zipcode', info.default_zipcode)
+      set('receiver-address', info.default_address)
+      set('receiver-address-detail', info.default_address_detail)
+      // 배송 메모 — 기본 옵션에 있으면 select, 없으면 직접 입력 처리
+      const memoEl = document.getElementById('delivery-memo')
+      const memoCustomEl = document.getElementById('delivery-memo-custom')
+      const memoCustomGroup = document.getElementById('memo-custom-group')
+      const memo = info.default_delivery_memo || ''
+      const options = Array.from(memoEl.options).map(o => o.value)
+      if (options.includes(memo)) {
+        memoEl.value = memo
+      } else if (memo) {
+        memoEl.value = '직접 입력'
+        memoCustomEl.value = memo
+        memoCustomGroup.style.display = 'block'
+      }
+    }
+
+    /* --------------------------------------------------
        주문하기 버튼
     -------------------------------------------------- */
     document.getElementById('btn-order').addEventListener('click', async function() {
@@ -539,6 +566,9 @@
         // 로그인 회원은 비회원 필드 숨김
         const guestFields = document.getElementById('guest-fields')
         if (guestFields) guestFields.style.display = 'none'
+        // 저장된 배송 정보 자동 채움
+        const savedInfo = await getShippingInfo(savedUserId)
+        fillShippingForm(savedInfo)
       } else {
         savedUserId = null
         isGuest = true
@@ -604,6 +634,11 @@
       if (!zipcode || !address){ showToast('주소를 입력해 주세요.', 'error'); return }
 
       savedReceiverInfo = { name, phone, zipcode, address, addressDetail, deliveryMemo, ordererName, ordererEmail }
+
+      // 로그인 회원이면 배송 정보 DB에 저장 (다음 주문 시 자동 채움)
+      if (!isGuest && savedUserId) {
+        saveShippingInfo(savedUserId, { name, phone, zipcode, address, addressDetail, deliveryMemo }).catch(() => {})
+      }
 
       // STEP 2로 전환
       document.getElementById('order-form').style.display = 'none'
@@ -770,6 +805,9 @@
             isGuest = false
             const guestFields = document.getElementById('guest-fields')
             if (guestFields) guestFields.style.display = 'none'
+            // 저장된 배송 정보 자동 채움
+            const savedInfo = await getShippingInfo(savedUserId)
+            fillShippingForm(savedInfo)
           } else {
             savedUserId = null
             isGuest = true
