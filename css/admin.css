@@ -31,9 +31,9 @@
 /* 사이드바 상단 로고 영역 */
 .admin-sidebar-logo {
   padding: 0 24px 24px;
-  font-family: var(--font-serif);
+  font-family: var(--font-main);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   color: #ffffff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 8px;

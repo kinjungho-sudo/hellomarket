@@ -84,7 +84,7 @@ header nav,
 
 /* 로고 */
 .nav-logo {
-  font-family: var(--font-serif);
+  font-family: var(--font-main);
   color: var(--color-green-dark);
   font-size: 18px;
   font-weight: 600;
@@ -290,10 +290,10 @@ footer,
 }
 
 .footer-logo {
-  font-family: var(--font-serif);
+  font-family: var(--font-main);
   color: #fff;
   font-size: 17px;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 20px;
   display: block;
 }
@@ -334,9 +334,9 @@ footer,
 
 .page-hero h1,
 .page-hero__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-main);
   font-size: clamp(24px, 4vw, 40px);
-  font-weight: 700;
+  font-weight: 900;
   letter-spacing: -0.03em;
   margin-bottom: 8px;
   color: #fff;
