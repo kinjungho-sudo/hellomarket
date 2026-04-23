@@ -1,4 +1,5 @@
 import { supabase } from '../config.js'
+import { upsertUserProfile } from '../auth.js'
 
 /**
  * Q&A 목록 조회 (페이지네이션 지원)
@@ -12,7 +13,7 @@ export async function getQnaList({ page = 1, limit = 10 } = {}) {
 
     const { data, error, count } = await supabase
       .from('hgm_qna')
-      .select('*, hgm_users(name, avatar_url)', { count: 'exact' })
+      .select('*, hgm_users(name)', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
@@ -32,7 +33,7 @@ export async function getQnaById(id) {
   try {
     const { data, error } = await supabase
       .from('hgm_qna')
-      .select('*, hgm_users(name, avatar_url)')
+      .select('*, hgm_users(name)')
       .eq('id', id)
       .single()
 
@@ -54,6 +55,10 @@ export async function getQnaById(id) {
  */
 export async function createQna(userId, data) {
   try {
+    // hgm_users row가 없으면 자동 생성 (FK 제약 방지)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) await upsertUserProfile(user)
+
     const { data: created, error } = await supabase
       .from('hgm_qna')
       .insert([
