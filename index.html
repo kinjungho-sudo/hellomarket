@@ -22,13 +22,13 @@
       position: relative;
     }
     .brand-banner__inner {
-      max-width: 680px;
+      max-width: 760px;
       margin: 0 auto;
-      padding: 28px 24px 0;
+      padding: 20px 32px 0;
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      gap: 0;
+      gap: 16px;
       position: relative;
     }
     /* 텍스트 영역 */
@@ -37,26 +37,26 @@
       text-align: center;
       position: relative;
       z-index: 2;
-      padding-bottom: 24px;
+      padding-bottom: 20px;
     }
     .brand-banner__sub {
-      font-size: 14px;
-      font-weight: 800;
-      color: var(--color-green-dark);
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-green);
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
     }
     .brand-banner__title {
-      font-family: var(--font-serif);
-      font-size: clamp(40px, 9vw, 76px);
+      font-family: var(--font-main);
+      font-size: clamp(28px, 6vw, 52px);
       font-weight: 900;
       color: var(--color-green-dark);
-      line-height: 1.0;
-      letter-spacing: -0.04em;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
       position: relative;
       display: inline-block;
     }
@@ -64,13 +64,13 @@
     .brand-banner__title::after {
       content: '';
       position: absolute;
-      bottom: -4px;
+      bottom: 2px;
       left: 0; right: 0;
-      height: 8px;
+      height: 6px;
       background: var(--color-yellow);
-      border-radius: 4px;
+      border-radius: 3px;
       z-index: -1;
-      transform: skewX(-3deg);
+      transform: skewX(-2deg);
     }
     /* 반짝이 장식 */
     .sp {
@@ -90,19 +90,17 @@
     }
     /* 로고 캐릭터 이미지 */
     .brand-banner__logo {
-      width: clamp(110px, 20vw, 180px);
+      width: clamp(80px, 14vw, 130px);
       flex-shrink: 0;
       position: relative;
       z-index: 2;
-      /* 아래 바닥에 딱 붙이기 */
       align-self: flex-end;
-      /* 살짝 튀어나오는 효과 */
-      filter: drop-shadow(0 -4px 12px rgba(245,200,66,0.35));
+      filter: drop-shadow(0 -3px 8px rgba(245,200,66,0.3));
       animation: logo-float 3.5s ease-in-out infinite;
     }
     @keyframes logo-float {
       0%,100% { transform: translateY(0); }
-      50%      { transform: translateY(-8px); }
+      50%      { transform: translateY(-6px); }
     }
     /* 배경 잎 데코 */
     .brand-banner__deco {
@@ -125,13 +123,13 @@
        히어로 — 매장 실사 풀스크린
     ==================================================== */
     .hero {
-      min-height: clamp(460px, 70vw, 640px);
+      min-height: clamp(400px, 55vw, 560px);
       background:
         linear-gradient(to bottom,
-          rgba(0,0,0,0.04) 0%,
-          rgba(0,0,0,0.22) 45%,
-          rgba(0,0,0,0.62) 100%),
-        url('/assets/images/hero-bg.jpg') center 25% / cover no-repeat;
+          rgba(0,0,0,0.1) 0%,
+          rgba(0,0,0,0.3) 50%,
+          rgba(0,0,0,0.68) 100%),
+        url('/assets/images/hero-bg.jpg') center center / cover no-repeat;
       display: flex;
       align-items: flex-end;
       color: #fff;
@@ -185,22 +183,22 @@
       border-bottom: none;
     }
     .hero__sub-copy {
-      font-size: clamp(14px, 2.8vw, 18px);
+      font-size: clamp(13px, 2.2vw, 16px);
       font-weight: 700;
-      color: rgba(255,255,255,0.9);
+      color: rgba(255,255,255,0.88);
       margin-bottom: 6px;
       letter-spacing: 0.01em;
       line-height: 1.4;
     }
     .hero__headline {
-      font-family: var(--font-serif);
-      font-size: clamp(42px, 8.5vw, 86px);
+      font-family: var(--font-main);
+      font-size: clamp(36px, 7vw, 68px);
       font-weight: 900;
-      line-height: 1.0;
+      line-height: 1.05;
       letter-spacing: -0.04em;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
       color: #fff;
-      text-shadow: 2px 5px 16px rgba(0,0,0,0.4);
+      text-shadow: 1px 3px 12px rgba(0,0,0,0.45);
     }
     .hero__headline .hl {
       color: var(--color-yellow);
@@ -454,11 +452,16 @@
       .store-grid { grid-template-columns: 1fr; gap: 28px; }
       .section-new, .section-best, .section-guide, .section-store { padding: 52px 0; }
       .cta-banner { padding: 60px 24px; }
+      .brand-banner__inner { padding: 16px 20px 0; gap: 8px; }
+      .sp-1, .sp-3 { left: 3%; }
+      .sp-2, .sp-4 { right: 3%; }
     }
     @media (max-width: 480px) {
       .guide-grid { grid-template-columns: 1fr; }
-      .hero__cta { flex-direction: column; align-items: center; }
-      .hero__cta .btn { width: 100%; max-width: 300px; }
+      .hero__cta { flex-direction: column; align-items: flex-start; }
+      .hero__cta .btn { width: 100%; max-width: 280px; }
+      .brand-banner__inner { padding: 14px 16px 0; }
+      .sp-1, .sp-2, .sp-3, .sp-4 { display: none; }
     }
   </style>
 </head>
