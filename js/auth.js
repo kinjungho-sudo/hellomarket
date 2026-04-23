@@ -149,18 +149,6 @@ export async function updateNavAuth() {
     navAuthEl.textContent = ''
 
     if (session) {
-      // 관리자 여부 확인
-      const admin = await isAdmin()
-
-      // 관리자 페이지 버튼 (관리자인 경우)
-      if (admin) {
-        const adminLink = document.createElement('a')
-        adminLink.href = '/admin/index.html'
-        adminLink.className = 'btn btn-admin'
-        adminLink.textContent = '관리자 페이지'
-        navAuthEl.appendChild(adminLink)
-      }
-
       // 마이페이지 + 로그아웃 인라인 묶음
       const userNav = document.createElement('div')
       userNav.style.cssText = 'display:flex; align-items:center; gap:4px;'
