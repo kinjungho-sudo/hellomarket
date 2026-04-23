@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>리뷰 이벤트 관리 — 헬로우가든마켓 관리자</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <style>
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#fff; border-radius:var(--radius-lg); padding:32px; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; }
+    .modal-title { font-size:18px; font-weight:800; margin-bottom:24px; }
+    .modal-footer { display:flex; gap:12px; justify-content:flex-end; margin-top:24px; padding-top:20px; border-top:1px solid #eee; }
+    .review-thumb { width:50px; height:50px; object-fit:cover; border-radius:var(--radius-sm); }
+    .toggle-switch { position:relative; display:inline-block; width:44px; height:24px; }
+    .toggle-switch input { opacity:0; width:0; height:0; }
+    .toggle-slider { position:absolute; cursor:pointer; inset:0; background:#ccc; border-radius:24px; transition:.3s; }
+    .toggle-slider:before { position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.3s; }
+    .toggle-switch input:checked + .toggle-slider { background:var(--color-primary); }
+    .toggle-switch input:checked + .toggle-slider:before { transform:translateX(20px); }
+    .event-banner-box { background:var(--color-bg-section); border-radius:var(--radius-md); padding:20px; margin-bottom:24px; }
+    .event-banner-box label { font-size:13px; font-weight:700; display:block; margin-bottom:8px; }
+  </style>
+</head>
+<body>
+<div class="admin-layout">
+  <div class="admin-sidebar-overlay" id="sidebar-overlay"></div>
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-logo">🌻 HGM 관리자</div>
+    <div class="admin-sidebar-label">메인</div>
+    <a href="index.html">📊 대시보드</a>
+    <div class="admin-sidebar-label">콘텐츠</div>
+    <a href="products.html">🌿 상품 관리</a>
+    <a href="gallery.html">🖼️ 갤러리 관리</a>
+    <a href="posts.html">📰 입고 소식</a>
+    <div class="admin-sidebar-label">고객</div>
+    <a href="orders.html">📦 주문 관리</a>
+    <a href="qna.html">💬 묻고 답하기</a>
+    <a href="reviews.html" class="active">⭐ 리뷰 이벤트</a>
+    <div class="admin-sidebar-label">시스템</div>
+    <a href="settings.html">⚙️ 알림 설정</a>
+    <a href="../index.html">← 사이트로 이동</a>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-header">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="admin-menu-toggle" id="menu-toggle">☰</button>
+        <span class="admin-header-title">리뷰 이벤트 관리</span>
+      </div>
+      <div class="admin-header-user">
+        <button class="btn btn-ghost" id="btn-logout" style="font-size:13px;">로그아웃</button>
+      </div>
+    </header>
+
+    <div class="admin-content">
+      <!-- 이벤트 배너 문구 수정 -->
+      <div class="event-banner-box">
+        <label>🎉 이벤트 배너 문구</label>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <input type="text" class="admin-input" id="event-banner-text"
+            value="리뷰 작성 시 다음 구매 5% 할인 쿠폰 증정"
+            style="flex:1;">
+          <button class="btn btn-primary" id="btn-save-banner" style="white-space:nowrap; height:40px;">저장</button>
+        </div>
+        <div style="font-size:12px; color:var(--color-text-light); margin-top:6px;">
+          리뷰 이벤트 페이지 상단 배너에 표시됩니다.
+        </div>
+      </div>
+
+      <!-- 리뷰 목록 테이블 -->
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width:60px;">이미지</th>
+              <th>제목</th>
+              <th>작성자</th>
+              <th>상품</th>
+              <th>좋아요</th>
+              <th>발행</th>
+              <th>작성일</th>
+              <th style="width:60px;">삭제</th>
+            </tr>
+          </thead>
+          <tbody id="reviews-body">
+            <tr><td colspan="8" style="text-align:center; padding:40px; color:var(--color-text-light);">로딩 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="pagination" style="display:flex; gap:8px; justify-content:center; margin-top:20px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 삭제 확인 모달 -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal-box" style="max-width:400px;">
+    <div class="modal-title">리뷰 삭제</div>
+    <p style="color:var(--color-text-sub); margin-bottom:24px;">이 리뷰를 삭제하시겠어요? 삭제 후 복구할 수 없습니다.</p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="btn-delete-cancel">취소</button>
+      <button class="btn" id="btn-delete-confirm" style="background:var(--color-danger); color:#fff;">삭제</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../js/pages/admin/reviews.js"></script>
+</body>
+</html>

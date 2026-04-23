@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>헬로우가든마켓 | 일상에 초록을</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <style>
+    .hero {
+      min-height: 600px;
+      background: linear-gradient(135deg, #1a3d28 0%, #2d5a3d 60%, #4a7c59 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #ffffff;
+      padding: 80px 24px;
+    }
+    .hero__inner { max-width: 720px; }
+    .hero__headline {
+      font-family: var(--font-serif);
+      font-size: clamp(32px, 5vw, 60px);
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+    .hero__sub {
+      font-size: clamp(15px, 2vw, 18px);
+      line-height: 1.65;
+      color: rgba(255,255,255,.82);
+      margin-bottom: 36px;
+    }
+    .hero__cta {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .hero__cta .btn-lg { height: 52px; padding: 0 40px; font-size: 16px; }
+    .btn-outline-white {
+      background-color: transparent;
+      color: #ffffff;
+      border: 2px solid rgba(255,255,255,.8);
+    }
+    .btn-outline-white:hover {
+      background-color: rgba(255,255,255,.15);
+      border-color: #ffffff;
+    }
+    .hero__reassurance {
+      font-size: 13px;
+      color: rgba(255,255,255,.6);
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .hero__reassurance span { display: flex; align-items: center; gap: 6px; }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 36px;
+    }
+    .section-header__link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-primary);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .section-header__link:hover { text-decoration: underline; }
+
+    .section-new { padding: 80px 0; }
+    .section-best { padding: 80px 0; background: var(--color-bg-section); }
+
+    .product-card__actions {
+      padding: 0 16px 16px;
+      display: flex;
+      gap: 8px;
+    }
+    .product-card__actions .btn { flex: 1; font-size: 13px; height: 36px; }
+
+    .cta-banner {
+      background: linear-gradient(135deg, #2d5a3d 0%, #1a3d28 100%);
+      padding: 80px 24px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .cta-banner__headline {
+      font-family: var(--font-serif);
+      font-size: clamp(26px, 4vw, 44px);
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+    .cta-banner__sub {
+      font-size: 15px;
+      line-height: 1.65;
+      color: rgba(255,255,255,.75);
+      margin-bottom: 32px;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-banner .btn-accent {
+      background: var(--color-accent);
+      color: var(--color-text);
+      height: 52px;
+      padding: 0 40px;
+      font-size: 16px;
+      font-weight: 800;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: background-color 0.2s ease;
+    }
+    .cta-banner .btn-accent:hover { background: var(--color-accent-dark); }
+
+    .section-guide { padding: 80px 0; }
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .guide-card {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 1.5px solid rgba(0,0,0,.08);
+      overflow: hidden;
+      transition: box-shadow 0.25s ease, transform 0.25s ease;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .guide-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .guide-card__thumb {
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+    .guide-card__body { padding: 20px; }
+    .guide-card__type {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: 8px;
+      display: block;
+    }
+    .guide-card__title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--color-text);
+      line-height: 1.45;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .guide-card__date { font-size: 12px; color: var(--color-text-light); }
+
+    .instagram-banner {
+      background: #e8f5e9;
+      padding: 56px 24px;
+      text-align: center;
+    }
+    .instagram-banner__icon { font-size: 40px; margin-bottom: 12px; }
+    .instagram-banner__text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 20px;
+    }
+    .btn-instagram {
+      background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      height: 48px;
+      padding: 0 32px;
+      border-radius: var(--radius-sm);
+      font-weight: 800;
+      font-size: 15px;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+    .btn-instagram:hover { opacity: 0.9; }
+
+    .section-store { padding: 80px 0; background: var(--color-bg-section); }
+    .store-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+    .store-info__title {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 24px;
+    }
+    .store-info__row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+    .store-info__icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+    .store-info__label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+    .store-info__value { font-size: 15px; color: var(--color-text); line-height: 1.55; }
+    .store-info__value .closed { color: var(--color-danger); font-weight: 600; }
+    .map-placeholder {
+      border-radius: var(--radius-md);
+      background: #d1d5db;
+      height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      color: #6b7280;
+    }
+    .map-placeholder__icon { font-size: 40px; }
+    .map-placeholder__text { font-size: 14px; font-weight: 500; }
+
+    .products-empty {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--color-text-light);
+    }
+    .products-loading {
+      display: flex;
+      justify-content: center;
+      padding: 60px 24px;
+    }
+
+    @media (max-width: 768px) {
+      .guide-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .store-grid { grid-template-columns: 1fr; gap: 32px; }
+      .section-new, .section-best, .section-guide, .section-store { padding: 56px 0; }
+      .cta-banner { padding: 56px 24px; }
+    }
+    @media (max-width: 480px) {
+      .guide-grid { grid-template-columns: 1fr; }
+      .hero__cta { flex-direction: column; align-items: center; }
+      .hero__cta .btn-lg { width: 100%; max-width: 320px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <nav class="container">
+      <a href="/index.html" class="nav-logo">🌻 Hello Garden Market</a>
+      <ul class="nav-links">
+        <li><a href="/index.html">홈</a></li>
+        <li><a href="/shop.html">쇼핑하기</a></li>
+        <li><a href="/new.html">새로 들어왔어요</a></li>
+        <li><a href="/gallery.html">매장 구경하기</a></li>
+        <li><a href="/qna.html">묻고 답하기</a></li>
+        <li><a href="/review-event.html">리뷰 이벤트</a></li>
+        <li><a href="/about.html">매장 소개</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div id="nav-auth"></div>
+        <a href="/cart.html" class="cart-icon">🛒 <span id="cart-count" class="cart-badge">0</span></a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+    <div class="mobile-menu" id="mobile-menu">
+      <ul>
+        <li><a href="/index.html">홈</a></li>
+        <li><a href="/shop.html">쇼핑하기</a></li>
+        <li><a href="/new.html">새로 들어왔어요</a></li>
+        <li><a href="/gallery.html">매장 구경하기</a></li>
+        <li><a href="/qna.html">묻고 답하기</a></li>
+        <li><a href="/review-event.html">리뷰 이벤트</a></li>
+        <li><a href="/about.html">매장 소개</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- 섹션 1: 히어로 -->
+  <section class="hero">
+    <div class="hero__inner">
+      <h1 class="hero__headline">일상에 초록을,<br>헬로우가든마켓</h1>
+      <p class="hero__sub">수백 종의 식물을 한눈에 — 온라인 쇼핑부터 매장 방문까지</p>
+      <div class="hero__cta">
+        <a href="/shop.html" class="btn btn-primary btn-lg">쇼핑하기</a>
+        <a href="/gallery.html" class="btn btn-outline-white btn-lg">매장 구경하기</a>
+      </div>
+      <div class="hero__reassurance">
+        <span>✓ 전국 배송</span>
+        <span>✓ 안전한 포장</span>
+        <span>✓ 식물 전문가 상담</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 섹션 2: 신상 입고 -->
+  <section class="section-new">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <span class="section-label">New Arrivals</span>
+          <h2 class="section-title">NEW 🌿 새로 들어왔어요</h2>
+        </div>
+        <a href="/new.html" class="section-header__link">더 보기 →</a>
+      </div>
+      <div id="new-products-grid" class="product-grid">
+        <div class="products-loading"><div class="loading-spinner"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 섹션 3: 베스트셀러 -->
+  <section class="section-best">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <span class="section-label">Best Sellers</span>
+          <h2 class="section-title">BEST ⭐ 베스트셀러</h2>
+        </div>
+        <a href="/shop.html" class="section-header__link">전체 보기 →</a>
+      </div>
+      <div id="best-products-grid" class="product-grid">
+        <div class="products-loading"><div class="loading-spinner"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 섹션 4: 매장 방문 유도 CTA -->
+  <section class="cta-banner">
+    <div class="container">
+      <h2 class="cta-banner__headline">온라인에 없는 수백 종이<br>매장에 있어요</h2>
+      <p class="cta-banner__sub">직접 보고 골라가세요. 헬로우가든마켓 오프라인 매장에서 만나요.</p>
+      <a href="/gallery.html" class="btn-accent">매장 구경하기 📍</a>
+    </div>
+  </section>
+
+  <!-- 섹션 5: 가드닝 가이드 -->
+  <section class="section-guide">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <span class="section-label">Gardening Guide</span>
+          <h2 class="section-title">가드닝 가이드</h2>
+        </div>
+      </div>
+      <div id="guide-grid" class="guide-grid">
+        <div class="products-loading" style="grid-column:1/-1"><div class="loading-spinner"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 섹션 6: 인스타그램 배너 -->
+  <section class="instagram-banner">
+    <div class="instagram-banner__icon">📸</div>
+    <p class="instagram-banner__text">헬로우가든마켓의 일상을 인스타그램에서 만나보세요</p>
+    <a href="https://instagram.com/hellogarden_official" target="_blank" rel="noopener noreferrer" class="btn-instagram">
+      @hellogarden_official 팔로우하기
+    </a>
+  </section>
+
+  <!-- 섹션 7: 매장 정보 -->
+  <section class="section-store">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <span class="section-label">Store Info</span>
+          <h2 class="section-title">매장 안내</h2>
+        </div>
+      </div>
+      <div class="store-grid">
+        <div class="store-info">
+          <h3 class="store-info__title">헬로우가든마켓 (건민농원)</h3>
+          <div class="store-info__row">
+            <div class="store-info__icon">🕐</div>
+            <div>
+              <div class="store-info__label">운영시간</div>
+              <div class="store-info__value">
+                평일 09:00 ~ 18:00<br>
+                토요일 09:00 ~ 17:00<br>
+                <span class="closed">일요일 휴무</span>
+              </div>
+            </div>
+          </div>
+          <div class="store-info__row">
+            <div class="store-info__icon">📍</div>
+            <div>
+              <div class="store-info__label">주소</div>
+              <div class="store-info__value">추후 업데이트 예정</div>
+            </div>
+          </div>
+          <div class="store-info__row">
+            <div class="store-info__icon">📞</div>
+            <div>
+              <div class="store-info__label">문의</div>
+              <div class="store-info__value">인스타그램 DM 또는 QnA 게시판 이용</div>
+            </div>
+          </div>
+        </div>
+        <div class="map-placeholder">
+          <div class="map-placeholder__icon">🗺️</div>
+          <div class="map-placeholder__text">지도는 주소 확정 후 업데이트 예정입니다</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="nav-logo" style="margin-bottom:12px;">🌻 Hello Garden Market</div>
+      <div class="footer-links">
+        <a href="/about.html">매장 소개</a>
+        <a href="#">개인정보처리방침</a>
+        <a href="#">이용약관</a>
+      </div>
+      <p class="footer-copy">© 2026 헬로우가든마켓(건민농원). All rights reserved.</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { updateNavAuth } from '/js/auth.js'
+    import { updateCartBadge, addToCart } from '/js/utils/cart.js'
+    import { getProducts } from '/js/api/products.js'
+    import { getPosts } from '/js/api/posts.js'
+    import { trackEvent } from '/js/api/analytics.js'
+    import { getSessionId } from '/js/utils/session.js'
+
+    // 햄버거 메뉴
+    const hamburger = document.getElementById('hamburger')
+    const mobileMenu = document.getElementById('mobile-menu')
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open')
+      hamburger.classList.toggle('open')
+    })
+
+    updateNavAuth()
+    updateCartBadge()
+
+    // 토스트
+    function showToast(msg, type) {
+      const el = document.getElementById('toast')
+      el.textContent = msg
+      el.className = 'toast show' + (type ? ' ' + type : '')
+      setTimeout(() => { el.className = 'toast' }, 2800)
+    }
+
+    // 상품 카드 DOM 생성 (XSS 안전)
+    function createProductCard(p) {
+      const card = document.createElement('div')
+      card.className = 'product-card'
+      card.style.cursor = 'pointer'
+      card.addEventListener('click', () => { window.location.href = '/product.html?id=' + p.id })
+
+      // 뱃지
+      if (p.is_new || p.is_best || p.status === 'season') {
+        const badge = document.createElement('span')
+        badge.className = 'product-card__badge'
+        if (p.is_new) { badge.classList.add('badge-new'); badge.textContent = 'NEW' }
+        else if (p.is_best) { badge.classList.add('badge-sale'); badge.textContent = 'BEST' }
+        else { badge.classList.add('badge-season'); badge.textContent = '시즌한정' }
+        card.appendChild(badge)
+      }
+
+      // 이미지
+      const imgWrap = document.createElement('div')
+      imgWrap.className = 'product-card__img'
+      const img = document.createElement('img')
+      img.src = p.image_url || '/assets/images/placeholder.svg'
+      img.alt = p.name
+      img.loading = 'lazy'
+      img.onerror = function() { this.src = '/assets/images/placeholder.svg' }
+      imgWrap.appendChild(img)
+      card.appendChild(imgWrap)
+
+      // 본문
+      const body = document.createElement('div')
+      body.className = 'product-card__body'
+      const nameEl = document.createElement('p')
+      nameEl.className = 'product-card__name'
+      nameEl.textContent = p.name
+      const priceEl = document.createElement('p')
+      priceEl.className = 'product-card__price'
+      priceEl.textContent = Number(p.price).toLocaleString() + '원'
+      if (p.original_price) {
+        const orig = document.createElement('span')
+        orig.className = 'product-card__original-price'
+        orig.textContent = Number(p.original_price).toLocaleString() + '원'
+        priceEl.appendChild(orig)
+      }
+      body.appendChild(nameEl)
+      body.appendChild(priceEl)
+      card.appendChild(body)
+
+      // 액션
+      const actions = document.createElement('div')
+      actions.className = 'product-card__actions'
+      const soldOut = p.status === 'sold_out' || p.status === 'inactive'
+      const cartBtn = document.createElement('button')
+      if (soldOut) {
+        cartBtn.className = 'btn btn-sm'
+        cartBtn.style.cssText = 'flex:1;background:#e0e0e0;color:#999;cursor:not-allowed'
+        cartBtn.textContent = '품절'
+        cartBtn.disabled = true
+      } else {
+        cartBtn.className = 'btn btn-primary btn-sm'
+        cartBtn.style.flex = '1'
+        cartBtn.textContent = '장바구니'
+        cartBtn.addEventListener('click', (e) => {
+          e.stopPropagation()
+          addToCart({ id: String(p.id), name: p.name, price: p.price, imageUrl: p.image_url || '' })
+          showToast('장바구니에 담았어요 🛒', 'success')
+        })
+      }
+      actions.appendChild(cartBtn)
+      card.appendChild(actions)
+
+      return card
+    }
+
+    function renderProductsTo(gridId, products) {
+      const grid = document.getElementById(gridId)
+      grid.textContent = ''
+      if (!products || products.error || products.length === 0) {
+        const empty = document.createElement('div')
+        empty.className = 'products-empty'
+        empty.textContent = '등록된 상품이 없습니다.'
+        grid.appendChild(empty)
+        return
+      }
+      products.forEach(p => grid.appendChild(createProductCard(p)))
+    }
+
+    // 가이드 카드 DOM 생성
+    const GUIDE_EMOJIS = ['🌱', '🪴', '🌿', '🌸', '🍃']
+    function createGuideCard(post, idx) {
+      const a = document.createElement('a')
+      a.className = 'guide-card'
+      a.href = '/post.html?id=' + post.id
+
+      const thumb = document.createElement('div')
+      thumb.className = 'guide-card__thumb'
+      thumb.textContent = GUIDE_EMOJIS[idx % GUIDE_EMOJIS.length]
+
+      const body = document.createElement('div')
+      body.className = 'guide-card__body'
+
+      const type = document.createElement('span')
+      type.className = 'guide-card__type'
+      type.textContent = '가드닝 가이드'
+
+      const title = document.createElement('p')
+      title.className = 'guide-card__title'
+      title.textContent = post.title || '제목 없음'
+
+      const date = document.createElement('span')
+      date.className = 'guide-card__date'
+      date.textContent = post.created_at ? new Date(post.created_at).toLocaleDateString('ko-KR') : ''
+
+      body.appendChild(type)
+      body.appendChild(title)
+      body.appendChild(date)
+      a.appendChild(thumb)
+      a.appendChild(body)
+      return a
+    }
+
+    // 데이터 로드
+    async function loadNewProducts() {
+      const data = await getProducts({ isNew: true, limit: 4 })
+      renderProductsTo('new-products-grid', data)
+    }
+
+    async function loadBestProducts() {
+      const data = await getProducts({ isBest: true, limit: 6 })
+      renderProductsTo('best-products-grid', data)
+    }
+
+    async function loadGuidePosts() {
+      const grid = document.getElementById('guide-grid')
+      const data = await getPosts({ type: 'guide', limit: 3 })
+      grid.textContent = ''
+      if (!data || data.error || data.length === 0) {
+        const empty = document.createElement('div')
+        empty.className = 'products-empty'
+        empty.style.gridColumn = '1/-1'
+        empty.textContent = '등록된 가이드가 없습니다.'
+        grid.appendChild(empty)
+        return
+      }
+      data.forEach((post, idx) => grid.appendChild(createGuideCard(post, idx)))
+    }
+
+    trackEvent({ eventType: 'page_view', page: 'index', sessionId: getSessionId() })
+
+    loadNewProducts()
+    loadBestProducts()
+    loadGuidePosts()
+  </script>
+</body>
+</html>

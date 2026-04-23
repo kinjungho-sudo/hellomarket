@@ -1,0 +1,218 @@
+﻿// admin/dashboard.js — 대시보드 페이지 스크립트
+import { requireAdmin, signOut } from '/js/auth.js'
+import { supabase } from '/js/config.js'
+import { getOrderStats, getAllOrders } from '/js/api/orders.js'
+import { getUserCount } from '/js/api/users.js'
+import { getTodayVisitors, getWeeklyRevenueStats, getCategoryStats, getHourlyOrderStats } from '/js/api/analytics.js'
+import { getQnaList } from '/js/api/qna.js'
+
+// 관리자 접근 제어 — 비관리자는 index.html로 리다이렉트
+await requireAdmin()
+
+try {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const el = document.getElementById('admin-user-name')
+    if (el) el.textContent = user.email
+  }
+} catch (e) { console.error('[dashboard] 유저 정보 조회 실패:', e) }
+
+// 로그아웃 버튼
+document.getElementById('btn-logout')?.addEventListener('click', async () => {
+  await signOut()
+  window.location.href = '/login.html'
+})
+
+// 모바일 사이드바 토글
+document.getElementById('menu-toggle')?.addEventListener('click', () => {
+  document.getElementById('admin-sidebar')?.classList.toggle('open')
+  document.getElementById('sidebar-overlay')?.classList.toggle('active')
+})
+document.getElementById('sidebar-overlay')?.addEventListener('click', () => {
+  document.getElementById('admin-sidebar')?.classList.remove('open')
+  document.getElementById('sidebar-overlay')?.classList.remove('active')
+})
+
+// 숫자 포맷 헬퍼
+const fmt = (n) => (n ?? 0).toLocaleString('ko-KR')
+
+// 주문 상태 뱃지 클래스 매핑
+const STATUS_CLASS = {
+  '주문완료': 'status-pending',
+  '결제완료': 'status-shipping',
+  '배송준비': 'status-shipping',
+  '배송중':   'status-shipping',
+  '배송완료': 'status-complete',
+  '취소':     'status-cancel',
+}
+
+// 텍스트 안전 업데이트 (XSS 방지)
+function setText(id, text) {
+  const el = document.getElementById(id)
+  if (el) el.textContent = text
+}
+
+// 메인 초기화 — 병렬로 모든 데이터 로드
+async function initPage() {
+  await Promise.all([loadStats(), loadCharts(), loadRecentOrders(), loadOutOfStock()])
+}
+
+// 통계 카드 렌더링
+async function loadStats() {
+  try {
+    const stats = await getOrderStats()
+    if (!stats.error) {
+      setText('today-orders', fmt(stats.today?.count))
+      setText('today-revenue', fmt(stats.today?.revenue) + '원')
+      setText('month-orders', fmt(stats.month?.count))
+      setText('month-revenue', fmt(stats.month?.revenue) + '원')
+    }
+    const userCount = await getUserCount()
+    if (typeof userCount === 'number') setText('total-users', fmt(userCount))
+    const visitors = await getTodayVisitors()
+    if (typeof visitors === 'number') setText('today-visitors', fmt(visitors))
+    const qnaResult = await getQnaList({ limit: 100 })
+    if (!qnaResult.error && qnaResult.data) {
+      setText('unanswered-qna', qnaResult.data.filter(q => !q.is_answered).length)
+    }
+  } catch (err) { console.error('[dashboard] 통계 로딩 실패:', err) }
+}
+
+// Chart.js 차트 렌더링
+async function loadCharts() {
+  try {
+    // 시간대별 주문 바 차트
+    const hourly = await getHourlyOrderStats()
+    if (!hourly.error && Array.isArray(hourly)) {
+      const ctx = document.getElementById('chart-hourly')
+      if (ctx && window.Chart) {
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: hourly.map(h => h.hour + '시'),
+            datasets: [{ label: '주문 건수', data: hourly.map(h => h.count), backgroundColor: 'rgba(76,121,75,0.7)', borderRadius: 4 }]
+          },
+          options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        })
+      }
+    }
+    // 카테고리별 판매량 도넛 차트
+    const catStats = await getCategoryStats()
+    if (!catStats.error && Array.isArray(catStats) && catStats.length > 0) {
+      const ctx = document.getElementById('chart-category')
+      if (ctx && window.Chart) {
+        const colors = ['#4c794b','#6aaa69','#8ec58d','#b3d9b2','#d8edda','#2d5a2c','#a8c5a0','#3e6b3d']
+        new Chart(ctx, {
+          type: 'doughnut',
+          data: { labels: catStats.map(c => c.category), datasets: [{ data: catStats.map(c => c.count), backgroundColor: colors.slice(0, catStats.length), borderWidth: 2, borderColor: '#fff' }] },
+          options: { responsive: true, plugins: { legend: { position: 'right' } } }
+        })
+      }
+    }
+    // 최근 7일 매출 라인 차트
+    const weekly = await getWeeklyRevenueStats()
+    if (!weekly.error && Array.isArray(weekly)) {
+      const ctx = document.getElementById('chart-weekly')
+      if (ctx && window.Chart) {
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: weekly.map(d => { const dt = new Date(d.date); return (dt.getMonth()+1) + '/' + dt.getDate() }),
+            datasets: [{ label: '매출', data: weekly.map(d => d.revenue), borderColor: '#4c794b', backgroundColor: 'rgba(76,121,75,0.1)', borderWidth: 2, tension: 0.4, fill: true, pointBackgroundColor: '#4c794b' }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return (v/10000).toFixed(0) + '만' } } } }
+          }
+        })
+      }
+    }
+  } catch (err) { console.error('[dashboard] 차트 렌더링 실패:', err) }
+}
+
+// 최근 주문 테이블 렌더링 (DOM API 사용 — XSS 방지)
+async function loadRecentOrders() {
+  const tbody = document.getElementById('recent-orders-body')
+  if (!tbody) return
+  try {
+    const result = await getAllOrders({ limit: 10 })
+    const orders = result.data ?? []
+    tbody.textContent = ''
+    if (orders.length === 0) {
+      const tr = tbody.insertRow()
+      const td = tr.insertCell()
+      td.colSpan = 6
+      td.textContent = '주문이 없습니다.'
+      td.style.cssText = 'text-align:center; padding:32px; color:var(--color-text-light)'
+      return
+    }
+    orders.forEach(function(o) {
+      const items = o.hgm_order_items ?? []
+      const itemSummary = items.length > 0
+        ? items[0].product_name + (items.length > 1 ? ' 외 ' + (items.length-1) + '건' : '')
+        : '—'
+      const orderDate = new Date(o.created_at).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+      const tr = tbody.insertRow()
+      const c0 = tr.insertCell(); c0.textContent = o.order_number ?? '—'; c0.style.fontWeight = '600'
+      const c1 = tr.insertCell(); c1.textContent = o.receiver_name ?? '—'
+      const c2 = tr.insertCell(); c2.textContent = itemSummary
+      const c3 = tr.insertCell(); c3.textContent = fmt(o.total_amount) + '원'
+      const c4 = tr.insertCell()
+      const badge = document.createElement('span')
+      badge.className = 'status-badge ' + (STATUS_CLASS[o.status] ?? 'status-pending')
+      badge.textContent = o.status ?? '—'
+      c4.appendChild(badge)
+      const c5 = tr.insertCell(); c5.textContent = orderDate; c5.style.cssText = 'font-size:12px; color:var(--color-text-sub)'
+    })
+  } catch (err) {
+    console.error('[dashboard] 최근 주문 로딩 실패:', err)
+    tbody.textContent = ''
+    const tr = tbody.insertRow()
+    const td = tr.insertCell()
+    td.colSpan = 6; td.textContent = '데이터 로딩 실패'
+    td.style.cssText = 'text-align:center; padding:32px; color:var(--color-danger)'
+  }
+}
+
+// 품절/시즌한정 상품 목록 (DOM API)
+async function loadOutOfStock() {
+  const el = document.getElementById('out-of-stock-list')
+  if (!el) return
+  try {
+    const { data, error } = await supabase
+      .from('hgm_products').select('id, name, category, status')
+      .in('status', ['품절', '시즌한정']).order('status', { ascending: true }).limit(10)
+    if (error) throw error
+    el.textContent = ''
+    if (!data || data.length === 0) {
+      const msg = document.createElement('div')
+      msg.textContent = '품절 또는 시즌한정 상품이 없습니다 👍'
+      msg.style.cssText = 'color:var(--color-success); font-size:13px;'
+      el.appendChild(msg); return
+    }
+    data.forEach(function(p) {
+      const row = document.createElement('div')
+      row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f0f0f0;'
+      const nameSpan = document.createElement('span')
+      nameSpan.textContent = p.name; nameSpan.style.fontSize = '14px'
+      row.appendChild(nameSpan)
+      const right = document.createElement('div'); right.style.cssText = 'display:flex; gap:8px; align-items:center;'
+      const catSpan = document.createElement('span')
+      catSpan.textContent = p.category ?? '—'; catSpan.style.cssText = 'font-size:12px; color:var(--color-text-sub);'
+      right.appendChild(catSpan)
+      const badge = document.createElement('span')
+      badge.className = 'status-badge ' + (p.status === '품절' ? 'status-cancel' : 'status-pending')
+      badge.textContent = p.status; right.appendChild(badge)
+      const link = document.createElement('a')
+      link.href = '/admin/products.html'; link.textContent = '수정 →'
+      link.style.cssText = 'font-size:12px; color:var(--color-primary);'; right.appendChild(link)
+      row.appendChild(right); el.appendChild(row)
+    })
+  } catch (err) {
+    console.error('[dashboard] 품절 상품 로딩 실패:', err)
+    el.textContent = '데이터 로딩 실패'
+  }
+}
+
+initPage()

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주문 관리 — 헬로우가든마켓 관리자</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <style>
+    .tab-bar { display:flex; gap:4px; margin-bottom:20px; border-bottom:2px solid #eee; }
+    .tab-btn { padding:10px 20px; font-size:14px; font-weight:600; border:none; background:none; cursor:pointer; color:var(--color-text-sub); border-bottom:2px solid transparent; margin-bottom:-2px; }
+    .tab-btn.active { color:var(--color-primary); border-bottom-color:var(--color-primary); }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#fff; border-radius:var(--radius-lg); padding:32px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; }
+    .modal-title { font-size:18px; font-weight:800; margin-bottom:24px; }
+    .modal-footer { display:flex; gap:12px; justify-content:flex-end; margin-top:24px; padding-top:20px; border-top:1px solid #eee; }
+    .order-detail-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:14px; }
+    .order-detail-row:last-child { border-bottom:none; }
+    .order-detail-label { color:var(--color-text-sub); font-weight:600; }
+    .filter-bar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
+    .filter-bar input, .filter-bar select { height:36px; padding:0 10px; border:1.5px solid #ddd; border-radius:var(--radius-sm); font-size:13px; }
+  </style>
+</head>
+<body>
+<div class="admin-layout">
+  <div class="admin-sidebar-overlay" id="sidebar-overlay"></div>
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-logo">🌻 HGM 관리자</div>
+    <div class="admin-sidebar-label">메인</div>
+    <a href="index.html">📊 대시보드</a>
+    <div class="admin-sidebar-label">콘텐츠</div>
+    <a href="products.html">🌿 상품 관리</a>
+    <a href="gallery.html">🖼️ 갤러리 관리</a>
+    <a href="posts.html">📰 입고 소식</a>
+    <div class="admin-sidebar-label">고객</div>
+    <a href="orders.html" class="active">📦 주문 관리</a>
+    <a href="qna.html">💬 묻고 답하기</a>
+    <a href="reviews.html">⭐ 리뷰 이벤트</a>
+    <div class="admin-sidebar-label">시스템</div>
+    <a href="settings.html">⚙️ 알림 설정</a>
+    <a href="../index.html">← 사이트로 이동</a>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-header">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="admin-menu-toggle" id="menu-toggle">☰</button>
+        <span class="admin-header-title">주문 관리</span>
+      </div>
+      <div class="admin-header-user">
+        <button class="btn btn-ghost" id="btn-logout" style="font-size:13px;">로그아웃</button>
+      </div>
+    </header>
+
+    <div class="admin-content">
+      <!-- 상태별 탭 -->
+      <div class="tab-bar">
+        <button class="tab-btn active" data-status="">전체</button>
+        <button class="tab-btn" data-status="주문완료">주문완료</button>
+        <button class="tab-btn" data-status="결제완료">결제완료</button>
+        <button class="tab-btn" data-status="배송준비">배송준비</button>
+        <button class="tab-btn" data-status="배송중">배송중</button>
+        <button class="tab-btn" data-status="배송완료">배송완료</button>
+        <button class="tab-btn" data-status="취소">취소</button>
+      </div>
+
+      <!-- 필터 바 -->
+      <div class="filter-bar">
+        <input type="text" id="filter-search" placeholder="주문번호 또는 수령자명 검색..." style="width:260px;">
+        <input type="date" id="filter-start">
+        <span style="font-size:13px;">~</span>
+        <input type="date" id="filter-end">
+        <button class="btn btn-ghost" id="btn-filter" style="height:36px; font-size:13px;">검색</button>
+      </div>
+
+      <!-- 주문 테이블 -->
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>주문번호</th>
+              <th>주문자</th>
+              <th>상품 요약</th>
+              <th>총 금액</th>
+              <th>상태</th>
+              <th>주문일시</th>
+              <th style="width:80px;">관리</th>
+            </tr>
+          </thead>
+          <tbody id="orders-body">
+            <tr><td colspan="7" style="text-align:center; padding:40px; color:var(--color-text-light);">로딩 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="pagination" style="display:flex; gap:8px; justify-content:center; margin-top:20px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 주문 상세 모달 -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal-box">
+    <div class="modal-title">주문 상세</div>
+    <div id="order-detail-content"></div>
+
+    <!-- 상태 변경 -->
+    <div class="admin-form-group" style="margin-top:20px;">
+      <label>주문 상태 변경</label>
+      <select class="admin-input" id="order-status-select">
+        <option value="주문완료">주문완료</option>
+        <option value="결제완료">결제완료</option>
+        <option value="배송준비">배송준비</option>
+        <option value="배송중">배송중</option>
+        <option value="배송완료">배송완료</option>
+        <option value="취소">취소</option>
+      </select>
+    </div>
+
+    <!-- 운송장 번호 (Phase 2 준비, 비활성화) -->
+    <div class="admin-form-group" style="opacity:0.5;">
+      <label>운송장 번호 <span style="font-size:11px; color:var(--color-text-light);">(Phase 2 준비)</span></label>
+      <input type="text" class="admin-input" placeholder="운송장 번호 입력" disabled>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="btn-order-modal-close">닫기</button>
+      <button class="btn btn-primary" id="btn-order-status-save">상태 저장</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../js/pages/admin/orders.js"></script>
+</body>
+</html>

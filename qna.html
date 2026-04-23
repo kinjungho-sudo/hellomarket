@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>묻고 답하기 | 헬로우가든마켓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, #1a3d28 0%, #2d5a3d 60%, #4a7c59 100%);
+      color: #fff; padding: 64px 0 56px; text-align: center;
+    }
+    .page-hero h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 12px; }
+    .page-hero p { font-size: 16px; color: rgba(255,255,255,0.72); }
+
+    .qna-section { padding: 56px 0 80px; }
+
+    /* 상단 액션 바 */
+    .qna-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .qna-topbar h2 { font-size: 20px; font-weight: 700; color: var(--color-text); }
+
+    /* 게시판 테이블 */
+    .qna-table-wrap { overflow-x: auto; }
+    .qna-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 14px;
+    }
+    .qna-table thead tr { border-bottom: 2px solid var(--color-primary); }
+    .qna-table th {
+      padding: 12px 14px; font-weight: 700; color: var(--color-text);
+      text-align: left; white-space: nowrap;
+    }
+    .qna-table th.center { text-align: center; }
+    .qna-table tbody tr {
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .qna-table tbody tr:hover { background: var(--color-bg-section); }
+    .qna-table td { padding: 14px 14px; color: var(--color-text); vertical-align: middle; }
+    .qna-table td.center { text-align: center; color: var(--color-text-sub); }
+
+    .qna-num { color: var(--color-text-light); font-size: 13px; }
+    .qna-title-cell { display: flex; align-items: center; gap: 8px; }
+    .badge {
+      display: inline-block; padding: 2px 8px;
+      border-radius: var(--radius-full); font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .badge-answered { background: #e8f5e9; color: #2e7d32; }
+    .badge-secret { background: #f5f5f5; color: #666; }
+    .badge-waiting { background: #fff3e0; color: #e65100; }
+
+    /* 페이지네이션 */
+    .pagination {
+      display: flex; justify-content: center; align-items: center;
+      gap: 6px; margin-top: 40px; flex-wrap: wrap;
+    }
+    .page-btn {
+      min-width: 36px; height: 36px; padding: 0 10px;
+      border-radius: var(--radius-sm); border: 1.5px solid rgba(0,0,0,0.12);
+      background: #fff; color: var(--color-text); font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .page-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .page-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+    .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* 상태 박스 */
+    .state-box { text-align: center; padding: 60px 24px; color: var(--color-text-light); }
+    .state-box .icon { font-size: 48px; margin-bottom: 16px; }
+    .state-box p { font-size: 15px; }
+
+    /* 모달 공통 */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 200;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: var(--radius-lg);
+      max-width: 600px; width: 100%; max-height: 88vh;
+      overflow-y: auto; position: relative; box-shadow: var(--shadow-lg);
+    }
+    .modal-header {
+      padding: 24px 28px 0;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    }
+    .modal-close {
+      background: none; border: none; font-size: 24px;
+      cursor: pointer; color: var(--color-text-sub); line-height: 1; flex-shrink: 0; margin-top: -2px;
+    }
+    .modal-close:hover { color: var(--color-text); }
+    .modal-body { padding: 20px 28px 28px; }
+    .modal-meta { font-size: 12px; color: var(--color-text-light); margin-bottom: 8px; }
+    .modal-title { font-size: 20px; font-weight: 800; color: var(--color-text); margin-bottom: 16px; line-height: 1.4; }
+    .modal-content { font-size: 15px; color: var(--color-text-sub); line-height: 1.75; white-space: pre-line; }
+    .modal-divider { border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 24px 0; }
+
+    /* 답변 영역 */
+    .answer-box {
+      background: #f0f7f2; border-radius: var(--radius-sm);
+      padding: 18px 20px; border-left: 3px solid var(--color-primary);
+    }
+    .answer-label { font-size: 12px; font-weight: 800; color: var(--color-primary); margin-bottom: 8px; letter-spacing: 0.06em; }
+    .answer-content { font-size: 14px; color: var(--color-text); line-height: 1.7; white-space: pre-line; }
+
+    /* 글쓰기 폼 */
+    .write-form { display: flex; flex-direction: column; gap: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--color-text); }
+    .form-input {
+      width: 100%; height: 40px; padding: 0 14px;
+      border: 1.5px solid rgba(0,0,0,0.14); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: var(--font-main);
+      transition: border-color 0.2s;
+    }
+    .form-input:focus { outline: none; border-color: var(--color-primary); }
+    .form-textarea {
+      width: 100%; height: 140px; padding: 12px 14px;
+      border: 1.5px solid rgba(0,0,0,0.14); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: var(--font-main); resize: vertical;
+      transition: border-color 0.2s;
+    }
+    .form-textarea:focus { outline: none; border-color: var(--color-primary); }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; }
+    .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--color-primary); }
+    .checkbox-row label { font-size: 14px; color: var(--color-text); cursor: pointer; }
+    .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+
+    .cart-badge {
+      position: absolute; top: -6px; right: -8px;
+      background: var(--color-danger); color: #fff;
+      border-radius: var(--radius-full); font-size: 11px; font-weight: 700;
+      min-width: 18px; height: 18px; display: none;
+      align-items: center; justify-content: center; padding: 0 4px;
+    }
+    .mobile-menu.open { display: block; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <nav class="container">
+    <a href="/index.html" class="nav-logo">🌻 Hello Garden Market</a>
+    <ul class="nav-links">
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div id="nav-auth"></div>
+      <a href="/cart.html" class="cart-icon" style="position:relative;">🛒 <span id="cart-count" class="cart-badge">0</span></a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="메뉴"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <ul>
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <h1>묻고 답하기 💬</h1>
+    <p>식물에 관한 무엇이든 물어보세요</p>
+  </div>
+</section>
+
+<section class="qna-section">
+  <div class="container">
+    <div class="qna-topbar">
+      <h2>Q&amp;A 게시판</h2>
+      <button class="btn btn-primary btn-sm" id="btn-write">글쓰기</button>
+    </div>
+
+    <div id="qna-list-wrap">
+      <div class="state-box">
+        <div class="icon">💬</div>
+        <p>불러오는 중...</p>
+      </div>
+    </div>
+
+    <div class="pagination" id="pagination"></div>
+  </div>
+</section>
+
+<!-- 상세 모달 -->
+<div class="modal-overlay" id="detail-overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-meta" id="detail-meta"></div>
+        <h2 class="modal-title" id="detail-title"></h2>
+      </div>
+      <button class="modal-close" id="detail-close" aria-label="닫기">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-content" id="detail-content"></div>
+      <div id="detail-answer-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 글쓰기 모달 -->
+<div class="modal-overlay" id="write-overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" style="margin-bottom:0;">글쓰기</h2>
+      <button class="modal-close" id="write-close" aria-label="닫기">×</button>
+    </div>
+    <div class="modal-body">
+      <form class="write-form" id="write-form">
+        <div class="form-group">
+          <label for="write-title">제목</label>
+          <input type="text" id="write-title" class="form-input" placeholder="제목을 입력해주세요" maxlength="100" required />
+        </div>
+        <div class="form-group">
+          <label for="write-content">내용</label>
+          <textarea id="write-content" class="form-textarea" placeholder="내용을 입력해주세요" required></textarea>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="write-secret" />
+          <label for="write-secret">비밀글로 등록하기</label>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline btn-sm" id="write-cancel">취소</button>
+          <button type="submit" class="btn btn-primary btn-sm">등록</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="nav-logo" style="margin-bottom:12px;">🌻 Hello Garden Market</div>
+    <div class="footer-links">
+      <a href="/about.html">매장 소개</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">이용약관</a>
+    </div>
+    <p class="footer-copy">© 2026 헬로우가든마켓(건민농원). All rights reserved.</p>
+  </div>
+</footer>
+
+<script type="module">
+  import { updateNavAuth, getSession } from '/js/auth.js'
+  import { updateCartBadge } from '/js/utils/cart.js'
+  import { getQnaList, createQna } from '/js/api/qna.js'
+
+  const hamburger = document.getElementById('hamburger')
+  const mobileMenu = document.getElementById('mobile-menu')
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open')
+    hamburger.classList.toggle('open')
+  })
+
+  updateNavAuth()
+  updateCartBadge()
+
+  const LIMIT = 10
+  let currentPage = 1
+  let totalCount = 0
+  let currentSession = null
+
+  // 세션 로드
+  getSession().then(({ session }) => { currentSession = session })
+
+  function formatDate(iso) {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`
+  }
+
+  // ===== QnA 목록 렌더링 =====
+  function renderList(data) {
+    const wrap = document.getElementById('qna-list-wrap')
+    wrap.textContent = ''
+
+    if (!data || data.length === 0) {
+      const box = document.createElement('div')
+      box.className = 'state-box'
+      const icon = document.createElement('div')
+      icon.className = 'icon'
+      icon.textContent = '💬'
+      const msg = document.createElement('p')
+      msg.textContent = '아직 등록된 질문이 없어요. 첫 번째로 질문해보세요!'
+      box.appendChild(icon)
+      box.appendChild(msg)
+      wrap.appendChild(box)
+      return
+    }
+
+    const tableWrap = document.createElement('div')
+    tableWrap.className = 'qna-table-wrap'
+
+    const table = document.createElement('table')
+    table.className = 'qna-table'
+
+    // thead
+    const thead = document.createElement('thead')
+    const headRow = document.createElement('tr')
+    const cols = [
+      { text: '번호', cls: 'center' },
+      { text: '제목', cls: '' },
+      { text: '작성자', cls: 'center' },
+      { text: '작성일', cls: 'center' },
+      { text: '상태', cls: 'center' },
+    ]
+    cols.forEach(c => {
+      const th = document.createElement('th')
+      th.textContent = c.text
+      if (c.cls) th.className = c.cls
+      headRow.appendChild(th)
+    })
+    thead.appendChild(headRow)
+    table.appendChild(thead)
+
+    // tbody
+    const tbody = document.createElement('tbody')
+    data.forEach((item, idx) => {
+      const row = document.createElement('tr')
+
+      // 번호
+      const numTd = document.createElement('td')
+      numTd.className = 'center qna-num'
+      numTd.textContent = totalCount - ((currentPage - 1) * LIMIT) - idx
+
+      // 제목
+      const titleTd = document.createElement('td')
+      const titleCell = document.createElement('div')
+      titleCell.className = 'qna-title-cell'
+
+      const titleText = document.createElement('span')
+      if (item.is_secret) {
+        titleText.textContent = item.title || '비밀글입니다'
+      } else {
+        titleText.textContent = item.title || '제목 없음'
+      }
+      titleCell.appendChild(titleText)
+
+      if (item.is_secret) {
+        const secBadge = document.createElement('span')
+        secBadge.className = 'badge badge-secret'
+        secBadge.textContent = '🔒 비밀글'
+        titleCell.appendChild(secBadge)
+      }
+      titleTd.appendChild(titleCell)
+
+      // 작성자
+      const authorTd = document.createElement('td')
+      authorTd.className = 'center'
+      const authorName = item.hgm_users?.name || '익명'
+      authorTd.textContent = authorName.slice(0, 1) + '**'
+
+      // 날짜
+      const dateTd = document.createElement('td')
+      dateTd.className = 'center'
+      dateTd.textContent = formatDate(item.created_at)
+
+      // 상태
+      const statusTd = document.createElement('td')
+      statusTd.className = 'center'
+      const statusBadge = document.createElement('span')
+      if (item.is_answered) {
+        statusBadge.className = 'badge badge-answered'
+        statusBadge.textContent = '답변완료'
+      } else {
+        statusBadge.className = 'badge badge-waiting'
+        statusBadge.textContent = '답변대기'
+      }
+      statusTd.appendChild(statusBadge)
+
+      row.appendChild(numTd)
+      row.appendChild(titleTd)
+      row.appendChild(authorTd)
+      row.appendChild(dateTd)
+      row.appendChild(statusTd)
+
+      row.addEventListener('click', () => openDetail(item))
+      tbody.appendChild(row)
+    })
+
+    table.appendChild(tbody)
+    tableWrap.appendChild(table)
+    wrap.appendChild(tableWrap)
+  }
+
+  // ===== 상세 모달 =====
+  function openDetail(item) {
+    const overlay = document.getElementById('detail-overlay')
+    const metaEl = document.getElementById('detail-meta')
+    const titleEl = document.getElementById('detail-title')
+    const contentEl = document.getElementById('detail-content')
+    const answerWrap = document.getElementById('detail-answer-wrap')
+
+    const authorName = item.hgm_users?.name || '익명'
+    metaEl.textContent = authorName.slice(0, 1) + '** · ' + formatDate(item.created_at)
+    titleEl.textContent = item.title || '제목 없음'
+
+    // 비밀글 처리
+    const isOwn = currentSession && currentSession.user?.id === item.user_id
+    if (item.is_secret && !isOwn) {
+      contentEl.textContent = '🔒 비밀글입니다. 작성자 본인만 내용을 확인할 수 있어요.'
+    } else {
+      contentEl.textContent = item.content || ''
+    }
+
+    // 답변 영역
+    answerWrap.textContent = ''
+    if (item.is_answered && item.answer && (!item.is_secret || isOwn)) {
+      const hr = document.createElement('hr')
+      hr.className = 'modal-divider'
+      const box = document.createElement('div')
+      box.className = 'answer-box'
+      const label = document.createElement('div')
+      label.className = 'answer-label'
+      label.textContent = '관리자 답변'
+      const content = document.createElement('div')
+      content.className = 'answer-content'
+      content.textContent = item.answer
+      box.appendChild(label)
+      box.appendChild(content)
+      answerWrap.appendChild(hr)
+      answerWrap.appendChild(box)
+    }
+
+    overlay.classList.add('open')
+    document.body.style.overflow = 'hidden'
+  }
+
+  function closeDetail() {
+    document.getElementById('detail-overlay').classList.remove('open')
+    document.body.style.overflow = ''
+  }
+
+  document.getElementById('detail-close').addEventListener('click', closeDetail)
+  document.getElementById('detail-overlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeDetail()
+  })
+
+  // ===== 글쓰기 모달 =====
+  document.getElementById('btn-write').addEventListener('click', () => {
+    if (!currentSession) {
+      alert('글쓰기는 로그인 후 이용하실 수 있어요.')
+      window.location.href = '/login.html'
+      return
+    }
+    document.getElementById('write-overlay').classList.add('open')
+    document.body.style.overflow = 'hidden'
+  })
+
+  function closeWrite() {
+    document.getElementById('write-overlay').classList.remove('open')
+    document.getElementById('write-form').reset()
+    document.body.style.overflow = ''
+  }
+
+  document.getElementById('write-close').addEventListener('click', closeWrite)
+  document.getElementById('write-cancel').addEventListener('click', closeWrite)
+  document.getElementById('write-overlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeWrite()
+  })
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeDetail()
+      closeWrite()
+    }
+  })
+
+  // 글쓰기 제출
+  document.getElementById('write-form').addEventListener('submit', async (e) => {
+    e.preventDefault()
+    if (!currentSession) return
+
+    const title = document.getElementById('write-title').value.trim()
+    const content = document.getElementById('write-content').value.trim()
+    const isSecret = document.getElementById('write-secret').checked
+
+    if (!title || !content) return
+
+    const submitBtn = e.target.querySelector('[type="submit"]')
+    submitBtn.disabled = true
+    submitBtn.textContent = '등록 중...'
+
+    const result = await createQna(currentSession.user.id, { title, content, isSecret })
+
+    submitBtn.disabled = false
+    submitBtn.textContent = '등록'
+
+    if (result && result.error) {
+      alert('등록에 실패했어요. 다시 시도해주세요.')
+      return
+    }
+
+    closeWrite()
+    currentPage = 1
+    loadList()
+  })
+
+  // ===== 페이지네이션 =====
+  function renderPagination() {
+    const pag = document.getElementById('pagination')
+    pag.textContent = ''
+
+    const totalPages = Math.ceil(totalCount / LIMIT)
+    if (totalPages <= 1) return
+
+    const prevBtn = document.createElement('button')
+    prevBtn.className = 'page-btn'
+    prevBtn.textContent = '이전'
+    prevBtn.disabled = currentPage === 1
+    prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadList() } })
+    pag.appendChild(prevBtn)
+
+    const start = Math.max(1, currentPage - 2)
+    const end = Math.min(totalPages, start + 4)
+
+    for (let i = start; i <= end; i++) {
+      const btn = document.createElement('button')
+      btn.className = 'page-btn' + (i === currentPage ? ' active' : '')
+      btn.textContent = i
+      const page = i
+      btn.addEventListener('click', () => { currentPage = page; loadList() })
+      pag.appendChild(btn)
+    }
+
+    const nextBtn = document.createElement('button')
+    nextBtn.className = 'page-btn'
+    nextBtn.textContent = '다음'
+    nextBtn.disabled = currentPage === totalPages
+    nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; loadList() } })
+    pag.appendChild(nextBtn)
+  }
+
+  // ===== 데이터 로드 =====
+  async function loadList() {
+    const result = await getQnaList({ page: currentPage, limit: LIMIT })
+
+    if (result && result.error) {
+      const wrap = document.getElementById('qna-list-wrap')
+      wrap.textContent = ''
+      const box = document.createElement('div')
+      box.className = 'state-box'
+      const icon = document.createElement('div')
+      icon.className = 'icon'
+      icon.textContent = '⚠️'
+      const msg = document.createElement('p')
+      msg.textContent = '목록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.'
+      box.appendChild(icon)
+      box.appendChild(msg)
+      wrap.appendChild(box)
+      return
+    }
+
+    totalCount = result.count || 0
+    renderList(result.data || [])
+    renderPagination()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  loadList()
+</script>
+</body>
+</html>

@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>상품 상세 | 헬로우가든마켓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <style>
+    /* -----------------------------------------------
+       상품 상세 레이아웃
+    ----------------------------------------------- */
+    .product-detail {
+      padding: 48px 0 80px;
+    }
+
+    /* 2컬럼 레이아웃 */
+    .product-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: start;
+    }
+
+    /* -----------------------------------------------
+       좌: 상품 이미지
+    ----------------------------------------------- */
+    .product-image-wrap {
+      position: sticky;
+      top: calc(var(--nav-height) + 24px);
+    }
+
+    .product-image-main {
+      aspect-ratio: 1 / 1;
+      background: #f5f5f5;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1.5px solid rgba(0,0,0,.08);
+    }
+
+    .product-image-main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* -----------------------------------------------
+       우: 상품 정보
+    ----------------------------------------------- */
+    .product-info {}
+
+    .product-info__category {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      background: var(--color-bg-section);
+      color: var(--color-primary);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 12px;
+    }
+
+    .product-info__name {
+      font-family: var(--font-serif);
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 700;
+      color: var(--color-text);
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    /* 가격 영역 */
+    .product-info__price-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .product-info__price {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--color-primary);
+      letter-spacing: -0.03em;
+    }
+
+    .product-info__original-price {
+      font-size: 16px;
+      color: var(--color-text-light);
+      text-decoration: line-through;
+      font-weight: 400;
+    }
+
+    .product-info__delivery {
+      font-size: 13px;
+      color: var(--color-text-sub);
+      margin-bottom: 16px;
+    }
+
+    /* 상태 뱃지 */
+    .product-status-badge {
+      display: inline-flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 14px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      letter-spacing: 0.02em;
+    }
+    .product-status-badge.active   { background: #e8f5e9; color: #2d5a3d; }
+    .product-status-badge.season   { background: #fff3e0; color: #e65100; }
+    .product-status-badge.sold_out { background: #f5f5f5; color: #9e9e9e; }
+
+    /* 관리 아이콘 */
+    .product-info__care {
+      display: flex;
+      gap: 24px;
+      padding: 16px 20px;
+      background: var(--color-bg-section);
+      border-radius: var(--radius-md);
+      margin-bottom: 20px;
+    }
+    .product-info__care-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--color-text-sub);
+    }
+    .product-info__care-icon { font-size: 20px; }
+    .product-info__care-label { font-size: 11px; font-weight: 700; color: var(--color-text-light); text-transform: uppercase; display: block; margin-bottom: 2px; }
+    .product-info__care-value { font-size: 13px; font-weight: 600; color: var(--color-text); }
+
+    /* 구분선 */
+    .product-divider {
+      height: 1px;
+      background: rgba(0,0,0,.08);
+      margin: 20px 0;
+    }
+
+    /* 상세 설명 */
+    .product-info__desc {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--color-text-sub);
+      margin-bottom: 24px;
+      white-space: pre-line;
+    }
+
+    /* 수량 선택 */
+    .qty-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 10px;
+      display: block;
+    }
+    .qty-control {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 24px;
+      width: fit-content;
+      border: 1.5px solid rgba(0,0,0,.15);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .qty-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--color-bg-section);
+      border: none;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-text);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qty-btn:hover { background: #e0e0e0; }
+    .qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .qty-input {
+      width: 56px;
+      height: 40px;
+      text-align: center;
+      border: none;
+      border-left: 1.5px solid rgba(0,0,0,.1);
+      border-right: 1.5px solid rgba(0,0,0,.1);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text);
+      font-family: var(--font-main);
+      background: #ffffff;
+    }
+    .qty-input:focus { outline: none; }
+
+    /* 구매 액션 버튼 */
+    .product-actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .btn-cart-main {
+      flex: 1;
+      height: 52px;
+      background: var(--color-primary);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .btn-cart-main:hover { background: var(--color-primary-light); }
+    .btn-cart-main:active { transform: scale(0.99); }
+    .btn-cart-main:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
+    .btn-wish-main {
+      width: 52px;
+      height: 52px;
+      background: #ffffff;
+      border: 2px solid rgba(0,0,0,.15);
+      border-radius: var(--radius-sm);
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s ease, color 0.2s ease;
+      color: var(--color-text-sub);
+    }
+    .btn-wish-main:hover { border-color: #e53935; color: #e53935; }
+    .btn-wish-main.active { color: #e53935; border-color: #e53935; background: #fff5f5; }
+
+    /* 안심 문구 */
+    .product-reassurance {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .product-reassurance__item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--color-text-sub);
+    }
+
+    /* -----------------------------------------------
+       관련 상품 섹션
+    ----------------------------------------------- */
+    .related-section {
+      padding: 64px 0 80px;
+      background: var(--color-bg-section);
+    }
+
+    .related-section .section-title {
+      margin-bottom: 32px;
+    }
+
+    /* 카드 하단 액션 */
+    .product-card__actions {
+      padding: 0 16px 16px;
+    }
+    .product-card__actions .btn-cart-sm {
+      width: 100%;
+      height: 36px;
+      background: var(--color-primary);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .product-card__actions .btn-cart-sm:hover { background: var(--color-primary-light); }
+    .product-card__actions .btn-cart-sm:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
+
+    /* 로딩 / 에러 */
+    .detail-loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 400px;
+    }
+    .detail-error {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--color-text-sub);
+    }
+    .detail-error__icon { font-size: 48px; margin-bottom: 16px; }
+
+    /* -----------------------------------------------
+       반응형 — 모바일
+    ----------------------------------------------- */
+    @media (max-width: 768px) {
+      .product-layout {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      .product-image-wrap { position: static; }
+      .product-detail { padding: 32px 0 60px; }
+    }
+
+    @media (max-width: 480px) {
+      .product-actions { flex-direction: column; }
+      .btn-wish-main { width: 100%; }
+      .product-info__care { flex-direction: column; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <nav class="container">
+      <a href="/index.html" class="nav-logo">🌻 Hello Garden Market</a>
+      <ul class="nav-links">
+        <li><a href="/index.html">홈</a></li>
+        <li><a href="/shop.html">쇼핑하기</a></li>
+        <li><a href="/new.html">새로 들어왔어요</a></li>
+        <li><a href="/gallery.html">매장 구경하기</a></li>
+        <li><a href="/qna.html">묻고 답하기</a></li>
+        <li><a href="/review-event.html">리뷰 이벤트</a></li>
+        <li><a href="/about.html">매장 소개</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div id="nav-auth"></div>
+        <a href="/cart.html" class="cart-icon">🛒 <span id="cart-count" class="cart-badge">0</span></a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+    <div class="mobile-menu" id="mobile-menu">
+      <ul>
+        <li><a href="/index.html">홈</a></li>
+        <li><a href="/shop.html">쇼핑하기</a></li>
+        <li><a href="/new.html">새로 들어왔어요</a></li>
+        <li><a href="/gallery.html">매장 구경하기</a></li>
+        <li><a href="/qna.html">묻고 답하기</a></li>
+        <li><a href="/review-event.html">리뷰 이벤트</a></li>
+        <li><a href="/about.html">매장 소개</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- 상품 상세 메인 -->
+  <main>
+    <section class="product-detail">
+      <div class="container">
+        <div id="product-detail-inner">
+          <!-- JS로 렌더링 -->
+          <div class="detail-loading"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 관련 상품 -->
+    <section class="related-section" id="related-section" style="display:none">
+      <div class="container">
+        <span class="section-label">Related Products</span>
+        <h2 class="section-title">관련 상품</h2>
+        <div id="related-grid" class="product-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="nav-logo" style="margin-bottom:12px;">🌻 Hello Garden Market</div>
+      <div class="footer-links">
+        <a href="/about.html">매장 소개</a>
+        <a href="#">개인정보처리방침</a>
+        <a href="#">이용약관</a>
+      </div>
+      <p class="footer-copy">© 2026 헬로우가든마켓(건민농원). All rights reserved.</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { updateNavAuth } from '/js/auth.js'
+    import { updateCartBadge, addToCart } from '/js/utils/cart.js'
+    import { getProductById, incrementViewCount, getProducts } from '/js/api/products.js'
+    import { trackEvent } from '/js/api/analytics.js'
+    import { getSessionId } from '/js/utils/session.js'
+
+    // 햄버거 메뉴
+    const hamburger = document.getElementById('hamburger')
+    const mobileMenu = document.getElementById('mobile-menu')
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open')
+      hamburger.classList.toggle('open')
+    })
+
+    updateNavAuth()
+    updateCartBadge()
+
+    // ---- 토스트 ----
+    function showToast(msg, type) {
+      const el = document.getElementById('toast')
+      el.textContent = msg
+      el.className = 'toast show' + (type ? ' ' + type : '')
+      setTimeout(() => { el.className = 'toast' }, 2800)
+    }
+
+    // ---- URL에서 id 추출 ----
+    const params = new URLSearchParams(window.location.search)
+    const productId = params.get('id')
+
+    if (!productId) {
+      window.location.href = '/shop.html'
+    }
+
+    // ---- 상태 배지 텍스트 ----
+    function getStatusText(status) {
+      const map = { active: '판매중', season: '시즌한정', sold_out: '품절', inactive: '준비중' }
+      return map[status] || status || ''
+    }
+
+    // ---- 상품 상세 렌더 (DOM API) ----
+    function renderProductDetail(p) {
+      document.title = p.name + ' | 헬로우가든마켓'
+
+      const container = document.getElementById('product-detail-inner')
+      container.textContent = ''
+
+      const layout = document.createElement('div')
+      layout.className = 'product-layout'
+
+      // ---- 좌: 이미지 ----
+      const imgCol = document.createElement('div')
+      imgCol.className = 'product-image-wrap'
+
+      const imgWrap = document.createElement('div')
+      imgWrap.className = 'product-image-main'
+      const img = document.createElement('img')
+      img.src = p.image_url || '/assets/images/placeholder.svg'
+      img.alt = p.name
+      img.onerror = function() { this.src = '/assets/images/placeholder.svg' }
+      imgWrap.appendChild(img)
+      imgCol.appendChild(imgWrap)
+
+      // ---- 우: 정보 ----
+      const infoCol = document.createElement('div')
+      infoCol.className = 'product-info'
+
+      // 카테고리 태그
+      if (p.category) {
+        const catTag = document.createElement('span')
+        catTag.className = 'product-info__category'
+        catTag.textContent = p.category
+        infoCol.appendChild(catTag)
+      }
+
+      // 상품명
+      const nameEl = document.createElement('h1')
+      nameEl.className = 'product-info__name'
+      nameEl.textContent = p.name
+      infoCol.appendChild(nameEl)
+
+      // 가격
+      const priceWrap = document.createElement('div')
+      priceWrap.className = 'product-info__price-wrap'
+      const priceEl = document.createElement('span')
+      priceEl.className = 'product-info__price'
+      priceEl.textContent = Number(p.price).toLocaleString() + '원'
+      priceWrap.appendChild(priceEl)
+      if (p.original_price) {
+        const origEl = document.createElement('span')
+        origEl.className = 'product-info__original-price'
+        origEl.textContent = Number(p.original_price).toLocaleString() + '원'
+        priceWrap.appendChild(origEl)
+      }
+      infoCol.appendChild(priceWrap)
+
+      // 배송비
+      const deliveryEl = document.createElement('p')
+      deliveryEl.className = 'product-info__delivery'
+      const deliveryFee = p.delivery_fee != null ? p.delivery_fee : 3000
+      deliveryEl.textContent = deliveryFee === 0 ? '무료배송' : '배송비 ' + Number(deliveryFee).toLocaleString() + '원'
+      infoCol.appendChild(deliveryEl)
+
+      // 상태 뱃지
+      if (p.status) {
+        const statusBadge = document.createElement('div')
+        statusBadge.className = 'product-status-badge ' + (p.status || 'active')
+        statusBadge.textContent = getStatusText(p.status)
+        infoCol.appendChild(statusBadge)
+      }
+
+      // 관리 아이콘 (광량/물주기)
+      if (p.light_level || p.water_cycle) {
+        const careWrap = document.createElement('div')
+        careWrap.className = 'product-info__care'
+
+        if (p.light_level) {
+          const item = document.createElement('div')
+          item.className = 'product-info__care-item'
+          const icon = document.createElement('span')
+          icon.className = 'product-info__care-icon'
+          icon.textContent = '☀️'
+          const txt = document.createElement('div')
+          const lbl = document.createElement('span')
+          lbl.className = 'product-info__care-label'
+          lbl.textContent = '광량'
+          const val = document.createElement('span')
+          val.className = 'product-info__care-value'
+          val.textContent = p.light_level
+          txt.appendChild(lbl)
+          txt.appendChild(val)
+          item.appendChild(icon)
+          item.appendChild(txt)
+          careWrap.appendChild(item)
+        }
+
+        if (p.water_cycle) {
+          const item = document.createElement('div')
+          item.className = 'product-info__care-item'
+          const icon = document.createElement('span')
+          icon.className = 'product-info__care-icon'
+          icon.textContent = '💧'
+          const txt = document.createElement('div')
+          const lbl = document.createElement('span')
+          lbl.className = 'product-info__care-label'
+          lbl.textContent = '물주기'
+          const val = document.createElement('span')
+          val.className = 'product-info__care-value'
+          val.textContent = p.water_cycle
+          txt.appendChild(lbl)
+          txt.appendChild(val)
+          item.appendChild(icon)
+          item.appendChild(txt)
+          careWrap.appendChild(item)
+        }
+
+        infoCol.appendChild(careWrap)
+      }
+
+      // 구분선
+      const divider = document.createElement('div')
+      divider.className = 'product-divider'
+      infoCol.appendChild(divider)
+
+      // 상세 설명
+      if (p.description) {
+        const desc = document.createElement('p')
+        desc.className = 'product-info__desc'
+        desc.textContent = p.description
+        infoCol.appendChild(desc)
+      }
+
+      // 수량 선택
+      const qtyLabel = document.createElement('span')
+      qtyLabel.className = 'qty-label'
+      qtyLabel.textContent = '수량'
+      infoCol.appendChild(qtyLabel)
+
+      const qtyControl = document.createElement('div')
+      qtyControl.className = 'qty-control'
+
+      const qtyMinus = document.createElement('button')
+      qtyMinus.className = 'qty-btn'
+      qtyMinus.textContent = '−'
+      qtyMinus.setAttribute('aria-label', '수량 줄이기')
+
+      const qtyInput = document.createElement('input')
+      qtyInput.type = 'number'
+      qtyInput.className = 'qty-input'
+      qtyInput.value = '1'
+      qtyInput.min = '1'
+      qtyInput.max = '99'
+      qtyInput.readOnly = true
+      qtyInput.setAttribute('aria-label', '수량')
+
+      const qtyPlus = document.createElement('button')
+      qtyPlus.className = 'qty-btn'
+      qtyPlus.textContent = '+'
+      qtyPlus.setAttribute('aria-label', '수량 늘리기')
+
+      let qty = 1
+      qtyMinus.disabled = true
+
+      qtyMinus.addEventListener('click', () => {
+        if (qty > 1) {
+          qty--
+          qtyInput.value = qty
+          qtyMinus.disabled = qty <= 1
+        }
+      })
+
+      qtyPlus.addEventListener('click', () => {
+        if (qty < 99) {
+          qty++
+          qtyInput.value = qty
+          qtyMinus.disabled = false
+        }
+      })
+
+      qtyControl.appendChild(qtyMinus)
+      qtyControl.appendChild(qtyInput)
+      qtyControl.appendChild(qtyPlus)
+      infoCol.appendChild(qtyControl)
+
+      // 구매 액션 버튼
+      const actions = document.createElement('div')
+      actions.className = 'product-actions'
+
+      const soldOut = p.status === 'sold_out' || p.status === 'inactive'
+
+      const cartBtn = document.createElement('button')
+      cartBtn.className = 'btn-cart-main'
+      if (soldOut) {
+        cartBtn.textContent = '품절된 상품입니다'
+        cartBtn.disabled = true
+      } else {
+        cartBtn.textContent = '장바구니 담기 🛒'
+        cartBtn.addEventListener('click', () => {
+          addToCart({
+            id: String(p.id),
+            name: p.name,
+            price: p.price,
+            delivery: p.delivery_fee != null ? p.delivery_fee : 3000,
+            imageUrl: p.image_url || '',
+          }, qty)
+          showToast(qty + '개를 장바구니에 담았어요 🛒', 'success')
+        })
+      }
+
+      const wishBtn = document.createElement('button')
+      wishBtn.className = 'btn-wish-main'
+      wishBtn.setAttribute('aria-label', '위시리스트')
+      wishBtn.textContent = '♡'
+      wishBtn.addEventListener('click', () => {
+        const isActive = wishBtn.classList.toggle('active')
+        wishBtn.textContent = isActive ? '♥' : '♡'
+        showToast(isActive ? '위시리스트에 추가했어요 ♥' : '위시리스트에서 제거했어요', '')
+      })
+
+      actions.appendChild(cartBtn)
+      actions.appendChild(wishBtn)
+      infoCol.appendChild(actions)
+
+      // 안심 문구
+      const reassurance = document.createElement('div')
+      reassurance.className = 'product-reassurance'
+      const items = [
+        { icon: '📦', text: '안전 포장 배송' },
+        { icon: '🌿', text: '식물 전문가 검수' },
+        { icon: '🚚', text: '전국 배송 가능' },
+      ]
+      items.forEach(item => {
+        const el = document.createElement('div')
+        el.className = 'product-reassurance__item'
+        const icon = document.createElement('span')
+        icon.textContent = item.icon
+        const text = document.createElement('span')
+        text.textContent = item.text
+        el.appendChild(icon)
+        el.appendChild(text)
+        reassurance.appendChild(el)
+      })
+      infoCol.appendChild(reassurance)
+
+      layout.appendChild(imgCol)
+      layout.appendChild(infoCol)
+      container.appendChild(layout)
+    }
+
+    // ---- 관련 상품 카드 ----
+    function createRelatedCard(p) {
+      const card = document.createElement('div')
+      card.className = 'product-card'
+      card.style.cursor = 'pointer'
+      card.addEventListener('click', () => { window.location.href = '/product.html?id=' + p.id })
+
+      if (p.is_new) {
+        const badge = document.createElement('span')
+        badge.className = 'product-card__badge badge-new'
+        badge.textContent = 'NEW'
+        card.appendChild(badge)
+      }
+
+      const imgWrap = document.createElement('div')
+      imgWrap.className = 'product-card__img'
+      const img = document.createElement('img')
+      img.src = p.image_url || '/assets/images/placeholder.svg'
+      img.alt = p.name
+      img.loading = 'lazy'
+      img.onerror = function() { this.src = '/assets/images/placeholder.svg' }
+      imgWrap.appendChild(img)
+      card.appendChild(imgWrap)
+
+      const body = document.createElement('div')
+      body.className = 'product-card__body'
+      const nameEl = document.createElement('p')
+      nameEl.className = 'product-card__name'
+      nameEl.textContent = p.name
+      const priceEl = document.createElement('p')
+      priceEl.className = 'product-card__price'
+      priceEl.textContent = Number(p.price).toLocaleString() + '원'
+      body.appendChild(nameEl)
+      body.appendChild(priceEl)
+      card.appendChild(body)
+
+      const actions = document.createElement('div')
+      actions.className = 'product-card__actions'
+      const soldOut = p.status === 'sold_out' || p.status === 'inactive'
+      const btn = document.createElement('button')
+      btn.className = 'btn-cart-sm'
+      if (soldOut) {
+        btn.textContent = '품절'
+        btn.disabled = true
+      } else {
+        btn.textContent = '장바구니'
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation()
+          addToCart({ id: String(p.id), name: p.name, price: p.price, imageUrl: p.image_url || '' })
+          showToast('장바구니에 담았어요 🛒', 'success')
+        })
+      }
+      actions.appendChild(btn)
+      card.appendChild(actions)
+
+      return card
+    }
+
+    // ---- 관련 상품 로드 ----
+    async function loadRelatedProducts(category, currentId) {
+      const section = document.getElementById('related-section')
+      const grid = document.getElementById('related-grid')
+
+      const data = await getProducts({ category, limit: 5 })
+      if (!data || data.error) return
+
+      const filtered = data.filter(p => String(p.id) !== String(currentId)).slice(0, 4)
+      if (filtered.length === 0) return
+
+      grid.textContent = ''
+      filtered.forEach(p => grid.appendChild(createRelatedCard(p)))
+      section.style.display = 'block'
+    }
+
+    // ---- 에러 렌더 ----
+    function renderError(msg) {
+      const container = document.getElementById('product-detail-inner')
+      container.textContent = ''
+      const err = document.createElement('div')
+      err.className = 'detail-error'
+      const icon = document.createElement('div')
+      icon.className = 'detail-error__icon'
+      icon.textContent = '🌵'
+      const text = document.createElement('p')
+      text.textContent = msg || '상품을 불러올 수 없습니다.'
+      const link = document.createElement('a')
+      link.href = '/shop.html'
+      link.className = 'btn btn-primary'
+      link.style.marginTop = '20px'
+      link.textContent = '쇼핑하기로 돌아가기'
+      err.appendChild(icon)
+      err.appendChild(text)
+      err.appendChild(link)
+      container.appendChild(err)
+    }
+
+    // ---- 메인 실행 ----
+    async function init() {
+      if (!productId) return
+
+      const product = await getProductById(productId)
+
+      if (!product || product.error) {
+        renderError('상품 정보를 불러오지 못했습니다.')
+        return
+      }
+
+      renderProductDetail(product)
+      incrementViewCount(productId)
+      trackEvent({ eventType: 'product_view', productId: productId, page: 'product', sessionId: getSessionId() })
+
+      if (product.category) {
+        loadRelatedProducts(product.category, productId)
+      }
+    }
+
+    init()
+  </script>
+</body>
+</html>

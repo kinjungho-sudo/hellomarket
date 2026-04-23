@@ -1,0 +1,555 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>장바구니 | 헬로우가든마켓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, #1a3d28, #2d5a3d);
+      padding: 48px 24px 40px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .page-hero__title {
+      font-family: var(--font-serif);
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+    .page-hero__sub { font-size: 15px; color: rgba(255,255,255,0.7); }
+    .cart-page { padding: 48px 0 80px; }
+    .cart-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 32px;
+      align-items: start;
+    }
+    .cart-list-section {
+      background: #fff;
+      border-radius: var(--radius-md);
+      border: 1.5px solid rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .cart-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .cart-list-header h2 { font-size: 20px; font-weight: 900; color: var(--color-text); letter-spacing: -0.03em; }
+    .btn-clear-all {
+      font-size: 13px; color: var(--color-text-light); background: none;
+      border: none; cursor: pointer; padding: 4px 8px;
+      border-radius: var(--radius-sm); transition: color 0.2s, background 0.2s;
+    }
+    .btn-clear-all:hover { color: var(--color-danger); background: rgba(244,67,54,0.08); }
+    .cart-empty {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 72px 24px; text-align: center; gap: 12px;
+    }
+    .cart-empty__emoji { font-size: 56px; line-height: 1; }
+    .cart-empty__text { font-size: 17px; color: var(--color-text-sub); font-weight: 500; }
+    #cart-items { padding: 0 24px; }
+    .cart-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .cart-item:last-child { border-bottom: none; }
+    .cart-item__img {
+      width: 72px; height: 72px; border-radius: var(--radius-sm);
+      object-fit: cover; flex-shrink: 0;
+      border: 1px solid rgba(0,0,0,0.08); background: var(--color-bg-section);
+    }
+    .cart-item__info { flex: 1; min-width: 0; }
+    .cart-item__name {
+      font-size: 15px; font-weight: 700; color: var(--color-text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;
+    }
+    .cart-item__unit-price { font-size: 13px; color: var(--color-text-light); }
+    .qty-control { display: flex; align-items: center; gap: 8px; }
+    .qty-btn {
+      width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 4px;
+      background: #fff; cursor: pointer; font-size: 16px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .qty-btn:hover { border-color: var(--color-primary); background: rgba(45,90,61,0.06); }
+    .qty-value { font-size: 15px; font-weight: 700; min-width: 24px; text-align: center; }
+    .cart-item__subtotal {
+      font-size: 15px; font-weight: 700; color: var(--color-primary);
+      min-width: 80px; text-align: right;
+    }
+    .btn-remove {
+      background: none; border: none; cursor: pointer; font-size: 18px;
+      color: var(--color-text-light); padding: 4px; border-radius: 4px;
+      line-height: 1; transition: color 0.2s; flex-shrink: 0;
+    }
+    .btn-remove:hover { color: var(--color-danger); }
+    .cart-summary {
+      background: white; border-radius: var(--radius-md);
+      padding: 28px; border: 1.5px solid rgba(0,0,0,0.08);
+      position: sticky; top: 80px;
+    }
+    .cart-summary__title { font-size: 18px; font-weight: 900; color: var(--color-text); letter-spacing: -0.03em; margin-bottom: 20px; }
+    .summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 15px; color: var(--color-text-sub); margin-bottom: 12px; }
+    .summary-row span:last-child { font-weight: 600; color: var(--color-text); }
+    .summary-divider { height: 1px; background: rgba(0,0,0,0.08); margin: 16px 0; }
+    .summary-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .summary-total-row .label { font-size: 16px; font-weight: 700; color: var(--color-text); }
+    .order-total { font-size: 20px; font-weight: 900; color: var(--color-primary); }
+    .btn-order { width: 100%; height: 48px; font-size: 15px; font-weight: 800; margin-bottom: 12px; }
+    .cart-summary__continue { display: block; text-align: center; font-size: 13px; color: var(--color-text-light); text-decoration: none; transition: color 0.2s; }
+    .cart-summary__continue:hover { color: var(--color-primary); }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: #fff; border-radius: var(--radius-lg); padding: 36px 32px 28px;
+      width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
+      box-shadow: var(--shadow-lg); position: relative;
+    }
+    .modal-box__title { font-size: 20px; font-weight: 900; color: var(--color-text); letter-spacing: -0.03em; margin-bottom: 24px; }
+    .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 22px; color: var(--color-text-light); cursor: pointer; line-height: 1; padding: 4px; }
+    .modal-close:hover { color: var(--color-text); }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 700; color: var(--color-text-sub); margin-bottom: 6px; }
+    .form-group input,
+    .form-group select {
+      width: 100%; height: 42px; padding: 0 14px;
+      border: 1.5px solid rgba(0,0,0,0.15); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: var(--font-main); color: var(--color-text);
+      background: #faf7f0; transition: border-color 0.2s; box-sizing: border-box;
+    }
+    .form-group input:focus,
+    .form-group select:focus { outline: none; border-color: var(--color-primary); background: #fff; }
+    .zipcode-row { display: flex; gap: 8px; }
+    .zipcode-row input { flex: 1; }
+    .btn-zipcode {
+      height: 42px; padding: 0 16px; font-size: 13px; font-weight: 700;
+      white-space: nowrap; background: var(--color-bg-section);
+      border: 1.5px solid rgba(0,0,0,0.15); border-radius: var(--radius-sm);
+      cursor: pointer; color: var(--color-text-sub); transition: border-color 0.2s;
+    }
+    .btn-zipcode:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .btn-order-confirm { width: 100%; height: 48px; font-size: 15px; font-weight: 800; margin-top: 8px; }
+    .toast-container { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast { padding: 12px 24px; border-radius: var(--radius-full); font-size: 14px; font-weight: 600; color: #fff; background: var(--color-text); box-shadow: var(--shadow-md); opacity: 0; transform: translateY(12px); transition: opacity 0.25s, transform 0.25s; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.toast-success { background: var(--color-success); }
+    .toast.toast-error   { background: var(--color-danger); }
+    @media (max-width: 768px) {
+      .cart-layout { grid-template-columns: 1fr; gap: 20px; }
+      .cart-summary { position: static; }
+      .cart-item__img { width: 56px; height: 56px; }
+      .cart-item__subtotal { min-width: 64px; font-size: 14px; }
+      .cart-item { gap: 10px; }
+      .modal-box { padding: 28px 20px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <nav class="container">
+      <a href="/index.html" class="nav-logo">🌻 Hello Garden Market</a>
+      <ul class="nav-links">
+        <li><a href="/index.html">홈</a></li>
+        <li><a href="/shop.html">쇼핑하기</a></li>
+        <li><a href="/new.html">새로 들어왔어요</a></li>
+        <li><a href="/gallery.html">매장 구경하기</a></li>
+        <li><a href="/qna.html">묻고 답하기</a></li>
+        <li><a href="/review-event.html">리뷰 이벤트</a></li>
+        <li><a href="/about.html">매장 소개</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div id="nav-auth"></div>
+        <a href="/cart.html" class="cart-icon" style="position:relative;">🛒 <span id="cart-count" class="cart-badge">0</span></a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="메뉴"><span></span><span></span><span></span></button>
+    </nav>
+    <div class="mobile-menu" id="mobile-menu">
+      <ul>
+        <li><a href="/index.html">홈</a></li>
+        <li><a href="/shop.html">쇼핑하기</a></li>
+        <li><a href="/new.html">새로 들어왔어요</a></li>
+        <li><a href="/gallery.html">매장 구경하기</a></li>
+        <li><a href="/qna.html">묻고 답하기</a></li>
+        <li><a href="/review-event.html">리뷰 이벤트</a></li>
+        <li><a href="/about.html">매장 소개</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <h1 class="page-hero__title">장바구니 🛒</h1>
+    <p class="page-hero__sub">담아두신 상품을 확인하고 주문해 보세요</p>
+  </section>
+
+  <main class="cart-page">
+    <div class="container">
+      <div class="cart-layout">
+
+        <div class="cart-list-section">
+          <div class="cart-list-header">
+            <h2>담긴 상품</h2>
+            <button class="btn-clear-all" id="btn-clear-all">전체 삭제</button>
+          </div>
+          <div class="cart-empty" id="cart-empty" style="display:none;">
+            <div class="cart-empty__emoji">🛍️</div>
+            <p class="cart-empty__text">장바구니가 비어있어요</p>
+            <a href="/shop.html" class="btn btn-primary" style="margin-top:8px;">쇼핑하기</a>
+          </div>
+          <div id="cart-items"></div>
+        </div>
+
+        <aside class="cart-summary">
+          <h2 class="cart-summary__title">주문 요약</h2>
+          <div class="summary-row">
+            <span>상품 금액</span>
+            <span id="summary-subtotal">0원</span>
+          </div>
+          <div class="summary-row">
+            <span>배송비</span>
+            <span id="summary-delivery">0원</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-total-row">
+            <span class="label">합계 금액</span>
+            <span class="order-total" id="summary-total">0원</span>
+          </div>
+          <button class="btn btn-primary btn-order" id="btn-order">주문하기</button>
+          <a href="/shop.html" class="cart-summary__continue">← 쇼핑 계속하기</a>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="order-modal">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal-close" id="modal-close" aria-label="닫기">✕</button>
+      <h2 class="modal-box__title" id="modal-title">배송 정보 입력</h2>
+      <form id="order-form" novalidate>
+        <div class="form-group">
+          <label for="receiver-name">받는 분 이름 <span style="color:var(--color-danger)">*</span></label>
+          <input type="text" id="receiver-name" placeholder="홍길동" autocomplete="name" required />
+        </div>
+        <div class="form-group">
+          <label for="receiver-phone">연락처 <span style="color:var(--color-danger)">*</span></label>
+          <input type="tel" id="receiver-phone" placeholder="010-0000-0000" autocomplete="tel" required />
+        </div>
+        <div class="form-group">
+          <label for="receiver-zipcode">우편번호 <span style="color:var(--color-danger)">*</span></label>
+          <div class="zipcode-row">
+            <input type="text" id="receiver-zipcode" placeholder="우편번호" maxlength="6" required />
+            <button type="button" class="btn-zipcode" id="btn-zipcode-search">주소 검색</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="receiver-address">주소 <span style="color:var(--color-danger)">*</span></label>
+          <input type="text" id="receiver-address" placeholder="주소를 검색해 주세요" readonly required />
+        </div>
+        <div class="form-group">
+          <label for="receiver-address-detail">상세 주소</label>
+          <input type="text" id="receiver-address-detail" placeholder="동/호수 등 상세 주소" autocomplete="address-line2" />
+        </div>
+        <div class="form-group">
+          <label for="delivery-memo">배송 메모</label>
+          <select id="delivery-memo">
+            <option value="">선택안함</option>
+            <option value="문 앞에 놔주세요">문 앞에 놔주세요</option>
+            <option value="경비실에 맡겨주세요">경비실에 맡겨주세요</option>
+            <option value="직접 입력">직접 입력</option>
+          </select>
+        </div>
+        <div class="form-group" id="memo-custom-group" style="display:none;">
+          <label for="delivery-memo-custom">배송 메모 직접 입력</label>
+          <input type="text" id="delivery-memo-custom" placeholder="배송 시 요청 사항을 입력해 주세요" maxlength="100" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-order-confirm">주문 완료</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script type="module">
+    import { getCart, removeFromCart, updateCartQuantity, clearCart, getCartTotal, getDeliveryFee, updateCartBadge } from '/js/utils/cart.js'
+    import { formatPrice } from '/js/utils/format.js'
+    import { getSession } from '/js/auth.js'
+    import { createOrder } from '/js/api/orders.js'
+    import { sendOrderAlert } from '/js/api/notifications.js'
+    import { updateNavAuth } from '/js/auth.js'
+
+    /* --------------------------------------------------
+       토스트
+    -------------------------------------------------- */
+    function showToast(message, type) {
+      const container = document.getElementById('toast-container')
+      const toast = document.createElement('div')
+      toast.className = type ? ('toast toast-' + type) : 'toast'
+      toast.textContent = message
+      container.appendChild(toast)
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { toast.classList.add('show') })
+      })
+      setTimeout(function() {
+        toast.classList.remove('show')
+        setTimeout(function() { toast.remove() }, 300)
+      }, 3000)
+    }
+
+    /* --------------------------------------------------
+       DOM 빌더 — createElement 기반 (XSS-safe)
+       사용자 데이터는 textContent / setAttribute 로만 삽입
+    -------------------------------------------------- */
+    function buildCartItem(item) {
+      const wrap = document.createElement('div')
+      wrap.className = 'cart-item'
+      wrap.dataset.id = item.id
+
+      const img = document.createElement('img')
+      img.className = 'cart-item__img'
+      img.src = item.imageUrl || '/assets/images/placeholder.svg'
+      img.alt = item.name
+      img.addEventListener('error', function() { img.src = '/assets/images/placeholder.svg' })
+
+      const info = document.createElement('div')
+      info.className = 'cart-item__info'
+      const nameEl = document.createElement('div')
+      nameEl.className = 'cart-item__name'
+      nameEl.textContent = item.name
+      const priceEl = document.createElement('div')
+      priceEl.className = 'cart-item__unit-price'
+      priceEl.textContent = formatPrice(item.price) + ' / 개'
+      info.appendChild(nameEl)
+      info.appendChild(priceEl)
+
+      const qtyCtrl = document.createElement('div')
+      qtyCtrl.className = 'qty-control'
+      const minusBtn = document.createElement('button')
+      minusBtn.className = 'qty-btn btn-qty-minus'
+      minusBtn.type = 'button'
+      minusBtn.setAttribute('aria-label', '수량 감소')
+      minusBtn.dataset.id = item.id
+      minusBtn.textContent = '−'
+      const qtyVal = document.createElement('span')
+      qtyVal.className = 'qty-value'
+      qtyVal.textContent = String(item.quantity)
+      const plusBtn = document.createElement('button')
+      plusBtn.className = 'qty-btn btn-qty-plus'
+      plusBtn.type = 'button'
+      plusBtn.setAttribute('aria-label', '수량 증가')
+      plusBtn.dataset.id = item.id
+      plusBtn.textContent = '+'
+      qtyCtrl.appendChild(minusBtn)
+      qtyCtrl.appendChild(qtyVal)
+      qtyCtrl.appendChild(plusBtn)
+
+      const subtotal = document.createElement('div')
+      subtotal.className = 'cart-item__subtotal'
+      subtotal.textContent = formatPrice(item.price * item.quantity)
+
+      const removeBtn = document.createElement('button')
+      removeBtn.className = 'btn-remove'
+      removeBtn.type = 'button'
+      removeBtn.setAttribute('aria-label', '삭제')
+      removeBtn.dataset.id = item.id
+      removeBtn.textContent = '✕'
+
+      wrap.appendChild(img)
+      wrap.appendChild(info)
+      wrap.appendChild(qtyCtrl)
+      wrap.appendChild(subtotal)
+      wrap.appendChild(removeBtn)
+      return wrap
+    }
+
+    /* --------------------------------------------------
+       장바구니 렌더링
+    -------------------------------------------------- */
+    function renderCart() {
+      const items = getCart()
+      const cartItemsEl = document.getElementById('cart-items')
+      const cartEmptyEl = document.getElementById('cart-empty')
+      const btnClearAll = document.getElementById('btn-clear-all')
+
+      if (items.length === 0) {
+        cartItemsEl.replaceChildren()
+        cartItemsEl.style.display = 'none'
+        cartEmptyEl.style.display = 'flex'
+        btnClearAll.style.display = 'none'
+      } else {
+        cartItemsEl.style.display = 'block'
+        cartEmptyEl.style.display = 'none'
+        btnClearAll.style.display = 'inline-block'
+        cartItemsEl.replaceChildren.apply(cartItemsEl, items.map(buildCartItem))
+      }
+      updateSummary()
+      updateCartBadge()
+    }
+
+    function updateSummary() {
+      const subtotal = getCartTotal()
+      const delivery = getDeliveryFee()
+      const total    = subtotal + delivery
+      document.getElementById('summary-subtotal').textContent = formatPrice(subtotal)
+      document.getElementById('summary-delivery').textContent = delivery === 0 ? '무료' : formatPrice(delivery)
+      document.getElementById('summary-total').textContent    = formatPrice(total)
+    }
+
+    /* --------------------------------------------------
+       이벤트 위임 — 수량 / 삭제
+    -------------------------------------------------- */
+    document.getElementById('cart-items').addEventListener('click', function(e) {
+      const minus  = e.target.closest('.btn-qty-minus')
+      const plus   = e.target.closest('.btn-qty-plus')
+      const remove = e.target.closest('.btn-remove')
+      if (minus) {
+        const id = minus.dataset.id
+        const item = getCart().find(function(i) { return i.id === id })
+        if (item) { updateCartQuantity(id, item.quantity - 1); renderCart() }
+        return
+      }
+      if (plus) {
+        const id = plus.dataset.id
+        const item = getCart().find(function(i) { return i.id === id })
+        if (item) { updateCartQuantity(id, item.quantity + 1); renderCart() }
+        return
+      }
+      if (remove) { removeFromCart(remove.dataset.id); renderCart() }
+    })
+
+    /* --------------------------------------------------
+       전체 삭제
+    -------------------------------------------------- */
+    document.getElementById('btn-clear-all').addEventListener('click', function() {
+      if (confirm('장바구니를 비우시겠어요?')) { clearCart(); renderCart() }
+    })
+
+    /* --------------------------------------------------
+       모달
+    -------------------------------------------------- */
+    function openModal()  { document.getElementById('order-modal').classList.add('active');    document.body.style.overflow = 'hidden' }
+    function closeModal() { document.getElementById('order-modal').classList.remove('active'); document.body.style.overflow = '' }
+
+    document.getElementById('modal-close').addEventListener('click', closeModal)
+    document.getElementById('order-modal').addEventListener('click', function(e) {
+      if (e.target === document.getElementById('order-modal')) closeModal()
+    })
+
+    /* --------------------------------------------------
+       주문하기
+    -------------------------------------------------- */
+    document.getElementById('btn-order').addEventListener('click', async function() {
+      if (getCart().length === 0) { showToast('장바구니가 비어있어요.', 'error'); return }
+      const sess = await getSession()
+      if (!sess.session) { window.location.href = '/login.html?redirect=/cart.html'; return }
+      openModal()
+    })
+
+    /* --------------------------------------------------
+       배송 메모 토글
+    -------------------------------------------------- */
+    document.getElementById('delivery-memo').addEventListener('change', function(e) {
+      document.getElementById('memo-custom-group').style.display =
+        e.target.value === '직접 입력' ? 'block' : 'none'
+    })
+
+    /* --------------------------------------------------
+       우편번호 검색
+    -------------------------------------------------- */
+    document.getElementById('btn-zipcode-search').addEventListener('click', function() {
+      if (typeof daum === 'undefined' || !daum.Postcode) {
+        showToast('주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.', 'error')
+        return
+      }
+      new daum.Postcode({
+        oncomplete: function(data) {
+          document.getElementById('receiver-zipcode').value = data.zonecode
+          document.getElementById('receiver-address').value = data.roadAddress || data.jibunAddress
+          document.getElementById('receiver-address-detail').focus()
+        }
+      }).open()
+    })
+
+    /* --------------------------------------------------
+       주문 폼 제출
+    -------------------------------------------------- */
+    document.getElementById('order-form').addEventListener('submit', async function(e) {
+      e.preventDefault()
+      const name          = document.getElementById('receiver-name').value.trim()
+      const phone         = document.getElementById('receiver-phone').value.trim()
+      const zipcode       = document.getElementById('receiver-zipcode').value.trim()
+      const address       = document.getElementById('receiver-address').value.trim()
+      const addressDetail = document.getElementById('receiver-address-detail').value.trim()
+      const memoSelect    = document.getElementById('delivery-memo').value
+      const memoCustom    = document.getElementById('delivery-memo-custom').value.trim()
+      const deliveryMemo  = memoSelect === '직접 입력' ? memoCustom : memoSelect
+
+      if (!name)               { showToast('받는 분 이름을 입력해 주세요.', 'error'); return }
+      if (!phone)              { showToast('연락처를 입력해 주세요.', 'error'); return }
+      if (!zipcode || !address){ showToast('주소를 입력해 주세요.', 'error'); return }
+
+      const sess = await getSession()
+      if (!sess.session) { showToast('로그인이 필요합니다.', 'error'); return }
+
+      const orderItems = getCart().map(function(item) {
+        return { productId: item.id, productName: item.name, quantity: item.quantity, price: item.price }
+      })
+      const receiverInfo = { name: name, phone: phone, address: address, addressDetail: addressDetail, zipcode: zipcode, deliveryMemo: deliveryMemo }
+
+      const submitBtn = document.querySelector('.btn-order-confirm')
+      submitBtn.disabled = true
+      submitBtn.textContent = '주문 처리 중...'
+
+      try {
+        const result = await createOrder(sess.session.user.id, orderItems, receiverInfo)
+        if (result.error) throw new Error(result.error)
+
+        try { await sendOrderAlert(result) }
+        catch (alertErr) { console.warn('[cart] 주문 알림 발송 실패 (무시):', alertErr) }
+
+        clearCart()
+        closeModal()
+        showToast('주문이 완료되었습니다! 🌻', 'success')
+        setTimeout(function() { window.location.href = '/mypage.html' }, 1500)
+      } catch (err) {
+        console.error('[cart] 주문 실패:', err)
+        showToast('주문 처리 중 오류가 발생했습니다. 다시 시도해 주세요.', 'error')
+        submitBtn.disabled = false
+        submitBtn.textContent = '주문 완료'
+      }
+    })
+
+    /* --------------------------------------------------
+       초기화
+    -------------------------------------------------- */
+    renderCart()
+    updateNavAuth()
+    updateCartBadge()
+
+    /* --------------------------------------------------
+       햄버거 메뉴
+    -------------------------------------------------- */
+    const hamburger  = document.getElementById('hamburger')
+    const mobileMenu = document.getElementById('mobile-menu')
+    hamburger.addEventListener('click', function() {
+      mobileMenu.classList.toggle('open')
+      hamburger.classList.toggle('open')
+    })
+  </script>
+
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>
+
+</body>
+</html>

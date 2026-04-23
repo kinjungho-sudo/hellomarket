@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>쇼핑하기 | 헬로우가든마켓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <style>
+    /* -----------------------------------------------
+       페이지 타이틀 배너
+    ----------------------------------------------- */
+    .page-hero {
+      background: linear-gradient(135deg, #1a3d28, #2d5a3d);
+      padding: 56px 24px 48px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .page-hero__title {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+    .page-hero__sub {
+      font-size: 15px;
+      color: rgba(255,255,255,.72);
+    }
+
+    /* -----------------------------------------------
+       필터 영역
+    ----------------------------------------------- */
+    .filter-section {
+      background: #ffffff;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      position: sticky;
+      top: var(--nav-height);
+      z-index: 50;
+    }
+    .filter-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* 카테고리 탭 */
+    .category-tabs {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+    .category-tabs::-webkit-scrollbar { display: none; }
+    .category-tab {
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-sub);
+      cursor: pointer;
+      white-space: nowrap;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s ease, border-color 0.2s ease;
+      margin-bottom: -1px;
+    }
+    .category-tab:hover { color: var(--color-primary); }
+    .category-tab.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    /* 정렬 + 상태 필터 행 */
+    .filter-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-row__left { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .status-btn {
+      height: 32px;
+      padding: 0 16px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 600;
+      border: 1.5px solid rgba(0,0,0,.15);
+      background: #ffffff;
+      color: var(--color-text-sub);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .status-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .status-btn.active {
+      background: var(--color-primary);
+      color: #ffffff;
+      border-color: var(--color-primary);
+    }
+
+    .sort-select {
+      height: 36px;
+      padding: 0 12px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid rgba(0,0,0,.15);
+      font-size: 13px;
+      color: var(--color-text);
+      background: #ffffff;
+      cursor: pointer;
+      font-family: var(--font-main);
+    }
+    .sort-select:focus { outline: none; border-color: var(--color-primary); }
+
+    /* -----------------------------------------------
+       상품 목록 영역
+    ----------------------------------------------- */
+    .shop-main {
+      padding: 48px 0 80px;
+    }
+
+    .products-count {
+      font-size: 14px;
+      color: var(--color-text-sub);
+      margin-bottom: 24px;
+    }
+    .products-count strong {
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    /* 카드 하단 액션 */
+    .product-card__actions {
+      padding: 0 16px 16px;
+      display: flex;
+      gap: 8px;
+    }
+    .product-card__actions .btn-cart {
+      flex: 1;
+      height: 36px;
+      font-size: 13px;
+      background: var(--color-primary);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .product-card__actions .btn-cart:hover { background: var(--color-primary-light); }
+    .product-card__actions .btn-cart:disabled {
+      background: #e0e0e0;
+      color: #999;
+      cursor: not-allowed;
+    }
+
+    /* 더 보기 버튼 */
+    .load-more-wrap {
+      text-align: center;
+      margin-top: 48px;
+    }
+    .btn-load-more {
+      height: 48px;
+      padding: 0 48px;
+      background: #ffffff;
+      border: 2px solid var(--color-primary);
+      color: var(--color-primary);
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-load-more:hover { background: var(--color-primary); color: #ffffff; }
+    .btn-load-more:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* 빈 상태 */
+    .products-empty {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--color-text-light);
+    }
+    .products-empty__icon { font-size: 48px; margin-bottom: 16px; }
+    .products-empty__text { font-size: 15px; }
+
+    .products-loading {
+      display: flex;
+      justify-content: center;
+      padding: 80px 24px;
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 768px) {
+      .filter-row { padding: 10px 0; }
+      .category-tab { padding: 12px 14px; font-size: 13px; }
+      .shop-main { padding: 32px 0 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <nav class="container">
+      <a href="/index.html" class="nav-logo">🌻 Hello Garden Market</a>
+      <ul class="nav-links">
+        <li><a href="/index.html">홈</a></li>
+        <li><a href="/shop.html">쇼핑하기</a></li>
+        <li><a href="/new.html">새로 들어왔어요</a></li>
+        <li><a href="/gallery.html">매장 구경하기</a></li>
+        <li><a href="/qna.html">묻고 답하기</a></li>
+        <li><a href="/review-event.html">리뷰 이벤트</a></li>
+        <li><a href="/about.html">매장 소개</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div id="nav-auth"></div>
+        <a href="/cart.html" class="cart-icon">🛒 <span id="cart-count" class="cart-badge">0</span></a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="메뉴">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+    <div class="mobile-menu" id="mobile-menu">
+      <ul>
+        <li><a href="/index.html">홈</a></li>
+        <li><a href="/shop.html">쇼핑하기</a></li>
+        <li><a href="/new.html">새로 들어왔어요</a></li>
+        <li><a href="/gallery.html">매장 구경하기</a></li>
+        <li><a href="/qna.html">묻고 답하기</a></li>
+        <li><a href="/review-event.html">리뷰 이벤트</a></li>
+        <li><a href="/about.html">매장 소개</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- 페이지 타이틀 -->
+  <div class="page-hero">
+    <h1 class="page-hero__title">🛍️ 쇼핑하기</h1>
+    <p class="page-hero__sub">관엽식물부터 희귀식물까지, 원하는 식물을 찾아보세요</p>
+  </div>
+
+  <!-- 필터 -->
+  <div class="filter-section">
+    <div class="filter-inner">
+      <div class="category-tabs" id="category-tabs" role="tablist">
+        <!-- JS로 생성 -->
+      </div>
+      <div class="filter-row">
+        <div class="filter-row__left" id="status-filters">
+          <!-- JS로 생성 -->
+        </div>
+        <select class="sort-select" id="sort-select" aria-label="정렬 기준">
+          <option value="created_at_desc">최신순</option>
+          <option value="view_count_desc">인기순</option>
+          <option value="price_asc">낮은가격순</option>
+          <option value="price_desc">높은가격순</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 상품 목록 -->
+  <main class="shop-main">
+    <div class="container">
+      <p class="products-count" id="products-count"></p>
+      <div id="products-grid" class="product-grid">
+        <div class="products-loading"><div class="loading-spinner"></div></div>
+      </div>
+      <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+        <button class="btn-load-more" id="btn-load-more">더 보기</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="nav-logo" style="margin-bottom:12px;">🌻 Hello Garden Market</div>
+      <div class="footer-links">
+        <a href="/about.html">매장 소개</a>
+        <a href="#">개인정보처리방침</a>
+        <a href="#">이용약관</a>
+      </div>
+      <p class="footer-copy">© 2026 헬로우가든마켓(건민농원). All rights reserved.</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { updateNavAuth } from '/js/auth.js'
+    import { updateCartBadge, addToCart } from '/js/utils/cart.js'
+    import { getProducts } from '/js/api/products.js'
+    import { trackEvent } from '/js/api/analytics.js'
+    import { getSessionId } from '/js/utils/session.js'
+
+    // 햄버거 메뉴
+    const hamburger = document.getElementById('hamburger')
+    const mobileMenu = document.getElementById('mobile-menu')
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open')
+      hamburger.classList.toggle('open')
+    })
+
+    updateNavAuth()
+    updateCartBadge()
+
+    // ---- 상수 ----
+    const CATEGORIES = [
+      { value: '', label: '전체' },
+      { value: '관엽식물', label: '관엽식물' },
+      { value: '다육식물', label: '다육식물' },
+      { value: '꽃나무', label: '꽃나무' },
+      { value: '화분·용기', label: '화분·용기' },
+      { value: '희귀식물', label: '희귀식물' },
+      { value: '토양·비료', label: '토양·비료' },
+    ]
+    const STATUS_FILTERS = [
+      { value: '', label: '전체' },
+      { value: 'active', label: '판매중' },
+      { value: 'season', label: '시즌한정' },
+    ]
+    const PAGE_SIZE = 12
+
+    // ---- 상태 ----
+    let state = {
+      category: '',
+      status: '',
+      sort: 'created_at_desc',
+      offset: 0,
+      hasMore: false,
+      loading: false,
+    }
+
+    // ---- 토스트 ----
+    function showToast(msg, type) {
+      const el = document.getElementById('toast')
+      el.textContent = msg
+      el.className = 'toast show' + (type ? ' ' + type : '')
+      setTimeout(() => { el.className = 'toast' }, 2800)
+    }
+
+    // ---- 정렬 파싱 ----
+    function parseSortOption(val) {
+      switch (val) {
+        case 'view_count_desc': return { orderBy: 'view_count', ascending: false }
+        case 'price_asc':       return { orderBy: 'price', ascending: true }
+        case 'price_desc':      return { orderBy: 'price', ascending: false }
+        default:                return { orderBy: 'created_at', ascending: false }
+      }
+    }
+
+    // ---- 상품 카드 DOM 생성 ----
+    function createProductCard(p) {
+      const card = document.createElement('div')
+      card.className = 'product-card'
+      card.style.cursor = 'pointer'
+      card.addEventListener('click', () => { window.location.href = '/product.html?id=' + p.id })
+
+      // 뱃지
+      const badgeMap = [
+        { cond: p.is_new,              cls: 'badge-new',    text: 'NEW' },
+        { cond: p.status === 'season', cls: 'badge-season', text: '시즌한정' },
+        { cond: p.status === 'sold_out', cls: 'badge-sold', text: '품절' },
+      ]
+      for (const b of badgeMap) {
+        if (b.cond) {
+          const badge = document.createElement('span')
+          badge.className = 'product-card__badge ' + b.cls
+          badge.textContent = b.text
+          card.appendChild(badge)
+          break
+        }
+      }
+
+      // 위시리스트 버튼
+      const wishBtn = document.createElement('button')
+      wishBtn.className = 'wishlist-btn'
+      wishBtn.setAttribute('aria-label', '위시리스트')
+      wishBtn.textContent = '♡'
+      wishBtn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        const isActive = wishBtn.classList.toggle('active')
+        wishBtn.textContent = isActive ? '♥' : '♡'
+        showToast(isActive ? '위시리스트에 추가했어요 ♥' : '위시리스트에서 제거했어요', '')
+      })
+      card.appendChild(wishBtn)
+
+      // 이미지
+      const imgWrap = document.createElement('div')
+      imgWrap.className = 'product-card__img'
+      const img = document.createElement('img')
+      img.src = p.image_url || '/assets/images/placeholder.svg'
+      img.alt = p.name
+      img.loading = 'lazy'
+      img.onerror = function() { this.src = '/assets/images/placeholder.svg' }
+      imgWrap.appendChild(img)
+      card.appendChild(imgWrap)
+
+      // 본문
+      const body = document.createElement('div')
+      body.className = 'product-card__body'
+
+      const nameEl = document.createElement('p')
+      nameEl.className = 'product-card__name'
+      nameEl.textContent = p.name
+
+      const priceEl = document.createElement('p')
+      priceEl.className = 'product-card__price'
+      priceEl.textContent = Number(p.price).toLocaleString() + '원'
+      if (p.original_price) {
+        const orig = document.createElement('span')
+        orig.className = 'product-card__original-price'
+        orig.textContent = Number(p.original_price).toLocaleString() + '원'
+        priceEl.appendChild(orig)
+      }
+
+      body.appendChild(nameEl)
+      body.appendChild(priceEl)
+      card.appendChild(body)
+
+      // 액션
+      const actions = document.createElement('div')
+      actions.className = 'product-card__actions'
+      const soldOut = p.status === 'sold_out' || p.status === 'inactive'
+      const cartBtn = document.createElement('button')
+      cartBtn.className = 'btn-cart'
+      if (soldOut) {
+        cartBtn.textContent = '품절'
+        cartBtn.disabled = true
+      } else {
+        cartBtn.textContent = '장바구니 담기'
+        cartBtn.addEventListener('click', (e) => {
+          e.stopPropagation()
+          addToCart({ id: String(p.id), name: p.name, price: p.price, imageUrl: p.image_url || '' })
+          showToast('장바구니에 담았어요 🛒', 'success')
+        })
+      }
+      actions.appendChild(cartBtn)
+      card.appendChild(actions)
+
+      return card
+    }
+
+    // ---- 상품 렌더 ----
+    function renderProducts(products, append) {
+      const grid = document.getElementById('products-grid')
+      if (!append) grid.textContent = ''
+
+      if (!products || products.error || products.length === 0) {
+        if (!append) {
+          const empty = document.createElement('div')
+          empty.style.gridColumn = '1/-1'
+          empty.className = 'products-empty'
+          const icon = document.createElement('div')
+          icon.className = 'products-empty__icon'
+          icon.textContent = '🌵'
+          const text = document.createElement('div')
+          text.className = 'products-empty__text'
+          text.textContent = '해당 조건의 상품이 없습니다.'
+          empty.appendChild(icon)
+          empty.appendChild(text)
+          grid.appendChild(empty)
+        }
+        state.hasMore = false
+        document.getElementById('load-more-wrap').style.display = 'none'
+        return
+      }
+
+      products.forEach(p => grid.appendChild(createProductCard(p)))
+
+      state.hasMore = products.length >= PAGE_SIZE
+      document.getElementById('load-more-wrap').style.display = state.hasMore ? 'block' : 'none'
+    }
+
+    // ---- 데이터 로드 ----
+    async function loadProducts(append) {
+      if (state.loading) return
+      state.loading = true
+
+      const grid = document.getElementById('products-grid')
+      const countEl = document.getElementById('products-count')
+      const loadMoreBtn = document.getElementById('btn-load-more')
+      loadMoreBtn.disabled = true
+
+      if (!append) {
+        grid.textContent = ''
+        const spinner = document.createElement('div')
+        spinner.className = 'products-loading'
+        const s = document.createElement('div')
+        s.className = 'loading-spinner'
+        spinner.appendChild(s)
+        grid.appendChild(spinner)
+        countEl.textContent = ''
+      }
+
+      const { orderBy, ascending } = parseSortOption(state.sort)
+      const params = {
+        limit: PAGE_SIZE,
+        offset: state.offset,
+        orderBy,
+        ascending,
+      }
+      if (state.category) params.category = state.category
+      if (state.status) params.status = state.status
+
+      const data = await getProducts(params)
+
+      if (!append && countEl) {
+        const n = (data && !data.error) ? data.length : 0
+        const countText = document.createTextNode('')
+        countEl.textContent = ''
+        const strong = document.createElement('strong')
+        strong.textContent = n >= PAGE_SIZE ? PAGE_SIZE + '+' : String(n)
+        countEl.appendChild(document.createTextNode('상품 '))
+        countEl.appendChild(strong)
+        countEl.appendChild(document.createTextNode('개'))
+      }
+
+      renderProducts(data, append)
+      state.loading = false
+      loadMoreBtn.disabled = false
+    }
+
+    // ---- 카테고리 탭 ----
+    function buildCategoryTabs() {
+      const wrap = document.getElementById('category-tabs')
+      wrap.textContent = ''
+      CATEGORIES.forEach(cat => {
+        const btn = document.createElement('button')
+        btn.className = 'category-tab' + (cat.value === state.category ? ' active' : '')
+        btn.textContent = cat.label
+        btn.setAttribute('role', 'tab')
+        btn.addEventListener('click', () => {
+          if (state.category === cat.value) return
+          state.category = cat.value
+          state.offset = 0
+          wrap.querySelectorAll('.category-tab').forEach(b => b.classList.remove('active'))
+          btn.classList.add('active')
+          loadProducts(false)
+        })
+        wrap.appendChild(btn)
+      })
+    }
+
+    // ---- 상태 필터 버튼 ----
+    function buildStatusFilters() {
+      const wrap = document.getElementById('status-filters')
+      wrap.textContent = ''
+      STATUS_FILTERS.forEach(sf => {
+        const btn = document.createElement('button')
+        btn.className = 'status-btn' + (sf.value === state.status ? ' active' : '')
+        btn.textContent = sf.label
+        btn.addEventListener('click', () => {
+          if (state.status === sf.value) return
+          state.status = sf.value
+          state.offset = 0
+          wrap.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'))
+          btn.classList.add('active')
+          loadProducts(false)
+        })
+        wrap.appendChild(btn)
+      })
+    }
+
+    // ---- 정렬 변경 ----
+    document.getElementById('sort-select').addEventListener('change', (e) => {
+      state.sort = e.target.value
+      state.offset = 0
+      loadProducts(false)
+    })
+
+    // ---- 더 보기 ----
+    document.getElementById('btn-load-more').addEventListener('click', () => {
+      state.offset += PAGE_SIZE
+      loadProducts(true)
+    })
+
+    // ---- 초기화 ----
+    buildCategoryTabs()
+    buildStatusFilters()
+    loadProducts(false)
+
+    trackEvent({ eventType: 'page_view', page: 'shop', sessionId: getSessionId() })
+  </script>
+</body>
+</html>

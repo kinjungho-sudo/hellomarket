@@ -1,0 +1,277 @@
+/* ==========================================================================
+   common.css — 공통 레이아웃 & 전역 스타일
+   헬로우가든마켓 CSS 시스템
+   ========================================================================== */
+
+/* ------------------------------------------------------------------
+   Body 기본 스타일
+------------------------------------------------------------------ */
+body {
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.65;
+}
+
+/* ------------------------------------------------------------------
+   .container — 중앙 정렬 최대 너비 래퍼
+------------------------------------------------------------------ */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ------------------------------------------------------------------
+   .section — 페이지 섹션 기본 여백
+------------------------------------------------------------------ */
+.section {
+  padding: 80px 0;
+}
+
+/* ------------------------------------------------------------------
+   섹션 레이블 (소제목 위 라벨 텍스트)
+   예: "PRODUCT" / "ABOUT US"
+------------------------------------------------------------------ */
+.section-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* ------------------------------------------------------------------
+   섹션 메인 타이틀
+------------------------------------------------------------------ */
+.section-title {
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  color: var(--color-text);
+}
+
+/* ------------------------------------------------------------------
+   Header — 상단 네비게이션 바
+------------------------------------------------------------------ */
+header {
+  height: var(--nav-height);        /* 고정 높이 64px */
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  z-index: 100;
+}
+
+header nav {
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 로고 */
+.nav-logo {
+  font-family: var(--font-serif);
+  color: var(--color-primary);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+/* 중앙 네비게이션 링크 목록 */
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: var(--color-primary);
+}
+
+/* 우측 액션 아이콘 영역 (검색, 장바구니, 위시리스트 등) */
+.nav-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav-actions a,
+.nav-actions button {
+  color: var(--color-text);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.nav-actions a:hover,
+.nav-actions button:hover {
+  color: var(--color-primary);
+}
+
+/* 햄버거 메뉴 버튼 (모바일 전용) */
+.hamburger {
+  display: none;                 /* 기본 숨김 — 모바일에서만 표시 */
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+}
+
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: var(--color-text);
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* 햄버거 활성화 상태 (X 모양 변환) */
+.hamburger.active span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.active span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* 모바일 드로어 메뉴 */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: var(--nav-height);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 16px 0;
+  z-index: 99;
+  box-shadow: var(--shadow-md);
+}
+
+.mobile-menu.active {
+  display: block;
+}
+
+.mobile-menu a {
+  display: block;
+  padding: 12px 24px;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.mobile-menu a:hover {
+  background: var(--color-bg-section);
+  color: var(--color-primary);
+}
+
+/* ------------------------------------------------------------------
+   Footer — 하단 푸터
+------------------------------------------------------------------ */
+footer {
+  background: var(--color-primary-dark);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 48px 0;
+  text-align: center;
+}
+
+.footer-logo {
+  font-family: var(--font-serif);
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: #ffffff;
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ------------------------------------------------------------------
+   반응형 — 태블릿 이하 (768px)
+------------------------------------------------------------------ */
+@media (max-width: 768px) {
+  /* 컨테이너 좌우 패딩 축소 */
+  .container {
+    padding: 0 16px;
+  }
+
+  /* 섹션 상하 여백 축소 */
+  .section {
+    padding: 56px 0;
+  }
+
+  /* 네비게이션 링크 숨김 (햄버거 메뉴로 대체) */
+  .nav-links {
+    display: none;
+  }
+
+  /* 햄버거 버튼 표시 */
+  .hamburger {
+    display: flex;
+  }
+}
+
+/* ------------------------------------------------------------------
+   반응형 — 모바일 (480px)
+------------------------------------------------------------------ */
+@media (max-width: 480px) {
+  /* 섹션 여백 추가 축소 */
+  .section {
+    padding: 40px 0;
+  }
+
+  /* 푸터 패딩 축소 */
+  footer {
+    padding: 32px 0;
+  }
+
+  /* 푸터 링크 수직 배치 */
+  .footer-links {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+}

@@ -1,0 +1,451 @@
+/* ==========================================================================
+   components.css — 재사용 UI 컴포넌트 스타일
+   헬로우가든마켓 CSS 시스템
+   ========================================================================== */
+
+/* ==========================================================================
+   버튼 컴포넌트
+   ========================================================================== */
+
+/* 버튼 기본 베이스 스타일 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 28px;
+  border-radius: var(--radius-sm);
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s ease, color 0.2s ease,
+              box-shadow 0.2s ease, transform 0.1s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* 주요 버튼 (브랜드 그린) */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-light);
+  box-shadow: var(--shadow-md);
+}
+
+/* 보조 버튼 (골드 강조) */
+.btn-secondary {
+  background-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-accent-dark);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 아웃라인 버튼 (테두리형) */
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+/* 버튼 크기 변형 */
+.btn-sm {
+  height: 32px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.btn-lg {
+  height: 48px;
+  padding: 0 36px;
+  font-size: 15px;
+}
+
+/* ==========================================================================
+   일반 카드 컴포넌트
+   ========================================================================== */
+.card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  padding: 28px;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   상품 카드 컴포넌트
+   ========================================================================== */
+
+/* 상품 카드 래퍼 */
+.product-card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  border: 1.5px solid rgba(0, 0, 0, 0.07);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  position: relative;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  cursor: pointer;
+}
+
+.product-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+/* 상품 이미지 영역 */
+.product-card__img {
+  aspect-ratio: 1 / 1;           /* 정사각형 비율 유지 */
+  background-color: #f0f0f0;
+  overflow: hidden;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0; /* 위쪽 모서리만 둥글게 */
+}
+
+.product-card__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.product-card:hover .product-card__img img {
+  transform: scale(1.05);
+}
+
+/* 상품 정보 본문 */
+.product-card__body {
+  padding: 16px;
+}
+
+/* 상품명 */
+.product-card__name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--color-text);
+  margin-bottom: 6px;
+  line-height: 1.4;
+  /* 2줄 초과 시 말줄임 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 가격 표시 */
+.product-card__price {
+  font-weight: 900;
+  font-size: 17px;
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
+}
+
+/* 원가 (취소선) */
+.product-card__original-price {
+  font-size: 13px;
+  color: var(--color-text-light);
+  text-decoration: line-through;
+  margin-left: 6px;
+  font-weight: 400;
+}
+
+/* 상품 뱃지 (이미지 위에 절대 위치) */
+.product-card__badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}
+
+/* 뱃지 색상 변형 */
+.badge-new {
+  background-color: var(--color-badge-new);
+  color: #333333;
+}
+
+.badge-sale {
+  background-color: var(--color-badge-sale);
+  color: #ffffff;
+}
+
+.badge-sold {
+  background-color: var(--color-badge-sold);
+  color: #ffffff;
+}
+
+.badge-season {
+  background-color: var(--color-badge-season);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   상품 그리드 레이아웃
+   ========================================================================== */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* 태블릿: 2열 */
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* 모바일: 1열 */
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 14px;
+  }
+}
+
+/* ==========================================================================
+   모달 컴포넌트
+   ========================================================================== */
+
+/* 모달 오버레이 (전체 화면 어두운 배경) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;                          /* top/right/bottom/left: 0 */
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: none;                     /* 기본 숨김 */
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* 활성화 시 플렉스 레이아웃으로 표시 */
+.modal-overlay.active {
+  display: flex;
+}
+
+/* 모달 박스 */
+.modal {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  max-width: 560px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  animation: modal-in 0.25s ease;
+}
+
+/* 모달 열림 애니메이션 */
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 모달 닫기 버튼 */
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--color-text-sub);
+  line-height: 1;
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.modal-close:hover {
+  color: var(--color-text);
+}
+
+/* 모달 제목 */
+.modal-title {
+  font-size: 20px;
+  font-weight: 900;
+  margin-bottom: 20px;
+  color: var(--color-text);
+}
+
+/* ==========================================================================
+   위시리스트 버튼 (하트 아이콘)
+   ========================================================================== */
+.wishlist-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #ffffff;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 10;
+  color: var(--color-text-sub);
+  font-size: 16px;
+}
+
+.wishlist-btn:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+/* 위시리스트 활성 상태 (찜 완료) */
+.wishlist-btn.active {
+  color: #e53935;
+}
+
+/* ==========================================================================
+   태그 컴포넌트 (카테고리, 키워드 라벨)
+   ========================================================================== */
+.tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  background-color: var(--color-bg-section);
+  color: var(--color-text-sub);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tag:hover {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+/* 태그 활성화 상태 */
+.tag.active {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   로딩 스피너
+   ========================================================================== */
+.loading-spinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(45, 90, 61, 0.2);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spinner-rotate 0.75s linear infinite;
+}
+
+/* 스피너 회전 애니메이션 */
+@keyframes spinner-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 전체 화면 로딩 오버레이 */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 2000;
+}
+
+/* ==========================================================================
+   토스트 알림 컴포넌트
+   ========================================================================== */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #333333;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  z-index: 9999;
+  display: none;             /* 기본 숨김 */
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  max-width: 320px;
+  line-height: 1.5;
+  animation: toast-in 0.3s ease;
+}
+
+/* 토스트 표시 상태 */
+.toast.show {
+  display: block;
+}
+
+/* 토스트 타입별 배경색 */
+.toast.success {
+  background: var(--color-success);
+}
+
+.toast.warning {
+  background: var(--color-warning);
+}
+
+.toast.danger {
+  background: var(--color-danger);
+}
+
+/* 토스트 등장 애니메이션 */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

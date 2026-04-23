@@ -1,0 +1,103 @@
+/* ==========================================================================
+   reset.css — 브라우저 기본 스타일 초기화
+   헬로우가든마켓 CSS 시스템
+   ========================================================================== */
+
+/* 전역 box-sizing 설정: 모든 요소에 border-box 적용 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* margin / padding 전역 초기화 */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* HTML 루트: 부드러운 스크롤, 텍스트 크기 자동 조정 방지 */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* body 기본값 초기화 */
+body {
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* 제목 요소 font-weight 초기화 */
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/* 이미지: 블록 요소로 설정, 최대 너비 제한, 세로 정렬 문제 해결 */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* 입력 요소: font 상속 */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* p, h 요소: overflow-wrap 설정 (긴 단어 줄바꿈) */
+p,
+h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+/* a 태그: 밑줄 제거, 색상 상속 */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ul / ol: 리스트 스타일 제거 */
+ul,
+ol {
+  list-style: none;
+}
+
+/* button: 기본 스타일 초기화 */
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* table: 테두리 간격 제거 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* fieldset: 기본 테두리 제거 */
+fieldset {
+  border: none;
+}
+
+/* hr: 기본 스타일 초기화 */
+hr {
+  border: none;
+  border-top: 1px solid currentColor;
+}
+
+/* 선택 텍스트 색상 (브랜드 컬러 반영) */
+::selection {
+  background-color: rgba(45, 90, 61, 0.2);
+  color: inherit;
+}

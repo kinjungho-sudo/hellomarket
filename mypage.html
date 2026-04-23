@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>마이페이지 | 헬로우가든마켓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, #1a3d28 0%, #2d5a3d 60%, #4a7c59 100%);
+      color: #fff; padding: 64px 0 56px; text-align: center;
+    }
+    .page-hero h1 { font-size: clamp(26px, 5vw, 44px); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 6px; }
+    .page-hero p { font-size: 15px; color: rgba(255,255,255,0.65); }
+
+    .mypage-section { padding: 48px 0 80px; }
+    .mypage-layout { display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start; }
+    @media (max-width: 900px) { .mypage-layout { grid-template-columns: 1fr; } }
+
+    /* 사이드바 — 회원 정보 카드 */
+    .profile-card {
+      background: #fff; border-radius: var(--radius-md);
+      border: 1.5px solid rgba(0,0,0,0.07); padding: 28px 24px;
+      box-shadow: var(--shadow-sm); text-align: center;
+    }
+    .profile-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--color-bg-section);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; margin: 0 auto 16px; overflow: hidden;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .profile-name { font-size: 17px; font-weight: 800; color: var(--color-text); margin-bottom: 4px; }
+    .profile-email { font-size: 13px; color: var(--color-text-light); margin-bottom: 4px; }
+    .profile-meta { font-size: 12px; color: var(--color-text-light); margin-bottom: 20px; }
+    .provider-badge {
+      display: inline-block; padding: 2px 10px;
+      border-radius: var(--radius-full); font-size: 11px; font-weight: 700;
+      background: #e8f5e9; color: var(--color-primary); margin-bottom: 20px;
+    }
+    .logout-btn {
+      width: 100%; height: 38px;
+      background: none; border: 1.5px solid rgba(0,0,0,0.14);
+      border-radius: var(--radius-sm); font-size: 13px; font-weight: 600;
+      color: var(--color-text-sub); cursor: pointer; transition: all 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--color-danger); color: var(--color-danger); }
+
+    /* 메인 콘텐츠 */
+    .mypage-main { display: flex; flex-direction: column; gap: 0; }
+
+    /* 탭 네비게이션 */
+    .tab-nav {
+      display: flex; gap: 0;
+      border-bottom: 2px solid rgba(0,0,0,0.08);
+      margin-bottom: 32px;
+    }
+    .tab-btn {
+      height: 44px; padding: 0 20px;
+      background: none; border: none; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; font-size: 14px; font-weight: 700;
+      color: var(--color-text-sub); cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--color-primary); }
+    .tab-btn.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+
+    /* 탭 패널 */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* 주문 상태 탭 */
+    .order-status-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .order-status-tab {
+      height: 32px; padding: 0 14px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid rgba(0,0,0,0.12);
+      background: #fff; color: var(--color-text-sub);
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .order-status-tab:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .order-status-tab.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+
+    /* 주문 카드 */
+    .order-card {
+      background: #fff; border-radius: var(--radius-md);
+      border: 1.5px solid rgba(0,0,0,0.07); padding: 20px 22px;
+      margin-bottom: 14px; box-shadow: var(--shadow-sm);
+    }
+    .order-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .order-number { font-size: 13px; font-weight: 700; color: var(--color-text); }
+    .order-date { font-size: 12px; color: var(--color-text-light); }
+    .order-status-badge {
+      display: inline-block; padding: 3px 10px;
+      border-radius: var(--radius-full); font-size: 11px; font-weight: 700;
+    }
+    .status-pending { background: #fff3e0; color: #e65100; }
+    .status-confirmed { background: #e3f2fd; color: #1565c0; }
+    .status-shipping { background: #e8f5e9; color: #2e7d32; }
+    .status-delivered { background: #f3e5f5; color: #6a1b9a; }
+    .status-cancelled { background: #f5f5f5; color: #757575; }
+    .order-items { font-size: 14px; color: var(--color-text-sub); margin-bottom: 10px; }
+    .order-total { font-size: 15px; font-weight: 800; color: var(--color-text); }
+
+    /* 위시리스트 그리드 */
+    .wishlist-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (max-width: 480px) { .wishlist-grid { grid-template-columns: 1fr; } }
+    .wishlist-card {
+      background: #fff; border-radius: var(--radius-md);
+      border: 1.5px solid rgba(0,0,0,0.07);
+      box-shadow: var(--shadow-sm); overflow: hidden;
+    }
+    .wishlist-card-image {
+      width: 100%; aspect-ratio: 4/3;
+      background: #e8f0eb; display: flex;
+      align-items: center; justify-content: center; font-size: 36px; overflow: hidden;
+    }
+    .wishlist-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .wishlist-card-body { padding: 14px; }
+    .wishlist-product-name { font-size: 14px; font-weight: 700; color: var(--color-text); margin-bottom: 6px; }
+    .wishlist-product-price { font-size: 13px; color: var(--color-text-sub); margin-bottom: 12px; }
+    .wishlist-actions { display: flex; gap: 8px; }
+    .wishlist-actions .btn { flex: 1; height: 34px; font-size: 12px; padding: 0; }
+
+    /* 알림 설정 */
+    .notify-form { display: flex; flex-direction: column; gap: 0; }
+    .notify-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+    .notify-item:last-of-type { border-bottom: none; }
+    .notify-label { font-size: 15px; font-weight: 700; color: var(--color-text); }
+    .notify-desc { font-size: 13px; color: var(--color-text-sub); margin-top: 2px; }
+
+    /* 토글 스위치 */
+    .toggle-wrap { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-wrap input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: #ccc;
+      border-radius: var(--radius-full); cursor: pointer; transition: 0.3s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%; transition: 0.3s;
+    }
+    .toggle-wrap input:checked + .toggle-slider { background: var(--color-primary); }
+    .toggle-wrap input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    .notify-save-row { margin-top: 24px; display: flex; justify-content: flex-end; }
+
+    /* 상태 박스 */
+    .state-box { text-align: center; padding: 60px 24px; color: var(--color-text-light); }
+    .state-box .icon { font-size: 40px; margin-bottom: 14px; }
+    .state-box p { font-size: 14px; }
+
+    .cart-badge {
+      position: absolute; top: -6px; right: -8px;
+      background: var(--color-danger); color: #fff;
+      border-radius: var(--radius-full); font-size: 11px; font-weight: 700;
+      min-width: 18px; height: 18px; display: none;
+      align-items: center; justify-content: center; padding: 0 4px;
+    }
+    .mobile-menu.open { display: block; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <nav class="container">
+    <a href="/index.html" class="nav-logo">🌻 Hello Garden Market</a>
+    <ul class="nav-links">
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div id="nav-auth"></div>
+      <a href="/cart.html" class="cart-icon" style="position:relative;">🛒 <span id="cart-count" class="cart-badge">0</span></a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="메뉴"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <ul>
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <h1>마이페이지</h1>
+    <p id="hero-sub">반갑습니다!</p>
+  </div>
+</section>
+
+<section class="mypage-section">
+  <div class="container">
+    <div class="mypage-layout">
+
+      <!-- 사이드바: 회원 정보 -->
+      <aside>
+        <div class="profile-card">
+          <div class="profile-avatar" id="profile-avatar">👤</div>
+          <div class="profile-name" id="profile-name">-</div>
+          <div class="profile-email" id="profile-email">-</div>
+          <div class="profile-meta" id="profile-meta"></div>
+          <div class="provider-badge" id="provider-badge">구글</div>
+          <button class="logout-btn" id="logout-btn">로그아웃</button>
+        </div>
+      </aside>
+
+      <!-- 메인: 탭 -->
+      <div class="mypage-main">
+        <nav class="tab-nav">
+          <button class="tab-btn active" data-tab="orders">주문 내역</button>
+          <button class="tab-btn" data-tab="wishlist">위시리스트</button>
+          <button class="tab-btn" data-tab="notify">알림 설정</button>
+        </nav>
+
+        <!-- 주문 내역 탭 -->
+        <div class="tab-panel active" id="tab-orders">
+          <div class="order-status-tabs">
+            <button class="order-status-tab active" data-status="">전체</button>
+            <button class="order-status-tab" data-status="pending">주문완료</button>
+            <button class="order-status-tab" data-status="shipping">배송중</button>
+            <button class="order-status-tab" data-status="delivered">배송완료</button>
+          </div>
+          <div id="orders-list">
+            <div class="state-box">
+              <div class="icon">📦</div>
+              <p>불러오는 중...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 위시리스트 탭 -->
+        <div class="tab-panel" id="tab-wishlist">
+          <div id="wishlist-list">
+            <div class="state-box">
+              <div class="icon">🌿</div>
+              <p>불러오는 중...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 알림 설정 탭 -->
+        <div class="tab-panel" id="tab-notify">
+          <form class="notify-form" id="notify-form">
+            <div class="notify-item">
+              <div>
+                <div class="notify-label">신상 입고 알림</div>
+                <div class="notify-desc">새로운 식물이 입고되면 알려드려요</div>
+              </div>
+              <label class="toggle-wrap">
+                <input type="checkbox" id="notify-new" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="notify-item">
+              <div>
+                <div class="notify-label">할인 이벤트 알림</div>
+                <div class="notify-desc">할인 이벤트 및 쿠폰 소식을 알려드려요</div>
+              </div>
+              <label class="toggle-wrap">
+                <input type="checkbox" id="notify-sale" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="notify-save-row">
+              <button type="submit" class="btn btn-primary">저장</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="nav-logo" style="margin-bottom:12px;">🌻 Hello Garden Market</div>
+    <div class="footer-links">
+      <a href="/about.html">매장 소개</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">이용약관</a>
+    </div>
+    <p class="footer-copy">© 2026 헬로우가든마켓(건민농원). All rights reserved.</p>
+  </div>
+</footer>
+
+<script type="module">
+  import { updateCartBadge, addToCart } from '/js/utils/cart.js'
+  import { requireLogin, signOut, getSession } from '/js/auth.js'
+  import { getCurrentUser, updateUser, getWishlist, removeFromWishlist } from '/js/api/users.js'
+  import { getOrdersByUser } from '/js/api/orders.js'
+
+  const hamburger = document.getElementById('hamburger')
+  const mobileMenu = document.getElementById('mobile-menu')
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open')
+    hamburger.classList.toggle('open')
+  })
+
+  updateCartBadge()
+
+  // 로그인 필수
+  await requireLogin()
+
+  const { session } = await getSession()
+  if (!session) return
+
+  const userId = session.user.id
+
+  // ===== 회원 정보 표시 =====
+  const userInfo = await getCurrentUser()
+  if (userInfo && !userInfo.error) {
+    const name = userInfo.profile?.name || userInfo.user_metadata?.full_name || '회원'
+    const email = userInfo.email || ''
+    const avatarUrl = userInfo.profile?.avatar_url || userInfo.user_metadata?.avatar_url || ''
+    const provider = userInfo.app_metadata?.provider || 'google'
+    const joinedAt = userInfo.created_at ? new Date(userInfo.created_at).toLocaleDateString('ko-KR') : ''
+
+    document.getElementById('hero-sub').textContent = name + '님, 반갑습니다!'
+    document.getElementById('profile-name').textContent = name
+    document.getElementById('profile-email').textContent = email
+
+    const metaEl = document.getElementById('profile-meta')
+    metaEl.textContent = joinedAt ? '가입일: ' + joinedAt : ''
+
+    const badgeEl = document.getElementById('provider-badge')
+    badgeEl.textContent = provider === 'google' ? '구글 계정' : (provider === 'naver' ? '네이버 계정' : '소셜 계정')
+
+    if (avatarUrl) {
+      const avatarEl = document.getElementById('profile-avatar')
+      const img = document.createElement('img')
+      img.src = avatarUrl
+      img.alt = name
+      avatarEl.textContent = ''
+      avatarEl.appendChild(img)
+    }
+
+    // 알림 설정 초기화
+    if (userInfo.profile) {
+      document.getElementById('notify-new').checked = !!userInfo.profile.notify_new
+      document.getElementById('notify-sale').checked = !!userInfo.profile.notify_sale
+    }
+  }
+
+  // ===== 로그아웃 =====
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await signOut()
+    window.location.href = '/index.html'
+  })
+
+  // ===== 탭 전환 =====
+  const tabBtns = document.querySelectorAll('.tab-btn')
+  const tabPanels = document.querySelectorAll('.tab-panel')
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'))
+      tabPanels.forEach(p => p.classList.remove('active'))
+      btn.classList.add('active')
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active')
+    })
+  })
+
+  // ===== 주문 내역 =====
+  let allOrders = []
+  let currentOrderStatus = ''
+
+  function formatDate(iso) {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`
+  }
+
+  const STATUS_MAP = {
+    pending: { cls: 'status-pending', label: '주문완료' },
+    confirmed: { cls: 'status-confirmed', label: '결제확인' },
+    shipping: { cls: 'status-shipping', label: '배송중' },
+    delivered: { cls: 'status-delivered', label: '배송완료' },
+    cancelled: { cls: 'status-cancelled', label: '취소됨' },
+  }
+
+  function renderOrders(orders) {
+    const list = document.getElementById('orders-list')
+    list.textContent = ''
+
+    const filtered = currentOrderStatus
+      ? orders.filter(o => o.status === currentOrderStatus)
+      : orders
+
+    if (!filtered || filtered.length === 0) {
+      const box = document.createElement('div')
+      box.className = 'state-box'
+      const icon = document.createElement('div')
+      icon.className = 'icon'
+      icon.textContent = '📦'
+      const msg = document.createElement('p')
+      msg.textContent = '주문 내역이 없어요'
+      box.appendChild(icon)
+      box.appendChild(msg)
+      list.appendChild(box)
+      return
+    }
+
+    filtered.forEach(order => {
+      const card = document.createElement('div')
+      card.className = 'order-card'
+
+      const header = document.createElement('div')
+      header.className = 'order-card-header'
+
+      const numDate = document.createElement('div')
+      const numEl = document.createElement('div')
+      numEl.className = 'order-number'
+      numEl.textContent = order.order_number || ('주문 #' + order.id)
+      const dateEl = document.createElement('div')
+      dateEl.className = 'order-date'
+      dateEl.textContent = formatDate(order.created_at)
+      numDate.appendChild(numEl)
+      numDate.appendChild(dateEl)
+
+      const statusInfo = STATUS_MAP[order.status] || { cls: 'status-pending', label: order.status }
+      const statusEl = document.createElement('span')
+      statusEl.className = 'order-status-badge ' + statusInfo.cls
+      statusEl.textContent = statusInfo.label
+
+      header.appendChild(numDate)
+      header.appendChild(statusEl)
+
+      const itemsEl = document.createElement('div')
+      itemsEl.className = 'order-items'
+      const items = order.hgm_order_items || []
+      if (items.length > 0) {
+        const first = items[0].product_name || '상품'
+        itemsEl.textContent = items.length > 1
+          ? first + ' 외 ' + (items.length - 1) + '건'
+          : first
+      } else {
+        itemsEl.textContent = '상품 정보 없음'
+      }
+
+      const totalEl = document.createElement('div')
+      totalEl.className = 'order-total'
+      totalEl.textContent = Number(order.total_amount || 0).toLocaleString('ko-KR') + '원'
+
+      card.appendChild(header)
+      card.appendChild(itemsEl)
+      card.appendChild(totalEl)
+      list.appendChild(card)
+    })
+  }
+
+  // 주문 상태 필터 탭
+  document.querySelectorAll('.order-status-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.order-status-tab').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      currentOrderStatus = btn.dataset.status
+      renderOrders(allOrders)
+    })
+  })
+
+  async function loadOrders() {
+    const result = await getOrdersByUser(userId)
+    if (result && result.error) {
+      const list = document.getElementById('orders-list')
+      list.textContent = ''
+      const box = document.createElement('div')
+      box.className = 'state-box'
+      const icon = document.createElement('div')
+      icon.className = 'icon'
+      icon.textContent = '⚠️'
+      const msg = document.createElement('p')
+      msg.textContent = '주문 내역을 불러오지 못했어요'
+      box.appendChild(icon)
+      box.appendChild(msg)
+      list.appendChild(box)
+      return
+    }
+    allOrders = Array.isArray(result) ? result : []
+    renderOrders(allOrders)
+  }
+
+  // ===== 위시리스트 =====
+  async function loadWishlist() {
+    const result = await getWishlist(userId)
+    const listEl = document.getElementById('wishlist-list')
+    listEl.textContent = ''
+
+    if (result && result.error) {
+      const box = document.createElement('div')
+      box.className = 'state-box'
+      const icon = document.createElement('div')
+      icon.className = 'icon'
+      icon.textContent = '⚠️'
+      const msg = document.createElement('p')
+      msg.textContent = '위시리스트를 불러오지 못했어요'
+      box.appendChild(icon)
+      box.appendChild(msg)
+      listEl.appendChild(box)
+      return
+    }
+
+    const items = Array.isArray(result) ? result : []
+
+    if (items.length === 0) {
+      const box = document.createElement('div')
+      box.className = 'state-box'
+      const icon = document.createElement('div')
+      icon.className = 'icon'
+      icon.textContent = '🌱'
+      const msg = document.createElement('p')
+      msg.textContent = '위시리스트가 비어있어요'
+      box.appendChild(icon)
+      box.appendChild(msg)
+      listEl.appendChild(box)
+      return
+    }
+
+    const grid = document.createElement('div')
+    grid.className = 'wishlist-grid'
+
+    items.forEach(item => {
+      const product = item.hgm_products || {}
+      const card = document.createElement('div')
+      card.className = 'wishlist-card'
+
+      const imgWrap = document.createElement('div')
+      imgWrap.className = 'wishlist-card-image'
+      if (product.image_url) {
+        const img = document.createElement('img')
+        img.src = product.image_url
+        img.alt = product.name || ''
+        img.loading = 'lazy'
+        imgWrap.appendChild(img)
+      } else {
+        imgWrap.textContent = '🌿'
+      }
+
+      const body = document.createElement('div')
+      body.className = 'wishlist-card-body'
+
+      const name = document.createElement('div')
+      name.className = 'wishlist-product-name'
+      name.textContent = product.name || '상품명 없음'
+
+      const price = document.createElement('div')
+      price.className = 'wishlist-product-price'
+      price.textContent = product.price
+        ? Number(product.price).toLocaleString('ko-KR') + '원'
+        : '가격 정보 없음'
+
+      const actions = document.createElement('div')
+      actions.className = 'wishlist-actions'
+
+      const removeBtn = document.createElement('button')
+      removeBtn.className = 'btn btn-outline btn-sm'
+      removeBtn.textContent = '제거'
+      removeBtn.addEventListener('click', async () => {
+        await removeFromWishlist(userId, product.id)
+        loadWishlist()
+      })
+
+      const cartBtn = document.createElement('button')
+      cartBtn.className = 'btn btn-primary btn-sm'
+      cartBtn.textContent = '장바구니'
+      cartBtn.addEventListener('click', () => {
+        if (product.id && product.name && product.price) {
+          addToCart({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            delivery: product.delivery_fee || 3000,
+            imageUrl: product.image_url || '',
+          })
+          alert('장바구니에 담았어요!')
+        }
+      })
+
+      actions.appendChild(removeBtn)
+      actions.appendChild(cartBtn)
+      body.appendChild(name)
+      body.appendChild(price)
+      body.appendChild(actions)
+      card.appendChild(imgWrap)
+      card.appendChild(body)
+      grid.appendChild(card)
+    })
+
+    listEl.appendChild(grid)
+  }
+
+  // ===== 알림 설정 저장 =====
+  document.getElementById('notify-form').addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const notifyNew = document.getElementById('notify-new').checked
+    const notifySale = document.getElementById('notify-sale').checked
+
+    const submitBtn = e.target.querySelector('[type="submit"]')
+    submitBtn.disabled = true
+    submitBtn.textContent = '저장 중...'
+
+    const result = await updateUser(userId, {
+      notify_new: notifyNew,
+      notify_sale: notifySale,
+    })
+
+    submitBtn.disabled = false
+    submitBtn.textContent = '저장'
+
+    if (result && result.error) {
+      alert('저장에 실패했어요. 다시 시도해주세요.')
+    } else {
+      alert('알림 설정이 저장되었어요!')
+    }
+  })
+
+  // ===== 초기 로드 =====
+  loadOrders()
+  loadWishlist()
+
+  // 헤더 auth 업데이트
+  const { updateNavAuth } = await import('/js/auth.js')
+  updateNavAuth()
+</script>
+</body>
+</html>

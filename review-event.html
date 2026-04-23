@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>리뷰 이벤트 | 헬로우가든마켓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <style>
+    /* 이벤트 배너 */
+    .event-banner {
+      background: linear-gradient(135deg, #1a3d28 0%, #2d5a3d 60%, #4a7c59 100%);
+      color: #fff; padding: 64px 0 56px; text-align: center;
+    }
+    .event-banner h1 { font-size: clamp(26px, 5vw, 44px); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 12px; }
+    .event-banner .highlight {
+      display: inline-block;
+      background: var(--color-accent); color: var(--color-text);
+      border-radius: var(--radius-sm); padding: 6px 16px;
+      font-size: 15px; font-weight: 800; margin-bottom: 12px;
+    }
+    .event-banner p { font-size: 15px; color: rgba(255,255,255,0.72); }
+
+    .reviews-section { padding: 56px 0 80px; }
+
+    /* 액션 바 */
+    .reviews-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px; flex-wrap: wrap; gap: 12px;
+    }
+
+    /* 정렬 버튼 */
+    .sort-buttons { display: flex; gap: 8px; }
+    .sort-btn {
+      height: 34px; padding: 0 16px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid rgba(0,0,0,0.12);
+      background: #fff; color: var(--color-text-sub);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .sort-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .sort-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+
+    /* 리뷰 그리드 */
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 900px) { .reviews-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .reviews-grid { grid-template-columns: 1fr; } }
+
+    /* 리뷰 카드 */
+    .review-card {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 1.5px solid rgba(0,0,0,0.07);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .review-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+
+    .review-card-image {
+      width: 100%; aspect-ratio: 4/3;
+      background: linear-gradient(135deg, #e8f0eb 0%, #d0e8d8 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; overflow: hidden;
+    }
+    .review-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .review-card-body { padding: 14px 16px 16px; }
+    .review-card-title { font-size: 15px; font-weight: 700; color: var(--color-text); margin-bottom: 8px; line-height: 1.4; }
+    .review-card-meta { display: flex; align-items: center; justify-content: space-between; }
+    .review-card-author { font-size: 12px; color: var(--color-text-light); }
+    .review-like { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-text-light); }
+    .review-like .heart { font-size: 14px; }
+
+    /* 상태 박스 */
+    .state-box { text-align: center; padding: 80px 24px; color: var(--color-text-light); }
+    .state-box .icon { font-size: 48px; margin-bottom: 16px; }
+    .state-box p { font-size: 15px; }
+
+    /* 모달 */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 200;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: var(--radius-lg);
+      max-width: 600px; width: 100%; max-height: 88vh;
+      overflow-y: auto; position: relative; box-shadow: var(--shadow-lg);
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 18px;
+      background: none; border: none; font-size: 24px;
+      cursor: pointer; color: var(--color-text-sub); line-height: 1; z-index: 10;
+    }
+    .modal-close:hover { color: var(--color-text); }
+    .modal-image {
+      width: 100%; aspect-ratio: 4/3;
+      background: linear-gradient(135deg, #e8f0eb 0%, #d0e8d8 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 64px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; overflow: hidden;
+    }
+    .modal-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .modal-body { padding: 24px 28px 28px; }
+    .modal-meta { font-size: 12px; color: var(--color-text-light); margin-bottom: 8px; }
+    .modal-title { font-size: 20px; font-weight: 800; color: var(--color-text); margin-bottom: 14px; line-height: 1.4; }
+    .modal-content { font-size: 15px; color: var(--color-text-sub); line-height: 1.75; white-space: pre-line; margin-bottom: 16px; }
+    .modal-product-tag {
+      display: inline-block; padding: 4px 12px;
+      background: #e8f5e9; color: var(--color-primary);
+      border-radius: var(--radius-full); font-size: 12px; font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .modal-like-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .like-btn {
+      display: flex; align-items: center; gap: 8px;
+      height: 40px; padding: 0 20px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid rgba(0,0,0,0.12);
+      background: #fff; cursor: pointer; font-size: 14px; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .like-btn:hover { border-color: #e91e63; color: #e91e63; }
+    .like-btn.liked { background: #fce4ec; border-color: #e91e63; color: #e91e63; }
+
+    /* 글쓰기 폼 */
+    .write-form { display: flex; flex-direction: column; gap: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--color-text); }
+    .form-input {
+      width: 100%; height: 40px; padding: 0 14px;
+      border: 1.5px solid rgba(0,0,0,0.14); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: var(--font-main); transition: border-color 0.2s;
+    }
+    .form-input:focus { outline: none; border-color: var(--color-primary); }
+    .form-textarea {
+      width: 100%; height: 140px; padding: 12px 14px;
+      border: 1.5px solid rgba(0,0,0,0.14); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: var(--font-main); resize: vertical; transition: border-color 0.2s;
+    }
+    .form-textarea:focus { outline: none; border-color: var(--color-primary); }
+    .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-header { padding: 24px 28px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .modal-header .modal-close { position: static; margin: 0; }
+    .modal-header-title { font-size: 20px; font-weight: 800; color: var(--color-text); }
+
+    .cart-badge {
+      position: absolute; top: -6px; right: -8px;
+      background: var(--color-danger); color: #fff;
+      border-radius: var(--radius-full); font-size: 11px; font-weight: 700;
+      min-width: 18px; height: 18px; display: none;
+      align-items: center; justify-content: center; padding: 0 4px;
+    }
+    .mobile-menu.open { display: block; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <nav class="container">
+    <a href="/index.html" class="nav-logo">🌻 Hello Garden Market</a>
+    <ul class="nav-links">
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div id="nav-auth"></div>
+      <a href="/cart.html" class="cart-icon" style="position:relative;">🛒 <span id="cart-count" class="cart-badge">0</span></a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="메뉴"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <ul>
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+  </div>
+</header>
+
+<!-- 이벤트 배너 -->
+<section class="event-banner">
+  <div class="container">
+    <div class="highlight">🎁 리뷰 이벤트 진행 중</div>
+    <h1>리뷰 작성하고<br>5% 할인 쿠폰 받기</h1>
+    <p>구매하신 식물 리뷰를 작성하시면 다음 구매 5% 할인 쿠폰을 드려요</p>
+  </div>
+</section>
+
+<section class="reviews-section">
+  <div class="container">
+    <div class="reviews-topbar">
+      <div class="sort-buttons">
+        <button class="sort-btn active" data-order="created_at">최신순</button>
+        <button class="sort-btn" data-order="like_count">인기순</button>
+      </div>
+      <button class="btn btn-primary btn-sm" id="btn-write-review">리뷰 작성</button>
+    </div>
+
+    <div id="reviews-container">
+      <div class="state-box">
+        <div class="icon">🌿</div>
+        <p>불러오는 중...</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 리뷰 상세 모달 -->
+<div class="modal-overlay" id="detail-overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <button class="modal-close" id="detail-close" aria-label="닫기">×</button>
+    <div class="modal-image" id="modal-image">🌿</div>
+    <div class="modal-body">
+      <div class="modal-meta" id="modal-meta"></div>
+      <h2 class="modal-title" id="modal-title"></h2>
+      <div class="modal-content" id="modal-content"></div>
+      <div id="modal-product-tag-wrap"></div>
+      <div class="modal-like-row">
+        <button class="like-btn" id="like-btn">
+          <span id="like-heart">🤍</span>
+          <span id="like-count">0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 리뷰 작성 모달 -->
+<div class="modal-overlay" id="write-overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-header-title">리뷰 작성</span>
+      <button class="modal-close" id="write-close" aria-label="닫기">×</button>
+    </div>
+    <div class="modal-body">
+      <form class="write-form" id="write-form">
+        <div class="form-group">
+          <label for="write-title">제목</label>
+          <input type="text" id="write-title" class="form-input" placeholder="리뷰 제목을 입력해주세요" maxlength="100" required />
+        </div>
+        <div class="form-group">
+          <label for="write-content">내용</label>
+          <textarea id="write-content" class="form-textarea" placeholder="식물을 키우면서 느낀 점을 자유롭게 작성해주세요" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="write-image">이미지 (선택)</label>
+          <input type="file" id="write-image" class="form-input" accept="image/*" style="padding: 8px 14px; height: auto;" />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline btn-sm" id="write-cancel">취소</button>
+          <button type="submit" class="btn btn-primary btn-sm">등록</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="nav-logo" style="margin-bottom:12px;">🌻 Hello Garden Market</div>
+    <div class="footer-links">
+      <a href="/about.html">매장 소개</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">이용약관</a>
+    </div>
+    <p class="footer-copy">© 2026 헬로우가든마켓(건민농원). All rights reserved.</p>
+  </div>
+</footer>
+
+<script type="module">
+  import { updateNavAuth, getSession } from '/js/auth.js'
+  import { updateCartBadge } from '/js/utils/cart.js'
+  import { getReviews, toggleReviewLike } from '/js/api/reviews.js'
+
+  const hamburger = document.getElementById('hamburger')
+  const mobileMenu = document.getElementById('mobile-menu')
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open')
+    hamburger.classList.toggle('open')
+  })
+
+  updateNavAuth()
+  updateCartBadge()
+
+  let currentSession = null
+  let currentOrderBy = 'created_at'
+  let currentReview = null
+
+  getSession().then(({ session }) => { currentSession = session })
+
+  function formatDate(iso) {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`
+  }
+
+  function anonymize(name) {
+    if (!name) return '익명'
+    return name.slice(0, 1) + '**'
+  }
+
+  const PLANT_EMOJIS = ['🌿', '🪴', '🌱', '🌸', '🌺', '🌻', '🍀', '🌾']
+  function randomEmoji() { return PLANT_EMOJIS[Math.floor(Math.random() * PLANT_EMOJIS.length)] }
+
+  // ===== 카드 생성 =====
+  function createReviewCard(review) {
+    const card = document.createElement('div')
+    card.className = 'review-card'
+
+    const imgWrap = document.createElement('div')
+    imgWrap.className = 'review-card-image'
+    const images = review.images || []
+    if (images.length > 0) {
+      const img = document.createElement('img')
+      img.src = images[0]
+      img.alt = review.title || ''
+      img.loading = 'lazy'
+      imgWrap.appendChild(img)
+    } else {
+      imgWrap.textContent = randomEmoji()
+    }
+
+    const body = document.createElement('div')
+    body.className = 'review-card-body'
+
+    const title = document.createElement('div')
+    title.className = 'review-card-title'
+    title.textContent = review.title || '리뷰'
+
+    const meta = document.createElement('div')
+    meta.className = 'review-card-meta'
+
+    const author = document.createElement('span')
+    author.className = 'review-card-author'
+    author.textContent = anonymize(review.hgm_users?.name) + ' · ' + formatDate(review.created_at)
+
+    const likeEl = document.createElement('span')
+    likeEl.className = 'review-like'
+    const heart = document.createElement('span')
+    heart.className = 'heart'
+    heart.textContent = '🤍'
+    const likeCount = document.createElement('span')
+    likeCount.textContent = review.like_count || 0
+    likeEl.appendChild(heart)
+    likeEl.appendChild(likeCount)
+
+    meta.appendChild(author)
+    meta.appendChild(likeEl)
+    body.appendChild(title)
+    body.appendChild(meta)
+    card.appendChild(imgWrap)
+    card.appendChild(body)
+
+    card.addEventListener('click', () => openDetail(review))
+    return card
+  }
+
+  function renderReviews(reviews) {
+    const container = document.getElementById('reviews-container')
+    container.textContent = ''
+
+    if (!reviews || reviews.length === 0) {
+      const box = document.createElement('div')
+      box.className = 'state-box'
+      const icon = document.createElement('div')
+      icon.className = 'icon'
+      icon.textContent = '🌿'
+      const msg = document.createElement('p')
+      msg.textContent = '아직 리뷰가 없어요. 첫 번째 리뷰를 작성해보세요!'
+      box.appendChild(icon)
+      box.appendChild(msg)
+      container.appendChild(box)
+      return
+    }
+
+    const grid = document.createElement('div')
+    grid.className = 'reviews-grid'
+    reviews.forEach(r => grid.appendChild(createReviewCard(r)))
+    container.appendChild(grid)
+  }
+
+  // ===== 상세 모달 =====
+  function openDetail(review) {
+    currentReview = review
+    const overlay = document.getElementById('detail-overlay')
+    const imageEl = document.getElementById('modal-image')
+    const metaEl = document.getElementById('modal-meta')
+    const titleEl = document.getElementById('modal-title')
+    const contentEl = document.getElementById('modal-content')
+    const tagWrap = document.getElementById('modal-product-tag-wrap')
+    const likeCountEl = document.getElementById('like-count')
+    const likeHeart = document.getElementById('like-heart')
+
+    imageEl.textContent = ''
+    const images = review.images || []
+    if (images.length > 0) {
+      const img = document.createElement('img')
+      img.src = images[0]
+      img.alt = review.title || ''
+      imageEl.appendChild(img)
+    } else {
+      imageEl.textContent = randomEmoji()
+    }
+
+    metaEl.textContent = anonymize(review.hgm_users?.name) + ' · ' + formatDate(review.created_at)
+    titleEl.textContent = review.title || '리뷰'
+    contentEl.textContent = review.content || ''
+
+    tagWrap.textContent = ''
+    if (review.hgm_products?.name) {
+      const tag = document.createElement('div')
+      tag.className = 'modal-product-tag'
+      tag.textContent = '🪴 ' + review.hgm_products.name
+      tagWrap.appendChild(tag)
+    }
+
+    likeCountEl.textContent = review.like_count || 0
+    likeHeart.textContent = '🤍'
+
+    overlay.classList.add('open')
+    document.body.style.overflow = 'hidden'
+  }
+
+  function closeDetail() {
+    document.getElementById('detail-overlay').classList.remove('open')
+    document.body.style.overflow = ''
+    currentReview = null
+  }
+
+  document.getElementById('detail-close').addEventListener('click', closeDetail)
+  document.getElementById('detail-overlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeDetail()
+  })
+
+  // 좋아요 버튼
+  document.getElementById('like-btn').addEventListener('click', async () => {
+    if (!currentSession) {
+      alert('좋아요는 로그인 후 이용하실 수 있어요.')
+      return
+    }
+    if (!currentReview) return
+
+    const result = await toggleReviewLike(currentReview.id, currentSession.user.id)
+    if (result && !result.error) {
+      const likeCountEl = document.getElementById('like-count')
+      const likeHeart = document.getElementById('like-heart')
+      const likeBtn = document.getElementById('like-btn')
+
+      const current = parseInt(likeCountEl.textContent) || 0
+      if (result.liked) {
+        likeCountEl.textContent = current + 1
+        likeHeart.textContent = '❤️'
+        likeBtn.classList.add('liked')
+        currentReview.like_count = current + 1
+      } else {
+        likeCountEl.textContent = Math.max(0, current - 1)
+        likeHeart.textContent = '🤍'
+        likeBtn.classList.remove('liked')
+        currentReview.like_count = Math.max(0, current - 1)
+      }
+    }
+  })
+
+  // ===== 정렬 버튼 =====
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      currentOrderBy = btn.dataset.order
+      loadReviews()
+    })
+  })
+
+  // ===== 리뷰 작성 =====
+  document.getElementById('btn-write-review').addEventListener('click', () => {
+    if (!currentSession) {
+      alert('리뷰 작성은 로그인 후 이용하실 수 있어요.')
+      window.location.href = '/login.html'
+      return
+    }
+    document.getElementById('write-overlay').classList.add('open')
+    document.body.style.overflow = 'hidden'
+  })
+
+  function closeWrite() {
+    document.getElementById('write-overlay').classList.remove('open')
+    document.getElementById('write-form').reset()
+    document.body.style.overflow = ''
+  }
+
+  document.getElementById('write-close').addEventListener('click', closeWrite)
+  document.getElementById('write-cancel').addEventListener('click', closeWrite)
+  document.getElementById('write-overlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeWrite()
+  })
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { closeDetail(); closeWrite() }
+  })
+
+  document.getElementById('write-form').addEventListener('submit', (e) => {
+    e.preventDefault()
+    alert('리뷰 등록을 위해 구매 확인이 필요합니다. 마이페이지 주문 내역에서 리뷰를 작성해주세요.')
+    closeWrite()
+  })
+
+  // ===== 데이터 로드 =====
+  async function loadReviews() {
+    const result = await getReviews({ orderBy: currentOrderBy, ascending: false, limit: 24 })
+
+    if (result && result.error) {
+      const container = document.getElementById('reviews-container')
+      container.textContent = ''
+      const box = document.createElement('div')
+      box.className = 'state-box'
+      const icon = document.createElement('div')
+      icon.className = 'icon'
+      icon.textContent = '⚠️'
+      const msg = document.createElement('p')
+      msg.textContent = '리뷰를 불러오지 못했어요. 잠시 후 다시 시도해주세요.'
+      box.appendChild(icon)
+      box.appendChild(msg)
+      container.appendChild(box)
+      return
+    }
+
+    renderReviews(result.data || [])
+  }
+
+  loadReviews()
+</script>
+</body>
+</html>

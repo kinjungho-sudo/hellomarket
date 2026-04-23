@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>대시보드 — 헬로우가든마켓 관리자</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <!-- 사이드바 오버레이 (모바일) -->
+  <div class="admin-sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- 사이드바 -->
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-logo">🌻 HGM 관리자</div>
+    <div class="admin-sidebar-label">메인</div>
+    <a href="index.html" class="active">📊 대시보드</a>
+    <div class="admin-sidebar-label">콘텐츠</div>
+    <a href="products.html">🌿 상품 관리</a>
+    <a href="gallery.html">🖼️ 갤러리 관리</a>
+    <a href="posts.html">📰 입고 소식</a>
+    <div class="admin-sidebar-label">고객</div>
+    <a href="orders.html">📦 주문 관리</a>
+    <a href="qna.html">💬 묻고 답하기</a>
+    <a href="reviews.html">⭐ 리뷰 이벤트</a>
+    <div class="admin-sidebar-label">시스템</div>
+    <a href="settings.html">⚙️ 알림 설정</a>
+    <a href="../index.html">← 사이트로 이동</a>
+  </aside>
+
+  <!-- 메인 영역 -->
+  <div class="admin-main">
+    <!-- 헤더 -->
+    <header class="admin-header">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="admin-menu-toggle" id="menu-toggle">☰</button>
+        <span class="admin-header-title">대시보드</span>
+      </div>
+      <div class="admin-header-user">
+        <span id="admin-user-name">관리자</span>
+        <button class="btn btn-ghost" id="btn-logout" style="font-size:13px;">로그아웃</button>
+      </div>
+    </header>
+
+    <!-- 콘텐츠 -->
+    <div class="admin-content">
+
+      <!-- KPI 카드 (오늘) -->
+      <div class="stats-grid" id="stats-today">
+        <div class="stat-card">
+          <div class="stat-card__label">오늘 주문</div>
+          <div class="stat-card__value" id="today-orders">—</div>
+          <div class="stat-card__change" id="today-orders-change"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">오늘 매출</div>
+          <div class="stat-card__value" id="today-revenue">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">이번 달 주문</div>
+          <div class="stat-card__value" id="month-orders">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">이번 달 매출</div>
+          <div class="stat-card__value" id="month-revenue">—</div>
+        </div>
+      </div>
+
+      <!-- KPI 카드 (회원/방문자) -->
+      <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-card">
+          <div class="stat-card__label">총 회원 수</div>
+          <div class="stat-card__value" id="total-users">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">오늘 방문자</div>
+          <div class="stat-card__value" id="today-visitors">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">미답변 Q&A</div>
+          <div class="stat-card__value" id="unanswered-qna" style="color:var(--color-warning);">—</div>
+        </div>
+      </div>
+
+      <!-- 차트 섹션 -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
+        <!-- 시간대별 주문 -->
+        <div class="admin-card" style="margin-bottom:0;">
+          <div class="admin-card-title">시간대별 오늘 주문</div>
+          <canvas id="chart-hourly" height="200"></canvas>
+        </div>
+        <!-- 카테고리별 판매량 -->
+        <div class="admin-card" style="margin-bottom:0;">
+          <div class="admin-card-title">카테고리별 판매량</div>
+          <canvas id="chart-category" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- 최근 7일 매출 차트 -->
+      <div class="admin-card">
+        <div class="admin-card-title">최근 7일 매출 추이</div>
+        <canvas id="chart-weekly" height="100"></canvas>
+      </div>
+
+      <!-- 최근 주문 테이블 -->
+      <div class="admin-card">
+        <div class="admin-card-title">최근 주문 (10건)</div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>주문번호</th>
+                <th>주문자</th>
+                <th>금액</th>
+                <th>상태</th>
+                <th>주문시각</th>
+              </tr>
+            </thead>
+            <tbody id="recent-orders-body">
+              <tr><td colspan="5" style="text-align:center; color:var(--color-text-light); padding:32px;">로딩 중...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 품절/품절 임박 상품 -->
+      <div class="admin-card">
+        <div class="admin-card-title">⚠️ 품절 / 시즌한정 상품</div>
+        <div id="out-of-stock-list" style="color:var(--color-text-light);">로딩 중...</div>
+      </div>
+
+    </div><!-- /.admin-content -->
+  </div><!-- /.admin-main -->
+</div><!-- /.admin-layout -->
+
+<script type="module" src="../js/pages/admin/dashboard.js"></script>
+</body>
+</html>

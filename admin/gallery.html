@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>갤러리 관리 — 헬로우가든마켓 관리자</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <style>
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#fff; border-radius:var(--radius-lg); padding:32px; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; }
+    .modal-title { font-size:18px; font-weight:800; margin-bottom:24px; }
+    .modal-footer { display:flex; gap:12px; justify-content:flex-end; margin-top:24px; padding-top:20px; border-top:1px solid #eee; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .img-placeholder { width:80px; height:80px; background:#f5f5f5; border-radius:var(--radius-sm); border:1px dashed #ddd; display:flex; align-items:center; justify-content:center; font-size:24px; margin-top:8px; }
+    .gallery-thumb { width:50px; height:50px; object-fit:cover; border-radius:var(--radius-sm); }
+    .filter-bar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
+    .filter-bar select, .filter-bar input { height:36px; padding:0 10px; border:1.5px solid #ddd; border-radius:var(--radius-sm); font-size:13px; }
+  </style>
+</head>
+<body>
+<div class="admin-layout">
+  <div class="admin-sidebar-overlay" id="sidebar-overlay"></div>
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-logo">🌻 HGM 관리자</div>
+    <div class="admin-sidebar-label">메인</div>
+    <a href="index.html">📊 대시보드</a>
+    <div class="admin-sidebar-label">콘텐츠</div>
+    <a href="products.html">🌿 상품 관리</a>
+    <a href="gallery.html" class="active">🖼️ 갤러리 관리</a>
+    <a href="posts.html">📰 입고 소식</a>
+    <div class="admin-sidebar-label">고객</div>
+    <a href="orders.html">📦 주문 관리</a>
+    <a href="qna.html">💬 묻고 답하기</a>
+    <a href="reviews.html">⭐ 리뷰 이벤트</a>
+    <div class="admin-sidebar-label">시스템</div>
+    <a href="settings.html">⚙️ 알림 설정</a>
+    <a href="../index.html">← 사이트로 이동</a>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-header">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="admin-menu-toggle" id="menu-toggle">☰</button>
+        <span class="admin-header-title">갤러리 관리</span>
+      </div>
+      <div class="admin-header-user">
+        <button class="btn btn-primary" id="btn-add-gallery" style="font-size:13px;">+ 갤러리 등록</button>
+        <button class="btn btn-ghost" id="btn-logout" style="font-size:13px;">로그아웃</button>
+      </div>
+    </header>
+
+    <div class="admin-content">
+      <div class="filter-bar">
+        <select id="filter-category">
+          <option value="">전체 카테고리</option>
+          <option>나무류</option><option>관엽식물</option><option>꽃나무</option>
+          <option>공중식물</option><option>야자류</option><option>희귀식물</option>
+          <option>대나무류</option><option>행잉식물</option><option>과실수</option>
+          <option>침엽수</option>
+        </select>
+        <select id="filter-status">
+          <option value="">전체 상태</option>
+          <option value="판매중">판매중</option>
+          <option value="품절">품절</option>
+          <option value="시즌한정">시즌한정</option>
+        </select>
+        <button class="btn btn-ghost" id="btn-filter" style="height:36px; font-size:13px;">검색</button>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width:60px;">이미지</th>
+              <th>식물명</th>
+              <th>카테고리</th>
+              <th>상태</th>
+              <th>가격</th>
+              <th>가격 공개</th>
+              <th>발행</th>
+              <th style="width:100px;">관리</th>
+            </tr>
+          </thead>
+          <tbody id="gallery-body">
+            <tr><td colspan="8" style="text-align:center; padding:40px; color:var(--color-text-light);">로딩 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="pagination" style="display:flex; gap:8px; justify-content:center; margin-top:20px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 갤러리 등록/수정 모달 -->
+<div class="modal-overlay" id="gallery-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">갤러리 등록</div>
+    <form id="gallery-form">
+      <input type="hidden" id="gallery-id">
+
+      <div class="form-row">
+        <div class="admin-form-group">
+          <label>식물명 *</label>
+          <input type="text" class="admin-input" id="g-name" required placeholder="예: 올리브나무 대품">
+        </div>
+        <div class="admin-form-group">
+          <label>카테고리</label>
+          <select class="admin-input" id="g-category">
+            <option value="">선택</option>
+            <option>나무류</option><option>관엽식물</option><option>꽃나무</option>
+            <option>공중식물</option><option>야자류</option><option>희귀식물</option>
+            <option>대나무류</option><option>행잉식물</option><option>과실수</option>
+            <option>침엽수</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="admin-form-group">
+          <label>상태</label>
+          <select class="admin-input" id="g-status">
+            <option value="판매중">판매중</option>
+            <option value="품절">품절</option>
+            <option value="시즌한정">시즌한정</option>
+          </select>
+        </div>
+        <div class="admin-form-group">
+          <label>가격 (원)</label>
+          <input type="number" class="admin-input" id="g-price" placeholder="빈칸이면 미표시">
+        </div>
+      </div>
+
+      <div class="admin-form-group">
+        <label>설명</label>
+        <textarea class="admin-textarea" id="g-description" rows="3"></textarea>
+      </div>
+
+      <div class="admin-form-group">
+        <label>갤러리 이미지</label>
+        <input type="file" id="g-image-file" accept="image/*" style="display:block; margin-bottom:8px;">
+        <div id="g-image-preview" class="img-placeholder">📷</div>
+        <input type="hidden" id="g-image-url">
+      </div>
+
+      <div class="admin-form-group">
+        <label>옵션</label>
+        <div style="display:flex; gap:16px;">
+          <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer;">
+            <input type="checkbox" id="g-show-price"> 가격 공개
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer;">
+            <input type="checkbox" id="g-is-published" checked> 발행
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="btn-modal-cancel">취소</button>
+        <button type="submit" class="btn btn-primary">저장</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 삭제 확인 모달 -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal-box" style="max-width:400px;">
+    <div class="modal-title">갤러리 삭제</div>
+    <p style="color:var(--color-text-sub); margin-bottom:24px;">이 갤러리 항목을 삭제하시겠어요?</p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="btn-delete-cancel">취소</button>
+      <button class="btn" id="btn-delete-confirm" style="background:var(--color-danger); color:#fff;">삭제</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../js/pages/admin/gallery.js"></script>
+</body>
+</html>
