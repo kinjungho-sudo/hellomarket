@@ -37,7 +37,10 @@ export async function createOrder(userId, items, receiverInfo) {
       .insert([
         {
           order_number: orderNumber,
-          user_id: userId,
+          user_id: userId || null,
+          is_guest: !userId,
+          orderer_name: receiverInfo.ordererName || receiverInfo.name,
+          orderer_email: receiverInfo.ordererEmail || null,
           total_price: totalAmount,
           status: '주문완료',
           receiver_name: receiverInfo.name,
