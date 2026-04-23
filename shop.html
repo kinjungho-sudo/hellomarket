@@ -469,11 +469,12 @@
     })
   </script>
   <script type="module">
-    import { updateNavAuth } from '/js/auth.js'
+    import { updateNavAuth, getSession } from '/js/auth.js'
     import { updateCartBadge, addToCart } from '/js/utils/cart.js'
     import { supabase } from '/js/config.js'
     import { trackEvent } from '/js/api/analytics.js'
     import { getSessionId } from '/js/utils/session.js'
+    import { addToWishlist, removeFromWishlist, getWishlist } from '/js/api/users.js'
 
     // 햄버거 메뉴
     document.getElementById('hamburger').addEventListener('click', () => {
@@ -500,6 +501,43 @@
       searchQuery: '',   // 검색어
       offset: 0,
       loading: false,
+    }
+
+    // ---- 세션 / 위시리스트 상태 ----
+    let currentUserId = null
+    let wishlistSet = new Set()  // 찜한 product_id 집합
+
+    async function initSessionAndWishlist() {
+      const { session } = await getSession()
+      if (session?.user) {
+        currentUserId = session.user.id
+        const data = await getWishlist(currentUserId)
+        if (Array.isArray(data)) {
+          wishlistSet = new Set(data.map(w => w.product_id))
+        }
+      }
+    }
+
+    // 별점 평균 캐시 { productId: { avg, count } }
+    let ratingCache = {}
+
+    async function loadRatings(productIds) {
+      if (!productIds.length) return
+      const { data } = await supabase
+        .from('hgm_reviews')
+        .select('product_id, rating')
+        .in('product_id', productIds)
+        .eq('is_published', true)
+      if (!data) return
+      const map = {}
+      data.forEach(r => {
+        if (!map[r.product_id]) map[r.product_id] = { sum: 0, count: 0 }
+        map[r.product_id].sum += r.rating || 0
+        map[r.product_id].count += 1
+      })
+      Object.entries(map).forEach(([id, v]) => {
+        ratingCache[id] = { avg: v.sum / v.count, count: v.count }
+      })
     }
 
     // ---- 토스트 ----
@@ -619,14 +657,30 @@
 
       // 위시리스트
       const wishBtn = document.createElement('button')
-      wishBtn.className = 'wishlist-btn'
-      wishBtn.setAttribute('aria-label', '위시리스트')
-      wishBtn.textContent = '♡'
-      wishBtn.addEventListener('click', (e) => {
+      wishBtn.className = 'wishlist-btn' + (wishlistSet.has(p.id) ? ' active' : '')
+      wishBtn.setAttribute('aria-label', '찜하기')
+      wishBtn.textContent = wishlistSet.has(p.id) ? '♥' : '♡'
+      wishBtn.addEventListener('click', async (e) => {
         e.stopPropagation()
-        const on = wishBtn.classList.toggle('active')
-        wishBtn.textContent = on ? '♥' : '♡'
-        showToast(on ? '위시리스트에 추가했어요 ♥' : '위시리스트에서 제거했어요')
+        if (!currentUserId) {
+          showToast('로그인 후 찜하기를 이용할 수 있어요', '')
+          return
+        }
+        const isOn = wishlistSet.has(p.id)
+        // 즉시 UI 반영 (낙관적 업데이트)
+        if (isOn) {
+          wishlistSet.delete(p.id)
+          wishBtn.classList.remove('active')
+          wishBtn.textContent = '♡'
+          removeFromWishlist(currentUserId, p.id)
+          showToast('찜 목록에서 제거했어요', '')
+        } else {
+          wishlistSet.add(p.id)
+          wishBtn.classList.add('active')
+          wishBtn.textContent = '♥'
+          addToWishlist(currentUserId, p.id)
+          showToast('찜 목록에 추가했어요 ♥', 'success')
+        }
       })
       card.appendChild(wishBtn)
 
@@ -668,6 +722,32 @@
       nameEl.className = 'product-card__name'
       nameEl.textContent = p.name
       body.appendChild(nameEl)
+
+      // 별점 평균
+      const ratingInfo = ratingCache[p.id]
+      if (ratingInfo && ratingInfo.count > 0) {
+        const starEl = document.createElement('div')
+        starEl.className = 'product-card__rating'
+        const avg = ratingInfo.avg
+        const filled = Math.round(avg)
+        const filledSpan = document.createElement('span')
+        filledSpan.className = 'star-filled'
+        filledSpan.textContent = '★'.repeat(filled)
+        const emptySpan = document.createElement('span')
+        emptySpan.className = 'star-empty'
+        emptySpan.textContent = '☆'.repeat(5 - filled)
+        const numSpan = document.createElement('span')
+        numSpan.className = 'rating-num'
+        numSpan.textContent = avg.toFixed(1)
+        const cntSpan = document.createElement('span')
+        cntSpan.className = 'rating-cnt'
+        cntSpan.textContent = '(' + ratingInfo.count + ')'
+        starEl.appendChild(filledSpan)
+        starEl.appendChild(emptySpan)
+        starEl.appendChild(numSpan)
+        starEl.appendChild(cntSpan)
+        body.appendChild(starEl)
+      }
 
       const priceWrap = document.createElement('div')
       priceWrap.style.cssText = 'display:flex;align-items:baseline;gap:6px;'
@@ -772,6 +852,10 @@
           countEl.appendChild(strong)
           countEl.appendChild(document.createTextNode('개'))
         }
+
+        // 별점 데이터 로드 (캐시 없는 것만)
+        const uncached = data.map(p => p.id).filter(id => !(id in ratingCache))
+        if (uncached.length) await loadRatings(uncached)
 
         renderProducts(data, append)
       } catch (err) {
@@ -930,7 +1014,7 @@
     })
 
     // ---- 초기 로드 ----
-    loadProducts(false)
+    initSessionAndWishlist().then(() => loadProducts(false))
     trackEvent({ eventType: 'page_view', page: 'shop', sessionId: getSessionId() })
   </script>
 </body>

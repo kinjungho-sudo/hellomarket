@@ -267,7 +267,8 @@
     <!-- 탭 네비게이션 -->
     <div class="tab-nav">
       <button class="tab-btn active" data-tab="orders">📦 주문 내역</button>
-      <button class="tab-btn" data-tab="wishlist">♥ 위시리스트</button>
+      <button class="tab-btn" data-tab="wishlist">♥ 찜 목록</button>
+      <button class="tab-btn" data-tab="reviews">⭐ 내 리뷰</button>
       <button class="tab-btn" data-tab="notify">🔔 알림 설정</button>
     </div>
 
@@ -290,6 +291,13 @@
     <div class="tab-panel" id="tab-wishlist">
       <div id="wishlist-list">
         <div class="empty-state"><div class="empty-icon">🌿</div><p>불러오는 중...</p></div>
+      </div>
+    </div>
+
+    <!-- 리뷰 탭 -->
+    <div class="tab-panel" id="tab-reviews">
+      <div id="reviews-list">
+        <div class="empty-state"><div class="empty-icon">⭐</div><p>불러오는 중...</p></div>
       </div>
     </div>
 
@@ -344,6 +352,7 @@
   import { requireLogin, signOut, getSession, updateNavAuth } from '/js/auth.js'
   import { getCurrentUser, updateUser, getWishlist, removeFromWishlist } from '/js/api/users.js'
   import { getOrdersByUser } from '/js/api/orders.js'
+  import { supabase } from '/js/config.js'
 
   const hamburger = document.getElementById('hamburger')
   const mobileMenu = document.getElementById('mobile-menu')
@@ -615,9 +624,168 @@
     alert(result && result.error ? '저장에 실패했어요. 다시 시도해주세요.' : '알림 설정이 저장되었어요!')
   })
 
+  // ── 리뷰 ──
+
+  // 별점 렌더 헬퍼
+  function renderStars(rating) {
+    const r = Math.max(0, Math.min(5, rating || 0))
+    const wrap = document.createElement('span')
+    wrap.className = 'review-stars-display'
+    const filled = document.createElement('span')
+    filled.style.color = '#f5c842'
+    filled.textContent = '★'.repeat(r)
+    const empty = document.createElement('span')
+    empty.style.color = '#ddd'
+    empty.textContent = '☆'.repeat(5 - r)
+    wrap.appendChild(filled)
+    wrap.appendChild(empty)
+    return wrap
+  }
+
+  // 내 리뷰 삭제
+  async function deleteMyReview(reviewId) {
+    if (!confirm('리뷰를 삭제하시겠어요?')) return
+    const { error } = await supabase.from('hgm_reviews').delete().eq('id', reviewId).eq('user_id', userId)
+    if (error) { alert('삭제 실패: ' + error.message); return }
+    loadMyReviews()
+  }
+
+  // 내 리뷰 목록 로드
+  async function loadMyReviews() {
+    const listEl = document.getElementById('reviews-list')
+    listEl.textContent = ''
+
+    const { data, error } = await supabase
+      .from('hgm_reviews')
+      .select('*, hgm_products(id, name, image_url)')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      const s = document.createElement('div'); s.className = 'empty-state'
+      const i = document.createElement('div'); i.className = 'empty-icon'; i.textContent = '⚠️'
+      const p = document.createElement('p'); p.textContent = '리뷰를 불러오지 못했어요'
+      s.appendChild(i); s.appendChild(p); listEl.appendChild(s)
+      return
+    }
+
+    if (!data || data.length === 0) {
+      // 리뷰 없을 때 — 배송완료 주문의 상품으로 작성 유도
+      const s = document.createElement('div'); s.className = 'empty-state'
+      const i = document.createElement('div'); i.className = 'empty-icon'; i.textContent = '⭐'
+      const p = document.createElement('p'); p.textContent = '아직 작성한 리뷰가 없어요. 구매한 상품 페이지에서 리뷰를 남겨보세요!'
+      s.appendChild(i); s.appendChild(p)
+
+      // 배송완료 주문에서 리뷰 작성 가능한 상품 제안
+      const delivered = allOrders.filter(o => o.status === '배송완료')
+      if (delivered.length > 0) {
+        const suggestWrap = document.createElement('div')
+        suggestWrap.style.cssText = 'margin-top:20px;'
+        const suggestTitle = document.createElement('p')
+        suggestTitle.style.cssText = 'font-weight:700;margin-bottom:12px;color:var(--color-text);font-size:14px;'
+        suggestTitle.textContent = '리뷰 작성 가능한 구매 상품'
+        suggestWrap.appendChild(suggestTitle)
+
+        const suggestGrid = document.createElement('div')
+        suggestGrid.style.cssText = 'display:flex;flex-direction:column;gap:10px;'
+
+        delivered.forEach(order => {
+          const items = order.hgm_order_items || []
+          items.forEach(item => {
+            const row = document.createElement('a')
+            row.href = '/product.html?id=' + (item.product_id || '') + '#reviews'
+            row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px;background:#fff;border:1.5px solid #eee;border-radius:10px;text-decoration:none;color:inherit;'
+            const nameSpan = document.createElement('span')
+            nameSpan.style.cssText = 'flex:1;font-size:14px;font-weight:600;'
+            nameSpan.textContent = item.product_name || '상품'
+            const ctaSpan = document.createElement('span')
+            ctaSpan.style.cssText = 'font-size:12px;color:var(--color-primary);font-weight:700;white-space:nowrap;'
+            ctaSpan.textContent = '리뷰 작성 →'
+            row.appendChild(nameSpan)
+            row.appendChild(ctaSpan)
+            suggestGrid.appendChild(row)
+          })
+        })
+        suggestWrap.appendChild(suggestGrid)
+        s.appendChild(suggestWrap)
+      }
+
+      listEl.appendChild(s)
+      return
+    }
+
+    // 리뷰 카드 렌더
+    const list = document.createElement('div')
+    list.style.cssText = 'display:flex;flex-direction:column;gap:16px;'
+
+    data.forEach(r => {
+      const card = document.createElement('div')
+      card.style.cssText = 'background:#fff;border:1.5px solid #eee;border-radius:12px;padding:18px 20px;'
+
+      // 상품 링크 + 별점 헤더
+      const header = document.createElement('div')
+      header.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:12px;'
+
+      if (r.hgm_products?.image_url) {
+        const img = document.createElement('img')
+        img.src = r.hgm_products.image_url
+        img.alt = r.hgm_products.name || ''
+        img.style.cssText = 'width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0;'
+        img.onerror = () => { img.style.display = 'none' }
+        header.appendChild(img)
+      }
+
+      const headerRight = document.createElement('div')
+      headerRight.style.cssText = 'flex:1;min-width:0;'
+      const productName = document.createElement('a')
+      productName.href = '/product.html?id=' + (r.hgm_products?.id || '') + '#reviews'
+      productName.style.cssText = 'font-size:13px;font-weight:700;color:var(--color-text);text-decoration:none;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'
+      productName.textContent = r.hgm_products?.name || '상품'
+      const starRow = document.createElement('div')
+      starRow.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:2px;'
+      starRow.appendChild(renderStars(r.rating))
+      const dateSpan = document.createElement('span')
+      dateSpan.style.cssText = 'font-size:12px;color:var(--color-text-light);'
+      dateSpan.textContent = r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : ''
+      starRow.appendChild(dateSpan)
+      headerRight.appendChild(productName)
+      headerRight.appendChild(starRow)
+      header.appendChild(headerRight)
+
+      // 리뷰 이미지 (있으면)
+      if (r.image_url) {
+        const reviewImg = document.createElement('img')
+        reviewImg.src = r.image_url
+        reviewImg.alt = '리뷰 이미지'
+        reviewImg.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:10px;display:block;'
+        reviewImg.onerror = () => { reviewImg.style.display = 'none' }
+        card.appendChild(reviewImg)
+      }
+
+      // 내용
+      const content = document.createElement('p')
+      content.style.cssText = 'font-size:14px;color:var(--color-text-sub);line-height:1.65;margin-bottom:12px;'
+      content.textContent = r.content || ''
+
+      // 삭제 버튼
+      const delBtn = document.createElement('button')
+      delBtn.style.cssText = 'font-size:12px;color:var(--color-danger);background:none;border:none;cursor:pointer;padding:0;'
+      delBtn.textContent = '삭제'
+      delBtn.addEventListener('click', () => deleteMyReview(r.id))
+
+      card.appendChild(header)
+      card.appendChild(content)
+      card.appendChild(delBtn)
+      list.appendChild(card)
+    })
+
+    listEl.appendChild(list)
+  }
+
   // ── 초기 로드 ──
   loadOrders()
   loadWishlist()
+  loadMyReviews()
 </script>
 </body>
 </html>

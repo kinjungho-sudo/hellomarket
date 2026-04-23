@@ -391,6 +391,19 @@
     .review-item__stars { color: #f5c518; font-size: 14px; }
     .review-item__date { font-size: 12px; color: var(--color-text-light); margin-left: auto; }
     .review-item__content { font-size: 14px; color: var(--color-text-sub); line-height: 1.7; }
+    .review-item__img {
+      width: 80px; height: 80px; object-fit: cover;
+      border-radius: var(--radius-sm); margin: 8px 0 10px;
+      display: block; cursor: pointer;
+    }
+    .review-img-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 10px; margin-bottom: 4px;
+      font-size: 13px; font-weight: 600; color: var(--color-text-sub);
+      cursor: pointer; padding: 6px 12px;
+      border: 1.5px dashed rgba(0,0,0,.2); border-radius: var(--radius-sm);
+    }
+    .review-img-label:hover { border-color: var(--color-primary); color: var(--color-primary); }
     .review-empty { text-align: center; padding: 48px 0; color: var(--color-text-light); font-size: 14px; }
 
     /* Q&A 작성 폼 */
@@ -718,6 +731,7 @@
     import { trackEvent } from '/js/api/analytics.js'
     import { getSessionId } from '/js/utils/session.js'
     import { supabase } from '/js/config.js'
+    import { addToWishlist, removeFromWishlist, isWishlisted } from '/js/api/users.js'
 
     // 햄버거 메뉴
     const hamburger = document.getElementById('hamburger')
@@ -1044,12 +1058,41 @@
 
       const wishBtn = document.createElement('button')
       wishBtn.className = 'btn-wish-main'
-      wishBtn.setAttribute('aria-label', '위시리스트')
+      wishBtn.setAttribute('aria-label', '찜하기')
       wishBtn.textContent = '♡'
-      wishBtn.addEventListener('click', () => {
-        const isActive = wishBtn.classList.toggle('active')
-        wishBtn.textContent = isActive ? '♥' : '♡'
-        showToast(isActive ? '위시리스트에 추가했어요 ♥' : '위시리스트에서 제거했어요', '')
+      wishBtn.dataset.productId = p.id
+
+      // 로그인 상태면 현재 찜 여부 조회
+      ;(async () => {
+        const { session } = await getSession()
+        if (session?.user) {
+          const wishlisted = await isWishlisted(session.user.id, p.id)
+          if (wishlisted === true) {
+            wishBtn.classList.add('active')
+            wishBtn.textContent = '♥'
+          }
+        }
+      })()
+
+      wishBtn.addEventListener('click', async () => {
+        const { session } = await getSession()
+        if (!session?.user) {
+          showToast('로그인 후 찜하기를 이용할 수 있어요', '')
+          return
+        }
+        const userId = session.user.id
+        const isActive = wishBtn.classList.contains('active')
+        if (isActive) {
+          wishBtn.classList.remove('active')
+          wishBtn.textContent = '♡'
+          await removeFromWishlist(userId, p.id)
+          showToast('찜 목록에서 제거했어요', '')
+        } else {
+          wishBtn.classList.add('active')
+          wishBtn.textContent = '♥'
+          await addToWishlist(userId, p.id)
+          showToast('찜 목록에 추가했어요 ♥', 'success')
+        }
       })
 
       // 즉시 구매 버튼
@@ -1316,6 +1359,42 @@
         textarea.placeholder = '이 상품에 대한 솔직한 후기를 남겨주세요 (10자 이상)'
         box.appendChild(textarea)
 
+        // 이미지 업로드
+        const imgLabel = document.createElement('label')
+        imgLabel.className = 'review-img-label'
+        imgLabel.textContent = '📷 사진 첨부 (선택)'
+        const imgInput = document.createElement('input')
+        imgInput.type = 'file'
+        imgInput.accept = 'image/*'
+        imgInput.style.cssText = 'display:none;'
+        const imgPreview = document.createElement('img')
+        imgPreview.style.cssText = 'display:none;width:80px;height:80px;object-fit:cover;border-radius:8px;margin-top:6px;'
+        let uploadedImageUrl = null
+
+        imgInput.addEventListener('change', async () => {
+          const file = imgInput.files?.[0]
+          if (!file) return
+          imgLabel.textContent = '업로드 중...'
+          try {
+            const ext = file.name.split('.').pop()
+            const filename = 'reviews/' + session.user.id + '_' + Date.now() + '.' + ext
+            const { error } = await supabase.storage.from('hgm-images').upload(filename, file, { upsert: true })
+            if (error) throw error
+            const { data: urlData } = supabase.storage.from('hgm-images').getPublicUrl(filename)
+            uploadedImageUrl = urlData.publicUrl
+            imgPreview.src = uploadedImageUrl
+            imgPreview.style.display = 'block'
+            imgLabel.textContent = '📷 사진 변경'
+          } catch (err) {
+            imgLabel.textContent = '📷 사진 첨부 (선택)'
+            showToast('이미지 업로드 실패: ' + err.message, '')
+          }
+        })
+
+        imgLabel.appendChild(imgInput)
+        box.appendChild(imgLabel)
+        box.appendChild(imgPreview)
+
         const submitBtn = document.createElement('button')
         submitBtn.className = 'btn-submit-review'
         submitBtn.textContent = '리뷰 등록'
@@ -1332,10 +1411,15 @@
               title: document.title.split(' | ')[0],
               content,
               rating,
+              image_url: uploadedImageUrl || null,
               is_published: true,
             })
             if (error) throw error
             textarea.value = ''
+            uploadedImageUrl = null
+            imgPreview.style.display = 'none'
+            imgPreview.src = ''
+            imgLabel.textContent = '📷 사진 첨부 (선택)'
             showToast('리뷰가 등록되었습니다 🌿', 'success')
             await loadReviews()
           } catch (err) {
@@ -1401,6 +1485,18 @@
         content.textContent = r.content
 
         item.appendChild(header)
+
+        // 리뷰 이미지 (있으면)
+        if (r.image_url) {
+          const revImg = document.createElement('img')
+          revImg.src = r.image_url
+          revImg.alt = '리뷰 이미지'
+          revImg.className = 'review-item__img'
+          revImg.loading = 'lazy'
+          revImg.onerror = () => { revImg.style.display = 'none' }
+          item.appendChild(revImg)
+        }
+
         item.appendChild(content)
         listEl.appendChild(item)
       })

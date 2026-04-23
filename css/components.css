@@ -249,6 +249,20 @@
   overflow: hidden;
 }
 
+/* 별점 평균 */
+.product-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  line-height: 1;
+}
+.product-card__rating .star-filled { color: #f5c842; letter-spacing: -1px; }
+.product-card__rating .star-empty  { color: #ddd;    letter-spacing: -1px; }
+.product-card__rating .rating-num  { font-weight: 700; color: var(--color-text); margin-left: 2px; }
+.product-card__rating .rating-cnt  { color: var(--color-text-light); }
+
 /* 가격 영역 */
 .product-card__price-wrap {
   display: flex;
