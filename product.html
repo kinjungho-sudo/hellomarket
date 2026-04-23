@@ -490,7 +490,7 @@
       // 배송비
       const deliveryEl = document.createElement('p')
       deliveryEl.className = 'product-info__delivery'
-      const deliveryFee = p.delivery_fee != null ? p.delivery_fee : 3000
+      const deliveryFee = p.delivery != null ? p.delivery : 3000
       deliveryEl.textContent = deliveryFee === 0 ? '무료배송' : '배송비 ' + Number(deliveryFee).toLocaleString() + '원'
       infoCol.appendChild(deliveryEl)
 
@@ -503,11 +503,11 @@
       }
 
       // 관리 아이콘 (광량/물주기)
-      if (p.light_level || p.water_cycle) {
+      if (p.lighting || p.water) {
         const careWrap = document.createElement('div')
         careWrap.className = 'product-info__care'
 
-        if (p.light_level) {
+        if (p.lighting) {
           const item = document.createElement('div')
           item.className = 'product-info__care-item'
           const icon = document.createElement('span')
@@ -519,7 +519,7 @@
           lbl.textContent = '광량'
           const val = document.createElement('span')
           val.className = 'product-info__care-value'
-          val.textContent = p.light_level
+          val.textContent = p.lighting
           txt.appendChild(lbl)
           txt.appendChild(val)
           item.appendChild(icon)
@@ -527,7 +527,7 @@
           careWrap.appendChild(item)
         }
 
-        if (p.water_cycle) {
+        if (p.water) {
           const item = document.createElement('div')
           item.className = 'product-info__care-item'
           const icon = document.createElement('span')
@@ -539,7 +539,7 @@
           lbl.textContent = '물주기'
           const val = document.createElement('span')
           val.className = 'product-info__care-value'
-          val.textContent = p.water_cycle
+          val.textContent = p.water
           txt.appendChild(lbl)
           txt.appendChild(val)
           item.appendChild(icon)
@@ -633,7 +633,7 @@
             id: String(p.id),
             name: p.name,
             price: p.price,
-            delivery: p.delivery_fee != null ? p.delivery_fee : 3000,
+            delivery: p.delivery != null ? p.delivery : 3000,
             imageUrl: p.image_url || '',
           }, qty)
           showToast(qty + '개를 장바구니에 담았어요 🛒', 'success')
