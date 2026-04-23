@@ -1,4 +1,6 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
@@ -7,6 +9,12 @@
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-XSS-Protection", "value": "1; mode=block" }
       ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/daily-report",
+      "schedule": "0 13 * * *"
     }
   ]
 }

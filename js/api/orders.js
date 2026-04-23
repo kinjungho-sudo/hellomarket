@@ -1,4 +1,5 @@
 import { supabase } from '../config.js'
+import { sendOrderAlert } from './notifications.js'
 
 /**
  * 주문번호 생성 (HGM-YYYYMMDD-XXX 형식)
@@ -65,7 +66,12 @@ export async function createOrder(userId, items, receiverInfo) {
 
     if (itemsError) throw itemsError
 
-    return { ...order, items: orderItems }
+    const result = { ...order, items: orderItems }
+
+    // 텔레그램 주문 알림 발송 (실패해도 주문은 정상 처리)
+    sendOrderAlert(result).catch((e) => console.warn('[createOrder] 텔레그램 알림 실패:', e))
+
+    return result
   } catch (err) {
     console.error('[createOrder] 주문 생성 실패:', err)
     return { error: err.message }

@@ -42,6 +42,29 @@ const STATUS_CLASS = {
   '취소':     'status-cancel',
 }
 
+/**
+ * 택배사별 배송조회 URL 반환
+ * @param {string} carrier - 택배사명
+ * @param {string} trackingNo - 운송장 번호
+ * @returns {string} 배송조회 URL
+ */
+function getTrackingUrl(carrier, trackingNo) {
+  const no = encodeURIComponent(trackingNo)
+  switch (carrier) {
+    case 'CJ대한통운':
+      return `https://trace.cjlogistics.com/next/tracking.html?wblNo=${no}`
+    case '롯데택배':
+      return `https://www.lotteglogis.com/open/tracking?invno=${no}`
+    case '한진택배':
+      return `https://www.hanjin.com/kor/CMS/DeliveryMgr/WaybillResult.do?mCode=MN038&schLang=KR&wblnumText=${no}`
+    case '우체국택배':
+      return `https://service.epost.go.kr/trace.RetrieveDomRigiTraceList.comm?sid1=${no}`
+    default:
+      // 기타 / 로젠택배 / 편의점택배 → 통합 조회 사이트
+      return `https://www.tracker.delivery/#kr-epost/${no}`
+  }
+}
+
 async function initPage() {
   await loadOrders()
   setupEventListeners()
@@ -229,6 +252,38 @@ function openOrderDetail(order) {
   const sel = document.getElementById('order-status-select')
   if (sel) sel.value = order.status
 
+  // 운송장 번호 및 택배사 복원
+  const trackingInput = document.getElementById('tracking-number-input')
+  const carrierSelect = document.getElementById('carrier-select')
+  const trackingLinkArea = document.getElementById('tracking-link-area')
+  const trackingLink = document.getElementById('tracking-link')
+
+  let savedCarrier = ''
+  let savedTracking = ''
+
+  if (order.tracking_number) {
+    // "택배사:운송장번호" 형식 파싱
+    const parts = order.tracking_number.split(':')
+    if (parts.length >= 2) {
+      savedCarrier = parts[0]
+      savedTracking = parts.slice(1).join(':')
+    } else {
+      savedTracking = order.tracking_number
+    }
+  }
+
+  if (trackingInput) trackingInput.value = savedTracking
+  if (carrierSelect) carrierSelect.value = savedCarrier
+
+  // 기존 운송장이 있으면 배송조회 링크 표시
+  if (savedTracking) {
+    const url = getTrackingUrl(savedCarrier, savedTracking)
+    if (trackingLink) { trackingLink.href = url }
+    if (trackingLinkArea) trackingLinkArea.style.display = 'block'
+  } else {
+    if (trackingLinkArea) trackingLinkArea.style.display = 'none'
+  }
+
   document.getElementById('order-modal')?.classList.add('open')
 }
 
@@ -265,9 +320,46 @@ function setupEventListeners() {
     if (!currentOrderId) return
     const sel = document.getElementById('order-status-select')
     if (!sel) return
+
+    const trackingInput = document.getElementById('tracking-number-input')
+    const carrierSelect = document.getElementById('carrier-select')
+    const trackingLinkArea = document.getElementById('tracking-link-area')
+    const trackingLink = document.getElementById('tracking-link')
+
+    const trackingNumber = trackingInput?.value?.trim() ?? ''
+    const carrier = carrierSelect?.value ?? ''
+
+    // 운송장 번호가 입력됐으면 상태를 자동으로 "배송중"으로 변경
+    let newStatus = sel.value
+    if (trackingNumber && newStatus !== '배송완료' && newStatus !== '취소') {
+      newStatus = '배송중'
+      sel.value = '배송중'
+    }
+
+    // 운송장 번호를 "택배사:번호" 형식으로 합쳐서 저장
+    const trackingValue = trackingNumber
+      ? (carrier ? carrier + ':' + trackingNumber : trackingNumber)
+      : null
+
     try {
-      const result = await updateOrderStatus(currentOrderId, sel.value)
+      // 주문 상태 업데이트
+      const result = await updateOrderStatus(currentOrderId, newStatus)
       if (result.error) throw new Error(result.error)
+
+      // 운송장 번호 저장 (tracking_number 컬럼)
+      if (trackingValue !== null) {
+        const { error: trackingError } = await supabase
+          .from('hgm_orders')
+          .update({ tracking_number: trackingValue, shipped_at: new Date().toISOString() })
+          .eq('id', currentOrderId)
+        if (trackingError) throw new Error(trackingError.message)
+
+        // 배송조회 링크 갱신
+        const url = getTrackingUrl(carrier, trackingNumber)
+        if (trackingLink) { trackingLink.href = url }
+        if (trackingLinkArea) trackingLinkArea.style.display = 'block'
+      }
+
       document.getElementById('order-modal')?.classList.remove('open')
       await loadOrders()
     } catch (err) {

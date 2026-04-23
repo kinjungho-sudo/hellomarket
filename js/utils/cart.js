@@ -117,9 +117,19 @@ export function getDeliveryFee() {
  * id="cart-count" 요소에 getCartCount() 표시
  */
 export function updateCartBadge() {
-  const el = document.getElementById('cart-count')
-  if (!el) return
   const count = getCartCount()
-  el.textContent = count > 0 ? String(count) : ''
-  el.style.display = count > 0 ? 'inline-flex' : 'none'
+
+  // 네비 뱃지 (구형, 숨겨져 있어도 유지)
+  const el = document.getElementById('cart-count')
+  if (el) {
+    el.textContent = count > 0 ? String(count) : ''
+    el.style.display = count > 0 ? 'inline-flex' : 'none'
+  }
+
+  // 플로팅 FAB 뱃지
+  const fab = document.getElementById('cart-fab-count')
+  if (fab) {
+    fab.textContent = count > 0 ? String(count) : ''
+    fab.classList.toggle('show', count > 0)
+  }
 }

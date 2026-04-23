@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>가드닝 가이드 | 헬로우가든마켓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <style>
+    /* ===== 페이지 히어로 ===== */
+    .page-hero {
+      background: linear-gradient(135deg, #1a3d28 0%, #2d5a3d 60%, #4a7c59 100%);
+      color: #fff;
+      padding: 64px 0 56px;
+      text-align: center;
+    }
+    .page-hero h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    .page-hero p {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    /* ===== 섹션 공통 헤더 ===== */
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .section-header h2 {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: var(--color-text);
+    }
+    .section-header p {
+      font-size: 14px;
+      color: var(--color-text-light);
+    }
+
+    /* ===== DB 가이드 섹션 ===== */
+    .guides-section {
+      padding: 64px 0 80px;
+    }
+
+    /* 가이드 카드 그리드 — 3열, 모바일 1열 */
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .guide-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .guide-grid { grid-template-columns: 1fr; }
+    }
+
+    /* 카드 */
+    .guide-card {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-md);
+      border: 1.5px solid rgba(0, 0, 0, 0.07);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
+    }
+    .guide-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* 카드 썸네일 */
+    .guide-card__thumb {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, #d4edda, #b8dfc3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 52px;
+      overflow: hidden;
+    }
+    .guide-card__thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* 카드 바디 */
+    .guide-card__body { padding: 20px 22px 24px; }
+    .guide-card__label {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #1a3d28;
+      background: #f5c842;
+      padding: 3px 9px;
+      border-radius: 9999px;
+      margin-bottom: 10px;
+    }
+    .guide-card__date {
+      font-size: 12px;
+      color: var(--color-text-light);
+      margin-bottom: 8px;
+    }
+    .guide-card__title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 10px;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .guide-card__excerpt {
+      font-size: 13px;
+      color: var(--color-text-sub);
+      line-height: 1.65;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ===== 빈 상태 / 로딩 ===== */
+    .state-box {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--color-text-light);
+    }
+    .state-box .icon { font-size: 48px; margin-bottom: 16px; }
+    .state-box p { font-size: 15px; }
+
+    /* ===== 초보자 팁 섹션 ===== */
+    .tips-section {
+      padding: 64px 0 80px;
+      background: var(--color-bg-section, #f5f0e8);
+    }
+
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .tips-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .tips-grid { grid-template-columns: 1fr; }
+    }
+
+    .tip-card {
+      background: var(--color-bg-card, #fff);
+      border-radius: var(--radius-md);
+      border: 1.5px solid rgba(0, 0, 0, 0.07);
+      box-shadow: var(--shadow-sm);
+      padding: 28px 24px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .tip-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .tip-card__icon {
+      font-size: 36px;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .tip-card__title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--color-text, #2c2c2c);
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    .tip-card__desc {
+      font-size: 14px;
+      color: var(--color-text-sub, #666);
+      line-height: 1.7;
+    }
+
+    /* ===== 모달 ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      max-width: 640px;
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--color-text-sub);
+      line-height: 1;
+      z-index: 10;
+    }
+    .modal-close:hover { color: var(--color-text); }
+
+    .modal-image {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, #d4edda, #b8dfc3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      overflow: hidden;
+    }
+    .modal-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .modal-body { padding: 28px 30px 32px; }
+    .modal-meta { font-size: 12px; color: var(--color-text-light); margin-bottom: 10px; }
+    .modal-title {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: var(--color-text);
+      margin-bottom: 16px;
+      line-height: 1.35;
+    }
+    .modal-content {
+      font-size: 15px;
+      color: var(--color-text-sub);
+      line-height: 1.8;
+      white-space: pre-line;
+    }
+
+    /* ===== 장바구니 뱃지 ===== */
+    .cart-badge {
+      position: absolute;
+      top: -6px;
+      right: -8px;
+      background: var(--color-danger);
+      color: #fff;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+
+    /* ===== 햄버거 오픈 상태 ===== */
+    .mobile-menu.open { display: block; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  </style>
+</head>
+<body>
+
+<!-- ===== 헤더 네비게이션 ===== -->
+<header class="header">
+  <nav class="container">
+    <a href="/index.html" class="nav-logo">
+      <img src="/assets/logo/logo.png" alt="헬로우가든마켓" style="width:32px;height:32px;object-fit:contain;">
+      Hello Garden Market
+    </a>
+    <ul class="nav-links">
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div id="nav-auth"></div>
+      <a href="/cart.html" class="cart-icon" style="position:relative;">
+        🛒 <span id="cart-count" class="cart-badge">0</span>
+      </a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="메뉴">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <ul>
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+  </div>
+</header>
+
+<!-- ===== 페이지 히어로 ===== -->
+<section class="page-hero">
+  <div class="container">
+    <h1>가드닝 가이드 🌿</h1>
+    <p>식물을 더 잘 키우기 위한 팁과 이야기를 모았어요</p>
+  </div>
+</section>
+
+<!-- ===== DB 가이드 포스트 섹션 ===== -->
+<section class="guides-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>📖 가이드 모음</h2>
+      <p>헬로우가든마켓이 직접 작성하는 가드닝 이야기</p>
+    </div>
+    <!-- JS에서 type='guide' 포스트를 불러와 이곳에 렌더링 -->
+    <div id="guide-posts-container">
+      <div class="state-box">
+        <div class="icon">🌿</div>
+        <p>불러오는 중...</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 초보자 팁 섹션 (정적 콘텐츠) ===== -->
+<section class="tips-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>🌱 초보자 필수 팁 5가지</h2>
+      <p>식물을 처음 키우신다면 여기서 시작하세요</p>
+    </div>
+    <div class="tips-grid">
+
+      <!-- 팁 1: 물주기 -->
+      <div class="tip-card">
+        <span class="tip-card__icon">💧</span>
+        <h3 class="tip-card__title">물주기</h3>
+        <p class="tip-card__desc">
+          손가락으로 흙을 찔러 보세요.
+          2~3cm 깊이가 말랐을 때 주는 것이 기본입니다.
+          물을 너무 자주 주면 뿌리가 썩을 수 있어요.
+        </p>
+      </div>
+
+      <!-- 팁 2: 채광 -->
+      <div class="tip-card">
+        <span class="tip-card__icon">☀️</span>
+        <h3 class="tip-card__title">채광</h3>
+        <p class="tip-card__desc">
+          대부분의 실내식물은 창가 간접광이면 충분합니다.
+          직사광선이 강한 여름에는 커튼 너머로 빛을 걸러주세요.
+        </p>
+      </div>
+
+      <!-- 팁 3: 온도 -->
+      <div class="tip-card">
+        <span class="tip-card__icon">🌡️</span>
+        <h3 class="tip-card__title">온도</h3>
+        <p class="tip-card__desc">
+          18~25°C가 대부분 식물의 적정 온도입니다.
+          에어컨·선풍기 바람이 직접 닿는 곳은 피하고,
+          겨울엔 창가 냉기에도 주의하세요.
+        </p>
+      </div>
+
+      <!-- 팁 4: 분갈이 -->
+      <div class="tip-card">
+        <span class="tip-card__icon">🪴</span>
+        <h3 class="tip-card__title">분갈이</h3>
+        <p class="tip-card__desc">
+          봄(3~5월)이 분갈이 최적기입니다.
+          화분 바닥으로 뿌리가 나오거나 성장이 더뎌지면
+          한 치수 큰 화분으로 옮겨주세요.
+        </p>
+      </div>
+
+      <!-- 팁 5: 병충해 -->
+      <div class="tip-card">
+        <span class="tip-card__icon">🐛</span>
+        <h3 class="tip-card__title">병충해</h3>
+        <p class="tip-card__desc">
+          잎을 자주 닦아주고, 통풍이 잘 되는 곳에 두세요.
+          흰 가루나 끈적한 흔적이 보이면 친환경 살충제를
+          조기에 사용하는 것이 효과적입니다.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== 가이드 상세 모달 ===== -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modal-close" aria-label="닫기">×</button>
+    <div class="modal-image" id="modal-image">🌿</div>
+    <div class="modal-body">
+      <div class="modal-meta" id="modal-meta"></div>
+      <h2 class="modal-title" id="modal-title"></h2>
+      <div class="modal-content" id="modal-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 푸터 ===== -->
+<footer class="footer">
+  <div class="container">
+    <div class="nav-logo" style="margin-bottom:12px;">
+      <span class="logo-icon">🌻</span> Hello Garden Market
+    </div>
+    <div class="footer-links">
+      <a href="/about.html">매장 소개</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">이용약관</a>
+    </div>
+    <p class="footer-copy">© 2026 헬로우가든마켓. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- ===== 장바구니 플로팅 버튼 ===== -->
+<a href="/cart.html" class="cart-fab" id="cart-fab" aria-label="장바구니">
+  <span class="cart-fab__icon">🛒</span>
+  <span class="cart-fab__badge" id="cart-fab-count">0</span>
+</a>
+
+<script type="module">
+  import { updateNavAuth } from '/js/auth.js'
+  import { updateCartBadge } from '/js/utils/cart.js'
+  import { getPosts } from '/js/api/posts.js'
+  import { trackEvent } from '/js/api/analytics.js'
+
+  // ── 햄버거 메뉴 토글
+  const hamburger = document.getElementById('hamburger')
+  const mobileMenu = document.getElementById('mobile-menu')
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open')
+    hamburger.classList.toggle('open')
+  })
+
+  // ── 공통 초기화
+  updateNavAuth()
+  updateCartBadge()
+  trackEvent({ eventType: 'page_view', page: 'guide' })
+
+  // ── 날짜 포맷 헬퍼
+  function formatDate(iso) {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
+  }
+
+  // ── HTML 태그 제거 헬퍼 (excerpt 생성용)
+  function stripTags(str) {
+    return str ? str.replace(/<[^>]*>/g, '') : ''
+  }
+
+  // ── 이미지 없을 때 순환 사용할 이모지 목록
+  const FALLBACK_EMOJIS = ['🌿', '🪴', '🌱', '🍃', '🌸']
+
+  // ── 가이드 카드 DOM 생성 (XSS 안전 — textContent / DOM API 사용)
+  function createGuideCard(post, idx) {
+    const card = document.createElement('div')
+    card.className = 'guide-card'
+
+    // 썸네일 영역
+    const thumb = document.createElement('div')
+    thumb.className = 'guide-card__thumb'
+    if (post.image_url) {
+      const img = document.createElement('img')
+      img.src = post.image_url
+      img.alt = post.title || ''
+      img.loading = 'lazy'
+      img.onerror = () => { thumb.textContent = FALLBACK_EMOJIS[idx % FALLBACK_EMOJIS.length] }
+      thumb.appendChild(img)
+    } else {
+      thumb.textContent = FALLBACK_EMOJIS[idx % FALLBACK_EMOJIS.length]
+    }
+
+    // 카드 바디
+    const body = document.createElement('div')
+    body.className = 'guide-card__body'
+
+    const label = document.createElement('span')
+    label.className = 'guide-card__label'
+    label.textContent = '가드닝 가이드'
+
+    const date = document.createElement('div')
+    date.className = 'guide-card__date'
+    date.textContent = formatDate(post.created_at)
+
+    const title = document.createElement('div')
+    title.className = 'guide-card__title'
+    title.textContent = post.title || '제목 없음'
+
+    const excerpt = document.createElement('div')
+    excerpt.className = 'guide-card__excerpt'
+    excerpt.textContent = stripTags(post.content || '').slice(0, 80)
+
+    body.appendChild(label)
+    body.appendChild(date)
+    body.appendChild(title)
+    body.appendChild(excerpt)
+    card.appendChild(thumb)
+    card.appendChild(body)
+
+    // 클릭 시 모달 열기
+    card.addEventListener('click', () => openModal(post, idx))
+    return card
+  }
+
+  // ── 모달 열기
+  function openModal(post, idx) {
+    const overlay   = document.getElementById('modal-overlay')
+    const imageEl   = document.getElementById('modal-image')
+    const metaEl    = document.getElementById('modal-meta')
+    const titleEl   = document.getElementById('modal-title')
+    const contentEl = document.getElementById('modal-content')
+
+    // 이미지 처리 (DOM API 사용, innerHTML 미사용)
+    imageEl.textContent = ''
+    if (post.image_url) {
+      const img = document.createElement('img')
+      img.src = post.image_url
+      img.alt = post.title || ''
+      img.onerror = () => { imageEl.textContent = FALLBACK_EMOJIS[(idx || 0) % FALLBACK_EMOJIS.length] }
+      imageEl.appendChild(img)
+    } else {
+      imageEl.textContent = FALLBACK_EMOJIS[(idx || 0) % FALLBACK_EMOJIS.length]
+    }
+
+    // 모달 텍스트 (textContent로 XSS 방지)
+    metaEl.textContent    = formatDate(post.created_at)
+    titleEl.textContent   = post.title || '제목 없음'
+    contentEl.textContent = stripTags(post.content || '')
+
+    overlay.classList.add('open')
+    document.body.style.overflow = 'hidden'
+  }
+
+  // ── 모달 닫기
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open')
+    document.body.style.overflow = ''
+  }
+
+  document.getElementById('modal-close').addEventListener('click', closeModal)
+  document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal()
+  })
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal() })
+
+  // ── 빈 상태 / 에러 상태 렌더링 (DOM API 사용)
+  function showStateBox(containerId, emoji, message) {
+    const container = document.getElementById(containerId)
+    if (!container) return
+    container.textContent = ''
+
+    const box = document.createElement('div')
+    box.className = 'state-box'
+
+    const iconEl = document.createElement('div')
+    iconEl.className = 'icon'
+    iconEl.textContent = emoji
+
+    const msgEl = document.createElement('p')
+    msgEl.textContent = message
+
+    box.appendChild(iconEl)
+    box.appendChild(msgEl)
+    container.appendChild(box)
+  }
+
+  // ── DB에서 가이드 포스트 로드 (type='guide')
+  async function loadGuidePosts() {
+    try {
+      const result = await getPosts({ type: 'guide', limit: 20 })
+
+      // 에러 응답 처리
+      if (result && result.error) {
+        showStateBox('guide-posts-container', '⚠️', '가이드를 불러오지 못했어요. 잠시 후 다시 시도해주세요.')
+        return
+      }
+
+      const posts = Array.isArray(result) ? result : []
+      const container = document.getElementById('guide-posts-container')
+      container.textContent = ''
+
+      // 빈 상태 메시지
+      if (posts.length === 0) {
+        showStateBox('guide-posts-container', '🌿', '아직 등록된 가이드가 없어요')
+        return
+      }
+
+      // 카드 그리드 렌더링
+      const grid = document.createElement('div')
+      grid.className = 'guide-grid'
+      posts.forEach((post, idx) => grid.appendChild(createGuideCard(post, idx)))
+      container.appendChild(grid)
+
+    } catch (err) {
+      console.error('[guide.html] 가이드 포스트 로드 실패:', err)
+      showStateBox('guide-posts-container', '⚠️', '가이드를 불러오지 못했어요. 잠시 후 다시 시도해주세요.')
+    }
+  }
+
+  // ── 페이지 진입 시 데이터 로드
+  loadGuidePosts()
+</script>
+
+</body>
+</html>

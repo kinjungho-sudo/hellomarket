@@ -1,7 +1,7 @@
 ﻿// admin/settings.js — 알림 설정 페이지 스크립트
 import { requireAdmin, signOut } from '/js/auth.js'
 import { supabase } from '/js/config.js'
-import { getNotificationSettings, saveNotificationSettings, testTelegramConnection } from '/js/api/notifications.js'
+import { getNotificationSettings, saveNotificationSettings, testTelegramConnection, sendHourlyReport } from '/js/api/notifications.js'
 
 // 관리자 접근 제어
 await requireAdmin()
@@ -128,6 +128,28 @@ function setupEventListeners() {
     } finally {
       if (btn) btn.disabled = false
     }
+  })
+}
+
+// 수동 리포트 발송 버튼
+const btnSendReport = document.getElementById('btn-send-report')
+if (btnSendReport) {
+  btnSendReport.addEventListener('click', async () => {
+    btnSendReport.disabled = true
+    btnSendReport.textContent = '발송 중...'
+    const result = await sendHourlyReport()
+    const reportResult = document.getElementById('report-result')
+    if (result.error) {
+      reportResult.style.display = 'block'
+      reportResult.style.color = 'var(--color-danger)'
+      reportResult.textContent = '❌ ' + result.error
+    } else {
+      reportResult.style.display = 'block'
+      reportResult.style.color = 'var(--color-success)'
+      reportResult.textContent = '✅ 리포트가 텔레그램으로 발송되었습니다.'
+    }
+    btnSendReport.disabled = false
+    btnSendReport.textContent = '📊 지금 리포트 발송'
   })
 }
 

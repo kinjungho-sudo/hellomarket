@@ -171,33 +171,70 @@ header nav,
   background: var(--color-yellow-bg);
 }
 
-/* 장바구니 뱃지 */
-.cart-icon {
-  position: relative;
+/* ====================================================
+   플로팅 장바구니 버튼 (우하단 고정)
+==================================================== */
+.cart-fab {
+  position: fixed;
+  bottom: 32px;
+  right: 28px;
+  z-index: 999;
+  width: 58px;
+  height: 58px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow:
+    0 4px 16px rgba(45, 90, 61, 0.40),
+    0 1px 4px rgba(0,0,0,0.15);
+  animation: fab-float 3s ease-in-out infinite;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
 }
-
-.cart-badge {
+.cart-fab:hover {
+  background: var(--color-primary-dark);
+  box-shadow:
+    0 8px 28px rgba(45, 90, 61, 0.50),
+    0 2px 8px rgba(0,0,0,0.18);
+  animation-play-state: paused;
+  transform: translateY(-3px) scale(1.06);
+}
+.cart-fab__icon {
+  font-size: 24px;
+  line-height: 1;
+}
+.cart-fab__badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  background: var(--color-danger);
+  top: 4px;
+  right: 4px;
+  background: #e53935;
   color: #fff;
-  border-radius: var(--radius-full);
+  border-radius: 9999px;
   font-size: 10px;
   font-weight: 800;
-  min-width: 17px;
-  height: 17px;
+  min-width: 18px;
+  height: 18px;
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 0 3px;
+  padding: 0 4px;
   line-height: 1;
-  border: 1.5px solid #fff;
+  border: 2px solid #fff;
 }
-
-.cart-badge.show {
+.cart-fab__badge.show {
   display: flex;
 }
+
+@keyframes fab-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-7px); }
+}
+
+/* 네비게이션 내 구형 cart-icon (플로팅으로 대체됨) */
+.cart-icon { display: none; }
+.cart-badge { display: none !important; }
 
 /* 햄버거 버튼 */
 .hamburger {

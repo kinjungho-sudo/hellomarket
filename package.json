@@ -4,6 +4,6 @@
   "description": "헬로우가든마켓 독립몰",
   "private": true,
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.4"
+    "@supabase/supabase-js": "^2.104.0"
   }
 }
