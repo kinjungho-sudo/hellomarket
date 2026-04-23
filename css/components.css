@@ -154,6 +154,39 @@
   transform: translateY(-4px);
 }
 
+/* 품절 카드 — 흐릿하게 */
+.product-card.sold-out {
+  opacity: 0.55;
+  pointer-events: none;  /* 호버/클릭 방지 */
+}
+.product-card.sold-out:hover {
+  transform: none;
+  box-shadow: var(--shadow-card);
+}
+
+/* 품절 오버레이 — 이미지 가운데 텍스트 */
+.product-card__soldout-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.38);
+  z-index: 2;
+  pointer-events: none;
+}
+.product-card__soldout-overlay span {
+  background: rgba(0, 0, 0, 0.70);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 8px 22px;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(255,255,255,0.35);
+}
+
 /* 이미지 영역 */
 .product-card__img {
   aspect-ratio: 3 / 4;           /* 세로형 비율 — 실제 식물 사진에 최적 */

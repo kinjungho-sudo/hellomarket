@@ -220,11 +220,13 @@
 
     const imgWrap = document.createElement('div')
     imgWrap.className = 'post-card-image'
-    if (post.thumbnail) {
+    const cardImgSrc = post.image_url || post.thumbnail
+    if (cardImgSrc) {
       const img = document.createElement('img')
-      img.src = post.thumbnail
+      img.src = cardImgSrc
       img.alt = post.title || ''
       img.loading = 'lazy'
+      img.onerror = () => { imgWrap.textContent = '🌿' }
       imgWrap.appendChild(img)
     } else {
       imgWrap.textContent = '🌿'
@@ -288,10 +290,12 @@
     const actionsEl = document.getElementById('modal-actions')
 
     imageEl.textContent = ''
-    if (post.thumbnail) {
+    const modalImgSrc = post.image_url || post.thumbnail
+    if (modalImgSrc) {
       const img = document.createElement('img')
-      img.src = post.thumbnail
+      img.src = modalImgSrc
       img.alt = post.title || ''
+      img.onerror = () => { imageEl.textContent = '🌿' }
       imageEl.appendChild(img)
     } else {
       imageEl.textContent = '🌿'
