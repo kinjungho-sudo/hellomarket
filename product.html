@@ -226,6 +226,21 @@
     .btn-cart-main:hover { background: var(--color-yellow-dark); box-shadow: var(--shadow-yellow); }
     .btn-cart-main:active { transform: scale(0.99); }
     .btn-cart-main:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
+    .btn-buynow-main {
+      flex: 1;
+      height: 52px;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .btn-buynow-main:hover { background: var(--color-primary-dark); box-shadow: var(--shadow-md); }
+    .btn-buynow-main:active { transform: scale(0.99); }
+    .btn-buynow-main:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
     .btn-wish-main {
       width: 52px;
       height: 52px;
@@ -1037,6 +1052,28 @@
         showToast(isActive ? '위시리스트에 추가했어요 ♥' : '위시리스트에서 제거했어요', '')
       })
 
+      // 즉시 구매 버튼
+      const buyNowBtn = document.createElement('button')
+      buyNowBtn.className = 'btn-buynow-main'
+      if (soldOut) {
+        buyNowBtn.textContent = '품절'
+        buyNowBtn.disabled = true
+      } else {
+        buyNowBtn.textContent = '즉시 구매'
+        buyNowBtn.addEventListener('click', () => {
+          sessionStorage.setItem('hgm_buynow', JSON.stringify({
+            id: String(p.id),
+            name: p.name,
+            price: p.price,
+            delivery: deliveryFeeAmount,
+            imageUrl: p.image_url || '',
+            quantity: qty,
+          }))
+          window.location.href = '/cart.html?buynow=1'
+        })
+      }
+
+      actions.appendChild(buyNowBtn)
       actions.appendChild(cartBtn)
       actions.appendChild(wishBtn)
       infoCol.appendChild(actions)

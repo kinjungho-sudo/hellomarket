@@ -714,6 +714,71 @@
       mobileMenu.classList.toggle('open')
       hamburger.classList.toggle('open')
     })
+
+    /* --------------------------------------------------
+       즉시 구매 모드 — ?buynow=1 파라미터 감지
+       상품 상세에서 "즉시 구매" 클릭 시 진입
+    -------------------------------------------------- */
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('buynow') === '1') {
+      const buynowRaw = sessionStorage.getItem('hgm_buynow')
+      sessionStorage.removeItem('hgm_buynow')
+      if (buynowRaw) {
+        try {
+          const buynowItem = JSON.parse(buynowRaw)
+
+          // 기존 장바구니 백업 → 즉시 구매 상품 단독으로 임시 세팅
+          const cartBackup = localStorage.getItem('hgm_cart')
+          localStorage.setItem('hgm_cart', JSON.stringify([{
+            id: buynowItem.id,
+            name: buynowItem.name,
+            price: buynowItem.price,
+            delivery: buynowItem.delivery ?? 3000,
+            imageUrl: buynowItem.imageUrl || '',
+            quantity: buynowItem.quantity || 1,
+          }]))
+
+          renderCart()
+          updateCartBadge()
+
+          // 모달 닫힐 때 원래 장바구니 복원
+          document.getElementById('modal-close').addEventListener('click', function() {
+            if (cartBackup !== null) localStorage.setItem('hgm_cart', cartBackup)
+            else localStorage.removeItem('hgm_cart')
+            renderCart()
+            updateCartBadge()
+          }, { once: true })
+
+          document.getElementById('order-modal').addEventListener('click', function(e) {
+            if (e.target === document.getElementById('order-modal')) {
+              if (cartBackup !== null) localStorage.setItem('hgm_cart', cartBackup)
+              else localStorage.removeItem('hgm_cart')
+              renderCart()
+              updateCartBadge()
+            }
+          }, { once: true })
+
+          // 결제 완료 후에는 원래 장바구니 복원하지 않음 (order-complete로 이동)
+
+          // 주문 모달 자동 오픈
+          const sess = await getSession()
+          if (sess.session) {
+            savedUserId = sess.session.user.id
+            isGuest = false
+            const guestFields = document.getElementById('guest-fields')
+            if (guestFields) guestFields.style.display = 'none'
+          } else {
+            savedUserId = null
+            isGuest = true
+            const guestFields = document.getElementById('guest-fields')
+            if (guestFields) guestFields.style.display = 'block'
+          }
+          openModal()
+        } catch (e) {
+          console.error('[buynow] 파싱 실패:', e)
+        }
+      }
+    }
   </script>
 
   <!-- TossPayments SDK (non-module) -->
