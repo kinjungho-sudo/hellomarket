@@ -13,7 +13,7 @@ import { supabase } from '../config.js'
  */
 export async function trackEvent({ eventType, productId, userId, sessionId, page, referrer }) {
   try {
-    const { data, error } = await supabase.from('hgm_analytics_events').insert([
+    const { data, error } = await supabase.from('hgm_analytics').insert([
       {
         event_type: eventType,
         product_id: productId || null,
@@ -43,7 +43,7 @@ export async function getTodayVisitors() {
     todayStart.setHours(0, 0, 0, 0)
 
     const { data, error } = await supabase
-      .from('hgm_analytics_events')
+      .from('hgm_analytics')
       .select('session_id')
       .eq('event_type', 'page_view')
       .gte('created_at', todayStart.toISOString())
@@ -73,10 +73,10 @@ export async function getHourlyOrderStats(date) {
 
     const { data, error } = await supabase
       .from('hgm_orders')
-      .select('created_at, total_amount')
+      .select('created_at, total_price')
       .gte('created_at', startTime)
       .lte('created_at', endTime)
-      .neq('status', 'cancelled')
+      .neq('status', '취소')
 
     if (error) throw error
 
@@ -91,7 +91,7 @@ export async function getHourlyOrderStats(date) {
     data.forEach((order) => {
       const hour = new Date(order.created_at).getHours()
       hourlyStats[hour].count += 1
-      hourlyStats[hour].revenue += order.total_amount || 0
+      hourlyStats[hour].revenue += order.total_price || 0
     })
 
     return hourlyStats
@@ -147,9 +147,9 @@ export async function getWeeklyRevenueStats() {
 
     const { data, error } = await supabase
       .from('hgm_orders')
-      .select('created_at, total_amount')
+      .select('created_at, total_price')
       .gte('created_at', sevenDaysAgo.toISOString())
-      .neq('status', 'cancelled')
+      .neq('status', '취소')
       .order('created_at', { ascending: true })
 
     if (error) throw error
@@ -168,7 +168,7 @@ export async function getWeeklyRevenueStats() {
       const dateKey = order.created_at.split('T')[0]
       if (statsMap[dateKey]) {
         statsMap[dateKey].count += 1
-        statsMap[dateKey].revenue += order.total_amount || 0
+        statsMap[dateKey].revenue += order.total_price || 0
       }
     })
 

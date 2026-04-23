@@ -52,15 +52,15 @@ export async function sendTelegram(message) {
     // DB에서 봇 설정 가져오기
     const settings = await getNotificationSettings()
     if (settings.error) throw new Error('알림 설정을 불러올 수 없습니다.')
-    if (!settings.is_enabled) return { success: false, reason: '알림 비활성화 상태' }
-    if (!settings.bot_token || !settings.chat_id) throw new Error('Bot Token 또는 Chat ID가 설정되지 않았습니다.')
+    if (!settings.notify_on_order) return { success: false, reason: '알림 비활성화 상태' }
+    if (!settings.telegram_bot_token || !settings.telegram_chat_id) throw new Error('Bot Token 또는 Chat ID가 설정되지 않았습니다.')
 
-    const url = `https://api.telegram.org/bot${settings.bot_token}/sendMessage`
+    const url = `https://api.telegram.org/bot${settings.telegram_bot_token}/sendMessage`
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: settings.chat_id,
+        chat_id: settings.telegram_chat_id,
         text: message,
         parse_mode: 'HTML',
       }),
@@ -100,7 +100,7 @@ export async function sendOrderAlert(order) {
       `📋 주문번호: ${order.order_number}`,
       `👤 주문자: ${order.receiver_name}`,
       itemLines,
-      `💰 총 결제금액: ${order.total_amount?.toLocaleString()}원`,
+      `💰 총 결제금액: ${order.total_price?.toLocaleString()}원`,
       `⏰ 주문시각: ${orderTime}`,
     ].join('\n')
 

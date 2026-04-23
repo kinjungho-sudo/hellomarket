@@ -37,13 +37,13 @@ export async function createOrder(userId, items, receiverInfo) {
         {
           order_number: orderNumber,
           user_id: userId,
-          total_amount: totalAmount,
-          status: 'pending',
+          total_price: totalAmount,
+          status: '주문완료',
           receiver_name: receiverInfo.name,
           receiver_phone: receiverInfo.phone,
-          receiver_address: receiverInfo.address,
-          receiver_address_detail: receiverInfo.addressDetail,
-          receiver_zipcode: receiverInfo.zipcode,
+          address: receiverInfo.address,
+          address_detail: receiverInfo.addressDetail,
+          zipcode: receiverInfo.zipcode,
           delivery_memo: receiverInfo.deliveryMemo || '',
         },
       ])
@@ -202,8 +202,8 @@ export async function getOrderStats() {
     // 취소 제외한 주문만 집계
     const { data, error } = await supabase
       .from('hgm_orders')
-      .select('created_at, total_amount')
-      .neq('status', 'cancelled')
+      .select('created_at, total_price')
+      .neq('status', '취소')
 
     if (error) throw error
 
@@ -212,7 +212,7 @@ export async function getOrderStats() {
       const filtered = orders.filter((o) => new Date(o.created_at) >= new Date(fromDate))
       return {
         count: filtered.length,
-        revenue: filtered.reduce((sum, o) => sum + (o.total_amount || 0), 0),
+        revenue: filtered.reduce((sum, o) => sum + (o.total_price || 0), 0),
       }
     }
 
