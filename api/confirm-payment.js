@@ -1,7 +1,8 @@
 // Vercel Serverless Function — TossPayments 결제 검증 + 주문 저장
 // POST /api/confirm-payment
 // Body: { paymentKey, orderId, amount, orderData }
-//   orderData: { userId, items, receiverInfo }
+//   orderData: { userId, isGuest, items, receiverInfo }
+//   receiverInfo: { name, phone, address, addressDetail, zipcode, deliveryMemo, ordererName, ordererEmail }
 
 import { createClient } from '@supabase/supabase-js'
 
@@ -55,25 +56,34 @@ export default async function handler(req, res) {
 
   // 2. Supabase에 주문 저장 (service role key로 RLS 우회)
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-  const { userId, items, receiverInfo } = orderData
+  const { userId, isGuest, items, receiverInfo } = orderData
   const orderNumber = generateOrderNumber()
+
+  // 비회원 여부 판단 (userId가 없거나 isGuest 플래그)
+  const guestOrder = isGuest || !userId
 
   try {
     const { data: order, error: orderErr } = await supabase
       .from('hgm_orders')
       .insert([{
-        order_number: orderNumber,
-        user_id: userId,
-        total_amount: amount,
-        status: 'confirmed',
-        receiver_name: receiverInfo.name,
-        receiver_phone: receiverInfo.phone,
-        receiver_address: receiverInfo.address,
-        receiver_address_detail: receiverInfo.addressDetail || '',
-        receiver_zipcode: receiverInfo.zipcode,
-        delivery_memo: receiverInfo.deliveryMemo || '',
-        payment_key: tossResult.paymentKey,
-        payment_method: tossResult.method,
+        order_number:    orderNumber,
+        user_id:         guestOrder ? null : userId,
+        is_guest:        guestOrder,
+        total_price:     amount,
+        status:          '결제완료',
+        payment_method:  tossResult.method || null,
+        payment_status:  '결제완료',
+        payment_key:     tossResult.paymentKey,
+        // 수령자 정보
+        receiver_name:   receiverInfo.name,
+        receiver_phone:  receiverInfo.phone,
+        address:         receiverInfo.address,
+        address_detail:  receiverInfo.addressDetail || '',
+        zipcode:         receiverInfo.zipcode,
+        delivery_memo:   receiverInfo.deliveryMemo || '',
+        // 비회원 주문자 정보 (회원 주문 시에도 저장)
+        orderer_name:    receiverInfo.ordererName || receiverInfo.name,
+        orderer_email:   receiverInfo.ordererEmail || null,
       }])
       .select()
       .single()
@@ -81,28 +91,28 @@ export default async function handler(req, res) {
     if (orderErr) throw orderErr
 
     const orderItems = items.map(item => ({
-      order_id: order.id,
-      product_id: item.productId,
+      order_id:     order.id,
+      product_id:   item.productId,
       product_name: item.productName,
-      quantity: item.quantity,
-      price: item.price,
+      quantity:     item.quantity,
+      price:        item.price,
     }))
 
     const { error: itemsErr } = await supabase.from('hgm_order_items').insert(orderItems)
     if (itemsErr) throw itemsErr
 
     return res.status(200).json({
-      success: true,
+      success:       true,
       orderNumber,
-      orderId: order.id,
+      orderId:       order.id,
       amount,
       paymentMethod: tossResult.method,
     })
   } catch (err) {
     console.error('[confirm-payment] 주문 저장 실패:', err)
-    // 결제는 됐으나 DB 저장 실패 → 관리자 알림 필요 (토스 paymentKey 기록)
+    // 결제는 됐으나 DB 저장 실패 → paymentKey 응답에 포함
     return res.status(500).json({
-      error: '주문 저장 중 오류가 발생했습니다. 고객센터로 문의해 주세요.',
+      error:      '주문 저장 중 오류가 발생했습니다. 고객센터로 문의해 주세요.',
       paymentKey: tossResult.paymentKey,
     })
   }

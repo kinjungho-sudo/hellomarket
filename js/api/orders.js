@@ -144,7 +144,7 @@ export async function updateOrderStatus(orderId, status) {
  * @param {number} [options.limit=20] - 페이지당 조회 수
  * @param {number} [options.offset=0] - 시작 오프셋
  */
-export async function getAllOrders({ status, startDate, endDate, search, limit = 20, offset = 0 } = {}) {
+export async function getAllOrders({ status, startDate, endDate, search, guestOnly, limit = 20, offset = 0 } = {}) {
   try {
     let query = supabase
       .from('hgm_orders')
@@ -156,6 +156,11 @@ export async function getAllOrders({ status, startDate, endDate, search, limit =
       query = query.eq('status', status)
     }
 
+    // 비회원 필터
+    if (guestOnly) {
+      query = query.eq('is_guest', true)
+    }
+
     // 날짜 범위 필터 적용
     if (startDate) {
       query = query.gte('created_at', startDate)
@@ -164,9 +169,9 @@ export async function getAllOrders({ status, startDate, endDate, search, limit =
       query = query.lte('created_at', endDate)
     }
 
-    // 주문번호 또는 수령자명으로 검색
+    // 주문번호, 수령자명, 주문자명, 이메일로 검색
     if (search) {
-      query = query.or(`order_number.ilike.%${search}%,receiver_name.ilike.%${search}%`)
+      query = query.or(`order_number.ilike.%${search}%,receiver_name.ilike.%${search}%,orderer_name.ilike.%${search}%,orderer_email.ilike.%${search}%`)
     }
 
     const { data, error, count } = await query.range(offset, offset + limit - 1)

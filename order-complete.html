@@ -126,16 +126,17 @@
     const amount     = Number(params.get('amount'))
     const receiverInfo = JSON.parse(sessionStorage.getItem('hgm_receiver') || 'null')
     const cartSnapshot = JSON.parse(sessionStorage.getItem('hgm_cart_snapshot') || '[]')
-    const userId       = sessionStorage.getItem('hgm_user_id') || null  // 비회원은 null
+    const userId       = sessionStorage.getItem('hgm_user_id') || null
+    const isGuest      = sessionStorage.getItem('hgm_is_guest') === '1'
 
     if (!paymentKey || !orderId || !amount || !receiverInfo) {
       renderFail('결제 정보가 올바르지 않습니다. 다시 시도해 주세요.')
     } else {
-      confirmPayment(paymentKey, orderId, amount, receiverInfo, cartSnapshot, userId)
+      confirmPayment(paymentKey, orderId, amount, receiverInfo, cartSnapshot, userId, isGuest)
     }
   }
 
-  async function confirmPayment(paymentKey, orderId, amount, receiverInfo, cartItems, userId) {
+  async function confirmPayment(paymentKey, orderId, amount, receiverInfo, cartItems, userId, isGuest) {
     try {
       const res = await fetch('/api/confirm-payment', {
         method: 'POST',
@@ -146,6 +147,7 @@
           amount,
           orderData: {
             userId,
+            isGuest,
             receiverInfo,
             items: cartItems.map(function(item) {
               return { productId: item.id, productName: item.name, quantity: item.quantity, price: item.price }

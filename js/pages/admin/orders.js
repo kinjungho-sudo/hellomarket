@@ -1,9 +1,8 @@
-﻿// admin/orders.js — 주문 관리 페이지 스크립트
+// admin/orders.js — 주문 관리 페이지 스크립트
 import { requireAdmin, signOut } from '/js/auth.js'
 import { supabase } from '/js/config.js'
 import { getAllOrders, updateOrderStatus } from '/js/api/orders.js'
 
-// 관리자 접근 제어
 await requireAdmin()
 
 try {
@@ -28,15 +27,12 @@ document.getElementById('sidebar-overlay')?.addEventListener('click', () => {
 
 const fmt = (n) => (n ?? 0).toLocaleString('ko-KR')
 
-// 현재 필터 상태
 let currentStatus = ''
+let guestOnly = false   // 비회원 필터
 let currentPage = 1
 const PAGE_SIZE = 20
-
-// 현재 열려있는 주문 ID
 let currentOrderId = null
 
-// 상태 뱃지 클래스 매핑
 const STATUS_CLASS = {
   '주문완료': 'status-pending',
   '결제완료': 'status-shipping',
@@ -51,31 +47,33 @@ async function initPage() {
   setupEventListeners()
 }
 
-// 주문 목록 로드
 async function loadOrders() {
   const tbody = document.getElementById('orders-body')
   if (!tbody) return
   tbody.textContent = ''
 
   try {
-    const search = document.getElementById('filter-search')?.value?.trim()
+    const search    = document.getElementById('filter-search')?.value?.trim()
     const startDate = document.getElementById('filter-start')?.value
-    const endDate = document.getElementById('filter-end')?.value
+    const endDate   = document.getElementById('filter-end')?.value
 
     const result = await getAllOrders({
-      status: currentStatus || undefined,
-      search: search || undefined,
+      status:    currentStatus || undefined,
+      search:    search || undefined,
       startDate: startDate || undefined,
-      endDate: endDate ? endDate + 'T23:59:59' : undefined,
-      limit: PAGE_SIZE,
-      offset: (currentPage - 1) * PAGE_SIZE,
+      endDate:   endDate ? endDate + 'T23:59:59' : undefined,
+      guestOnly: guestOnly || undefined,
+      limit:     PAGE_SIZE,
+      offset:    (currentPage - 1) * PAGE_SIZE,
     })
     if (result.error) throw new Error(result.error)
     const orders = result.data ?? []
 
     if (orders.length === 0) {
-      const tr = tbody.insertRow(); const td = tr.insertCell()
-      td.colSpan = 7; td.textContent = '주문이 없습니다.'
+      const tr = tbody.insertRow()
+      const td = tr.insertCell()
+      td.colSpan = 7
+      td.textContent = '주문이 없습니다.'
       td.style.cssText = 'text-align:center; padding:40px; color:var(--color-text-light)'
       return
     }
@@ -83,23 +81,40 @@ async function loadOrders() {
     orders.forEach(function(o) {
       const items = o.hgm_order_items ?? []
       const itemSummary = items.length > 0
-        ? items[0].product_name + (items.length > 1 ? ' 외 ' + (items.length-1) + '건' : '')
+        ? items[0].product_name + (items.length > 1 ? ' 외 ' + (items.length - 1) + '건' : '')
         : '—'
-      const orderDate = new Date(o.created_at).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+      const orderDate = new Date(o.created_at).toLocaleString('ko-KR', {
+        month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+      })
+
+      // 주문자 표시: 비회원이면 [비회원] 뱃지
+      const ordererDisplay = o.is_guest
+        ? (o.orderer_name || o.receiver_name || '—')
+        : (o.receiver_name || '—')
 
       const tr = tbody.insertRow()
 
-      // 주문번호 (클릭 시 상세 모달)
+      // 주문번호
       const tdNum = tr.insertCell()
       const numLink = document.createElement('a')
-      numLink.href = '#'; numLink.textContent = o.order_number ?? '—'
+      numLink.href = '#'
+      numLink.textContent = o.order_number ?? '—'
       numLink.style.cssText = 'color:var(--color-primary); font-weight:600; font-size:13px;'
       numLink.addEventListener('click', function(e) { e.preventDefault(); openOrderDetail(o) })
       tdNum.appendChild(numLink)
 
-      const tdName = tr.insertCell(); tdName.textContent = o.receiver_name ?? '—'
-      const tdItem = tr.insertCell(); tdItem.textContent = itemSummary; tdItem.style.fontSize = '13px'
-      const tdAmt = tr.insertCell(); tdAmt.textContent = fmt(o.total_amount) + '원'
+      // 주문자 (비회원 뱃지)
+      const tdName = tr.insertCell()
+      tdName.textContent = ordererDisplay
+      if (o.is_guest) {
+        const badge = document.createElement('span')
+        badge.textContent = '비회원'
+        badge.style.cssText = 'margin-left:4px; font-size:10px; font-weight:700; color:#fff; background:#999; border-radius:4px; padding:1px 5px; vertical-align:middle;'
+        tdName.appendChild(badge)
+      }
+
+      const tdItem  = tr.insertCell(); tdItem.textContent = itemSummary; tdItem.style.fontSize = '13px'
+      const tdAmt   = tr.insertCell(); tdAmt.textContent  = fmt(o.total_price) + '원'
 
       const tdStatus = tr.insertCell()
       const badge = document.createElement('span')
@@ -109,13 +124,12 @@ async function loadOrders() {
 
       const tdDate = tr.insertCell(); tdDate.textContent = orderDate; tdDate.style.fontSize = '12px'
 
-      // 상태 변경 select
+      // 인라인 상태 변경 select
       const tdAction = tr.insertCell()
       const sel = document.createElement('select')
       sel.className = 'admin-input'
       sel.style.cssText = 'height:30px; font-size:12px; width:90px;'
-      const statusOptions = ['주문완료','결제완료','배송준비','배송중','배송완료','취소']
-      statusOptions.forEach(function(s) {
+      ;['주문완료','결제완료','배송준비','배송중','배송완료','취소'].forEach(function(s) {
         const opt = document.createElement('option')
         opt.value = s; opt.textContent = s
         if (s === o.status) opt.selected = true
@@ -123,9 +137,8 @@ async function loadOrders() {
       })
       sel.addEventListener('change', async function() {
         try {
-          const result = await updateOrderStatus(o.id, sel.value)
-          if (result.error) throw new Error(result.error)
-          // 뱃지 즉시 업데이트
+          const r = await updateOrderStatus(o.id, sel.value)
+          if (r.error) throw new Error(r.error)
           badge.className = 'status-badge ' + (STATUS_CLASS[sel.value] ?? 'status-pending')
           badge.textContent = sel.value
         } catch (err) {
@@ -145,48 +158,74 @@ async function loadOrders() {
   }
 }
 
-// 주문 상세 모달 열기
 function openOrderDetail(order) {
   currentOrderId = order.id
   const contentEl = document.getElementById('order-detail-content')
   if (!contentEl) return
-
   contentEl.textContent = ''
 
   const items = order.hgm_order_items ?? []
 
-  // 주문 정보 행 생성 헬퍼
-  function makeRow(label, value) {
+  function makeRow(label, value, highlight) {
     const row = document.createElement('div')
     row.className = 'order-detail-row'
     const lbl = document.createElement('span')
-    lbl.className = 'order-detail-label'; lbl.textContent = label
-    const val = document.createElement('span'); val.textContent = value ?? '—'
+    lbl.className = 'order-detail-label'
+    lbl.textContent = label
+    const val = document.createElement('span')
+    val.textContent = value ?? '—'
+    if (highlight) val.style.cssText = 'font-weight:700; color:var(--color-primary);'
     row.appendChild(lbl); row.appendChild(val)
     return row
   }
 
-  contentEl.appendChild(makeRow('주문번호', order.order_number))
-  contentEl.appendChild(makeRow('주문자', order.receiver_name))
-  contentEl.appendChild(makeRow('연락처', order.receiver_phone))
-  contentEl.appendChild(makeRow('배송지', (order.receiver_address ?? '') + ' ' + (order.receiver_address_detail ?? '')))
-  contentEl.appendChild(makeRow('우편번호', order.receiver_zipcode))
-  contentEl.appendChild(makeRow('배송메모', order.delivery_memo || '없음'))
-  contentEl.appendChild(makeRow('총 결제금액', fmt(order.total_amount) + '원'))
+  function makeSectionTitle(text) {
+    const el = document.createElement('div')
+    el.style.cssText = 'font-size:12px; font-weight:800; color:var(--color-text-light); letter-spacing:0.06em; text-transform:uppercase; margin:16px 0 6px;'
+    el.textContent = text
+    return el
+  }
 
-  // 주문 상품 목록
+  // 주문 기본 정보
+  contentEl.appendChild(makeSectionTitle('주문 정보'))
+  contentEl.appendChild(makeRow('주문번호', order.order_number, true))
+  contentEl.appendChild(makeRow('총 결제금액', fmt(order.total_price) + '원', true))
+  contentEl.appendChild(makeRow('결제 수단', order.payment_method || '—'))
+  contentEl.appendChild(makeRow('결제 상태', order.payment_status || '—'))
+
+  // 주문자 정보 (비회원/회원 구분)
+  contentEl.appendChild(makeSectionTitle(order.is_guest ? '주문자 정보 (비회원)' : '주문자 정보'))
+  if (order.is_guest) {
+    const guestBadge = document.createElement('div')
+    guestBadge.style.cssText = 'display:inline-block; font-size:11px; font-weight:700; color:#fff; background:#888; border-radius:4px; padding:2px 8px; margin-bottom:8px;'
+    guestBadge.textContent = '비회원 주문'
+    contentEl.appendChild(guestBadge)
+  }
+  contentEl.appendChild(makeRow('주문자 이름', order.orderer_name || order.receiver_name))
+  if (order.orderer_email) {
+    contentEl.appendChild(makeRow('주문자 이메일', order.orderer_email))
+  }
+
+  // 배송지 정보
+  contentEl.appendChild(makeSectionTitle('배송지 정보'))
+  contentEl.appendChild(makeRow('받는 분', order.receiver_name))
+  contentEl.appendChild(makeRow('연락처', order.receiver_phone))
+  contentEl.appendChild(makeRow('주소', (order.address ?? '') + (order.address_detail ? ' ' + order.address_detail : '')))
+  contentEl.appendChild(makeRow('우편번호', order.zipcode))
+  contentEl.appendChild(makeRow('배송 메모', order.delivery_memo || '없음'))
+
+  // 주문 상품
   if (items.length > 0) {
-    const heading = document.createElement('div')
-    heading.style.cssText = 'font-size:13px; font-weight:700; margin: 12px 0 8px;'
-    heading.textContent = '주문 상품'
-    contentEl.appendChild(heading)
+    contentEl.appendChild(makeSectionTitle('주문 상품'))
     items.forEach(function(item) {
-      const row = makeRow(item.product_name, item.quantity + '개 × ' + fmt(item.price) + '원')
-      contentEl.appendChild(row)
+      contentEl.appendChild(makeRow(
+        item.product_name,
+        item.quantity + '개 × ' + fmt(item.price) + '원 = ' + fmt(item.quantity * item.price) + '원'
+      ))
     })
   }
 
-  // 현재 상태 select에 반영
+  // 현재 상태 select 반영
   const sel = document.getElementById('order-status-select')
   if (sel) sel.value = order.status
 
@@ -194,28 +233,34 @@ function openOrderDetail(order) {
 }
 
 function setupEventListeners() {
-  // 탭 클릭
   document.querySelectorAll('.tab-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
       btn.classList.add('active')
-      currentStatus = btn.dataset.status ?? ''
+      if (btn.dataset.guest === '1') {
+        // 비회원 필터: 상태 필터 초기화
+        guestOnly = true
+        currentStatus = ''
+      } else {
+        guestOnly = false
+        currentStatus = btn.dataset.status ?? ''
+      }
       currentPage = 1
       loadOrders()
     })
   })
 
-  // 검색 버튼
   document.getElementById('btn-filter')?.addEventListener('click', function() {
     currentPage = 1; loadOrders()
   })
+  document.getElementById('filter-search')?.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { currentPage = 1; loadOrders() }
+  })
 
-  // 주문 상세 모달 닫기
   document.getElementById('btn-order-modal-close')?.addEventListener('click', function() {
     document.getElementById('order-modal')?.classList.remove('open')
   })
 
-  // 주문 상태 저장 버튼
   document.getElementById('btn-order-status-save')?.addEventListener('click', async function() {
     if (!currentOrderId) return
     const sel = document.getElementById('order-status-select')
@@ -231,7 +276,6 @@ function setupEventListeners() {
     }
   })
 
-  // 모달 바깥 클릭
   document.getElementById('order-modal')?.addEventListener('click', function(e) {
     if (e.target === this) document.getElementById('order-modal')?.classList.remove('open')
   })
