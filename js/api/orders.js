@@ -32,27 +32,35 @@ export async function createOrder(userId, items, receiverInfo) {
     const orderNumber = generateOrderNumber()
 
     // 1. hgm_orders 테이블에 주문 헤더 삽입
-    const { data: order, error: orderError } = await supabase
+    const orderRowFull = {
+      order_number:   orderNumber,
+      user_id:        userId || null,
+      is_guest:       !userId,
+      orderer_name:   receiverInfo.ordererName || receiverInfo.name,
+      orderer_email:  receiverInfo.ordererEmail || null,
+      total_price:    totalAmount,
+      status:         '주문완료',
+      receiver_name:  receiverInfo.name,
+      receiver_phone: receiverInfo.phone,
+      address:        receiverInfo.address,
+      address_detail: receiverInfo.addressDetail || '',
+      zipcode:        receiverInfo.zipcode || '',
+      delivery_memo:  receiverInfo.deliveryMemo || '',
+    }
+
+    let { data: order, error: orderError } = await supabase
       .from('hgm_orders')
-      .insert([
-        {
-          order_number: orderNumber,
-          user_id: userId || null,
-          is_guest: !userId,
-          orderer_name: receiverInfo.ordererName || receiverInfo.name,
-          orderer_email: receiverInfo.ordererEmail || null,
-          total_price: totalAmount,
-          status: '주문완료',
-          receiver_name: receiverInfo.name,
-          receiver_phone: receiverInfo.phone,
-          address: receiverInfo.address,
-          address_detail: receiverInfo.addressDetail,
-          zipcode: receiverInfo.zipcode,
-          delivery_memo: receiverInfo.deliveryMemo || '',
-        },
-      ])
+      .insert([orderRowFull])
       .select()
       .single()
+
+    // is_guest / orderer 컬럼이 DB에 없을 경우 해당 컬럼 제외 후 재시도
+    if (orderError && orderError.message && orderError.message.includes('column')) {
+      const { is_guest, orderer_name, orderer_email, ...orderRowBase } = orderRowFull
+      const retry = await supabase.from('hgm_orders').insert([orderRowBase]).select().single()
+      order = retry.data
+      orderError = retry.error
+    }
 
     if (orderError) throw orderError
 
