@@ -1,6 +1,6 @@
 // Supabase 클라이언트 초기화
 // SUPABASE_ANON_KEY는 .env에서 주입 — 직접 하드코딩 금지
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
 const SUPABASE_URL = 'https://gqynptpjomcqzxyykqic.supabase.co'
 // 아래 값을 Supabase 대시보드 → Settings → API → anon public key에서 복사해서 입력

@@ -958,7 +958,25 @@
       let qty = 1
       qtyMinus.disabled = true
 
-      // 총액 표시 업데이트 함수
+      qtyControl.appendChild(qtyMinus)
+      qtyControl.appendChild(qtyInput)
+      qtyControl.appendChild(qtyPlus)
+      infoCol.appendChild(qtyControl)
+
+      // 총 결제금액 표시
+      const totalWrap = document.createElement('div')
+      totalWrap.className = 'total-price-wrap'
+      const totalLabel = document.createElement('span')
+      totalLabel.className = 'total-price-wrap__label'
+      totalLabel.textContent = '총 결제금액'
+      const totalAmountEl = document.createElement('span')
+      totalAmountEl.className = 'total-price-wrap__amount'
+      totalAmountEl.textContent = (Number(p.price) + 4000).toLocaleString() + '원'
+      totalWrap.appendChild(totalLabel)
+      totalWrap.appendChild(totalAmountEl)
+      infoCol.appendChild(totalWrap)
+
+      // 총액 업데이트 (totalAmountEl 선언 이후에 정의)
       function updateTotal() {
         const base = Number(p.price) * qty
         const total = base + deliveryFeeAmount
@@ -982,24 +1000,6 @@
           updateTotal()
         }
       })
-
-      qtyControl.appendChild(qtyMinus)
-      qtyControl.appendChild(qtyInput)
-      qtyControl.appendChild(qtyPlus)
-      infoCol.appendChild(qtyControl)
-
-      // 총 결제금액 표시
-      const totalWrap = document.createElement('div')
-      totalWrap.className = 'total-price-wrap'
-      const totalLabel = document.createElement('span')
-      totalLabel.className = 'total-price-wrap__label'
-      totalLabel.textContent = '총 결제금액'
-      const totalAmountEl = document.createElement('span')
-      totalAmountEl.className = 'total-price-wrap__amount'
-      totalAmountEl.textContent = (Number(p.price) + 4000).toLocaleString() + '원'
-      totalWrap.appendChild(totalLabel)
-      totalWrap.appendChild(totalAmountEl)
-      infoCol.appendChild(totalWrap)
 
       // 구매 액션 버튼
       const actions = document.createElement('div')

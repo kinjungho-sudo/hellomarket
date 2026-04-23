@@ -269,6 +269,18 @@
 
       <!-- STEP 1: 배송 정보 -->
       <form id="order-form" novalidate>
+        <!-- 비회원 전용 입력 (로그인 시 자동 숨김) -->
+        <div id="guest-fields">
+          <div class="form-group">
+            <label for="orderer-name">주문자 이름 <span style="color:var(--color-danger)">*</span></label>
+            <input type="text" id="orderer-name" placeholder="홍길동" autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="orderer-email">이메일 <span style="color:var(--color-danger)">*</span></label>
+            <input type="email" id="orderer-email" placeholder="example@email.com" autocomplete="email" />
+          </div>
+          <div style="height:1px;background:rgba(0,0,0,0.08);margin:4px 0 16px;"></div>
+        </div>
         <div class="form-group">
           <label for="receiver-name">받는 분 이름 <span style="color:var(--color-danger)">*</span></label>
           <input type="text" id="receiver-name" placeholder="홍길동" autocomplete="name" required />
@@ -332,7 +344,8 @@
     let tossPayments = null
     let paymentWidgetInstance = null
     let savedReceiverInfo = null
-    let savedUserId = null
+    let savedUserId = null      // 로그인 회원이면 uuid, 비회원이면 null
+    let isGuest = true          // 비회원 여부
 
     /* --------------------------------------------------
        토스트
@@ -520,8 +533,18 @@
     document.getElementById('btn-order').addEventListener('click', async function() {
       if (getCart().length === 0) { showToast('장바구니가 비어있어요.', 'error'); return }
       const sess = await getSession()
-      if (!sess.session) { window.location.href = '/login.html?redirect=/cart.html'; return }
-      savedUserId = sess.session.user.id
+      if (sess.session) {
+        savedUserId = sess.session.user.id
+        isGuest = false
+        // 로그인 회원은 비회원 필드 숨김
+        const guestFields = document.getElementById('guest-fields')
+        if (guestFields) guestFields.style.display = 'none'
+      } else {
+        savedUserId = null
+        isGuest = true
+        const guestFields = document.getElementById('guest-fields')
+        if (guestFields) guestFields.style.display = 'block'
+      }
       openModal()
     })
 
@@ -564,11 +587,23 @@
       const memoCustom    = document.getElementById('delivery-memo-custom').value.trim()
       const deliveryMemo  = memoSelect === '직접 입력' ? memoCustom : memoSelect
 
+      // 비회원 추가 정보 검증
+      let ordererName  = ''
+      let ordererEmail = ''
+      if (isGuest) {
+        ordererName  = document.getElementById('orderer-name').value.trim()
+        ordererEmail = document.getElementById('orderer-email').value.trim()
+        if (!ordererName)  { showToast('주문자 이름을 입력해 주세요.', 'error'); return }
+        if (!ordererEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ordererEmail)) {
+          showToast('올바른 이메일 주소를 입력해 주세요.', 'error'); return
+        }
+      }
+
       if (!name)               { showToast('받는 분 이름을 입력해 주세요.', 'error'); return }
       if (!phone)              { showToast('연락처를 입력해 주세요.', 'error'); return }
       if (!zipcode || !address){ showToast('주소를 입력해 주세요.', 'error'); return }
 
-      savedReceiverInfo = { name, phone, zipcode, address, addressDetail, deliveryMemo }
+      savedReceiverInfo = { name, phone, zipcode, address, addressDetail, deliveryMemo, ordererName, ordererEmail }
 
       // STEP 2로 전환
       document.getElementById('order-form').style.display = 'none'
@@ -589,12 +624,16 @@
       sessionStorage.setItem('hgm_toss_amount', String(total))
       sessionStorage.setItem('hgm_receiver', JSON.stringify(savedReceiverInfo))
       sessionStorage.setItem('hgm_cart_snapshot', JSON.stringify(getCart()))
-      sessionStorage.setItem('hgm_user_id', savedUserId)
+      sessionStorage.setItem('hgm_user_id', savedUserId || '')
+      sessionStorage.setItem('hgm_is_guest', isGuest ? '1' : '0')
 
       try {
         // TossPayments SDK는 non-module script로 로드됨
         tossPayments = window.TossPayments(TOSS_CLIENT_KEY)
-        const customerKey = 'hgm-' + savedUserId.slice(0, 12)
+        // 비회원은 랜덤 키, 회원은 uuid 앞 12자리 사용
+        const customerKey = isGuest
+          ? 'guest-' + Date.now().toString(36)
+          : 'hgm-' + savedUserId.slice(0, 12)
         paymentWidgetInstance = tossPayments.widgets({ customerKey })
 
         await paymentWidgetInstance.setAmount({ currency: 'KRW', value: total })
@@ -639,14 +678,21 @@
       const baseUrl = isProd ? 'https://hellowgardenmarket.vercel.app' : window.location.origin
 
       try {
-        await paymentWidgetInstance.requestPayment({
+        const displayName = isGuest
+          ? (savedReceiverInfo.ordererName || savedReceiverInfo.name)
+          : savedReceiverInfo.name
+        const payload = {
           orderId: tossOrderId,
           orderName: getCart().length === 1 ? getCart()[0].name : getCart()[0].name + ' 외 ' + (getCart().length - 1) + '건',
           successUrl: baseUrl + '/order-complete.html?status=success',
           failUrl: baseUrl + '/order-complete.html?status=fail',
-          customerName: savedReceiverInfo.name,
+          customerName: displayName,
           customerMobilePhone: savedReceiverInfo.phone.replace(/-/g, ''),
-        })
+        }
+        if (isGuest && savedReceiverInfo.ordererEmail) {
+          payload.customerEmail = savedReceiverInfo.ordererEmail
+        }
+        await paymentWidgetInstance.requestPayment(payload)
       } catch (err) {
         console.error('[cart] 결제 요청 오류:', err)
         showToast(err.message || '결제 중 오류가 발생했습니다.', 'error')
