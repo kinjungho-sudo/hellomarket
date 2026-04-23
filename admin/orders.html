@@ -31,17 +31,17 @@
   <aside class="admin-sidebar" id="admin-sidebar">
     <div class="admin-sidebar-logo">🌻 HGM 관리자</div>
     <div class="admin-sidebar-label">메인</div>
-    <a href="index.html">📊 대시보드</a>
+    <a href="/admin/index.html">📊 대시보드</a>
     <div class="admin-sidebar-label">콘텐츠</div>
-    <a href="products.html">🌿 상품 관리</a>
-    <a href="gallery.html">🖼️ 갤러리 관리</a>
-    <a href="posts.html">📰 입고 소식</a>
+    <a href="/admin/products.html">🌿 상품 관리</a>
+    <a href="/admin/gallery.html">🖼️ 갤러리 관리</a>
+    <a href="/admin/posts.html">📰 입고 소식</a>
     <div class="admin-sidebar-label">고객</div>
-    <a href="orders.html" class="active">📦 주문 관리</a>
-    <a href="qna.html">💬 묻고 답하기</a>
-    <a href="reviews.html">⭐ 리뷰 이벤트</a>
+    <a href="/admin/orders.html" class="active">📦 주문 관리</a>
+    <a href="/admin/qna.html">💬 묻고 답하기</a>
+    <a href="/admin/reviews.html">⭐ 리뷰 이벤트</a>
     <div class="admin-sidebar-label">시스템</div>
-    <a href="settings.html">⚙️ 알림 설정</a>
+    <a href="/admin/settings.html">⚙️ 알림 설정</a>
     <a href="../index.html">← 사이트로 이동</a>
   </aside>
 
@@ -122,15 +122,31 @@
       </select>
     </div>
 
-    <!-- 운송장 번호 (Phase 2 준비, 비활성화) -->
-    <div class="admin-form-group" style="opacity:0.5;">
-      <label>운송장 번호 <span style="font-size:11px; color:var(--color-text-light);">(Phase 2 준비)</span></label>
-      <input type="text" class="admin-input" placeholder="운송장 번호 입력" disabled>
+    <!-- 운송장 번호 -->
+    <div class="admin-form-group" style="margin-top:12px;">
+      <label>택배사</label>
+      <select class="admin-input" id="carrier-select">
+        <option value="">택배사 선택</option>
+        <option value="CJ대한통운">CJ대한통운</option>
+        <option value="롯데택배">롯데택배</option>
+        <option value="한진택배">한진택배</option>
+        <option value="우체국택배">우체국택배</option>
+        <option value="로젠택배">로젠택배</option>
+        <option value="편의점택배">편의점택배</option>
+        <option value="기타">기타</option>
+      </select>
+    </div>
+    <div class="admin-form-group">
+      <label>운송장 번호</label>
+      <input type="text" class="admin-input" id="tracking-number-input" placeholder="운송장 번호 입력 후 저장하면 '배송중' 상태로 변경됩니다">
     </div>
 
     <div class="modal-footer">
+      <div id="tracking-link-area" style="display:none; margin-bottom:12px; font-size:13px; flex:1; text-align:left; align-self:center;">
+        <a id="tracking-link" href="#" target="_blank" style="color:var(--color-primary); text-decoration:underline;">🔍 배송 조회하기</a>
+      </div>
       <button class="btn btn-ghost" id="btn-order-modal-close">닫기</button>
-      <button class="btn btn-primary" id="btn-order-status-save">상태 저장</button>
+      <button class="btn btn-primary" id="btn-order-status-save">저장</button>
     </div>
   </div>
 </div>

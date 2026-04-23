@@ -32,17 +32,17 @@
   <aside class="admin-sidebar" id="admin-sidebar">
     <div class="admin-sidebar-logo">🌻 HGM 관리자</div>
     <div class="admin-sidebar-label">메인</div>
-    <a href="index.html">📊 대시보드</a>
+    <a href="/admin/index.html">📊 대시보드</a>
     <div class="admin-sidebar-label">콘텐츠</div>
-    <a href="products.html">🌿 상품 관리</a>
-    <a href="gallery.html">🖼️ 갤러리 관리</a>
-    <a href="posts.html">📰 입고 소식</a>
+    <a href="/admin/products.html">🌿 상품 관리</a>
+    <a href="/admin/gallery.html">🖼️ 갤러리 관리</a>
+    <a href="/admin/posts.html">📰 입고 소식</a>
     <div class="admin-sidebar-label">고객</div>
-    <a href="orders.html">📦 주문 관리</a>
-    <a href="qna.html">💬 묻고 답하기</a>
-    <a href="reviews.html">⭐ 리뷰 이벤트</a>
+    <a href="/admin/orders.html">📦 주문 관리</a>
+    <a href="/admin/qna.html">💬 묻고 답하기</a>
+    <a href="/admin/reviews.html">⭐ 리뷰 이벤트</a>
     <div class="admin-sidebar-label">시스템</div>
-    <a href="settings.html" class="active">⚙️ 알림 설정</a>
+    <a href="/admin/settings.html" class="active">⚙️ 알림 설정</a>
     <a href="../index.html">← 사이트로 이동</a>
   </aside>
 
@@ -104,11 +104,11 @@
           </div>
           <div class="toggle-row">
             <div>
-              <div class="toggle-label">시간대별 리포트 <span style="font-size:11px; background:#f0f0f0; padding:2px 6px; border-radius:99px; color:var(--color-text-sub);">Phase 2</span></div>
+              <div class="toggle-label">시간대별 리포트</div>
               <div class="toggle-desc">설정한 시간마다 판매 리포트를 자동 발송합니다</div>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="toggle-hourly-report" disabled>
+              <input type="checkbox" id="toggle-hourly-report">
               <span class="toggle-slider"></span>
             </label>
           </div>
@@ -121,6 +121,14 @@
           <div id="save-result" style="margin-top:8px; font-size:13px; color:var(--color-success); display:none;">
             ✅ 설정이 저장되었습니다.
           </div>
+        </div>
+
+        <!-- 수동 리포트 발송 -->
+        <div style="margin-top:16px;">
+          <button class="btn btn-ghost" id="btn-send-report" style="height:44px; padding:0 24px;">
+            📊 지금 리포트 발송
+          </button>
+          <div id="report-result" style="margin-top:8px; font-size:13px; display:none;"></div>
         </div>
       </div>
 
