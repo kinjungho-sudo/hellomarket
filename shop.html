@@ -583,10 +583,13 @@
 
     // ---- 상품 카드 생성 ----
     function createProductCard(p) {
+      const soldOut = p.status === '품절'
       const card = document.createElement('div')
-      card.className = 'product-card'
-      card.style.cursor = 'pointer'
-      card.addEventListener('click', () => { window.location.href = '/product.html?id=' + p.id })
+      card.className = 'product-card' + (soldOut ? ' sold-out' : '')
+      card.style.cursor = soldOut ? 'default' : 'pointer'
+      if (!soldOut) {
+        card.addEventListener('click', () => { window.location.href = '/product.html?id=' + p.id })
+      }
 
       // 배송 뱃지
       if (p.delivery_type) {
@@ -636,6 +639,17 @@
       img.loading = 'lazy'
       img.onerror = () => { img.src = '/assets/images/placeholder.svg' }
       imgWrap.appendChild(img)
+
+      // 품절 오버레이
+      if (soldOut) {
+        const overlay = document.createElement('div')
+        overlay.className = 'product-card__soldout-overlay'
+        const label = document.createElement('span')
+        label.textContent = '품절'
+        overlay.appendChild(label)
+        imgWrap.appendChild(overlay)
+      }
+
       card.appendChild(imgWrap)
 
       // 본문
@@ -680,7 +694,6 @@
       // 장바구니
       const actions = document.createElement('div')
       actions.className = 'product-card__actions'
-      const soldOut = p.status === '품절'
       const cartBtn = document.createElement('button')
       cartBtn.className = 'btn-cart'
       if (soldOut) {
@@ -829,7 +842,7 @@
       loadProducts(false)
     })
     // 엔터키로도 적용
-    ['price-min','price-max'].forEach(id => {
+    ;['price-min','price-max'].forEach(id => {
       document.getElementById(id).addEventListener('keydown', (e) => {
         if (e.key === 'Enter') document.getElementById('btn-price-apply').click()
       })
