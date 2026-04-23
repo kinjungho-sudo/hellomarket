@@ -728,7 +728,10 @@
           const buynowItem = JSON.parse(buynowRaw)
 
           // 기존 장바구니 백업 → 즉시 구매 상품 단독으로 임시 세팅
+          // sessionStorage에도 백업 — 결제 완료 후 order-complete에서 복원
           const cartBackup = localStorage.getItem('hgm_cart')
+          if (cartBackup !== null) sessionStorage.setItem('hgm_cart_buynow_backup', cartBackup)
+          else sessionStorage.removeItem('hgm_cart_buynow_backup')
           localStorage.setItem('hgm_cart', JSON.stringify([{
             id: buynowItem.id,
             name: buynowItem.name,

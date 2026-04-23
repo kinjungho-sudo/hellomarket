@@ -163,6 +163,14 @@
       }
 
       clearCart()
+
+      // 즉시 구매 모드였다면 원래 장바구니 복원
+      const cartBackupRaw = sessionStorage.getItem('hgm_cart_buynow_backup')
+      if (cartBackupRaw !== null) {
+        localStorage.setItem('hgm_cart', cartBackupRaw)
+        sessionStorage.removeItem('hgm_cart_buynow_backup')
+      }
+
       sessionStorage.removeItem('hgm_toss_order_id')
       sessionStorage.removeItem('hgm_toss_amount')
       sessionStorage.removeItem('hgm_receiver')
