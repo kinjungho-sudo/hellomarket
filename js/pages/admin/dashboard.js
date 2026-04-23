@@ -1,26 +1,18 @@
 ﻿// admin/dashboard.js — 대시보드 페이지 스크립트
-import { requireAdmin, signOut } from '/js/auth.js'
+import { requireAdminAuth, adminLogout } from '/js/utils/admin-auth.js'
 import { supabase } from '/js/config.js'
 import { getOrderStats, getAllOrders } from '/js/api/orders.js'
 import { getUserCount } from '/js/api/users.js'
 import { getTodayVisitors, getWeeklyRevenueStats, getCategoryStats, getHourlyOrderStats, getProductSalesStats } from '/js/api/analytics.js'
 import { getQnaList } from '/js/api/qna.js'
 
-// 관리자 접근 제어 — 비관리자는 index.html로 리다이렉트
-await requireAdmin()
-
-try {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) {
-    const el = document.getElementById('admin-user-name')
-    if (el) el.textContent = user.email
-  }
-} catch (e) { console.error('[dashboard] 유저 정보 조회 실패:', e) }
+// 관리자 접근 제어 — 비인증 시 admin/login.html로 리다이렉트
+requireAdminAuth()
 
 // 로그아웃 버튼
-document.getElementById('btn-logout')?.addEventListener('click', async () => {
-  await signOut()
-  window.location.href = '/login.html'
+document.getElementById('btn-logout')?.addEventListener('click', () => {
+  adminLogout()
+  window.location.href = '/admin/login.html'
 })
 
 // 모바일 사이드바 토글

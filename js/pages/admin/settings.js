@@ -1,24 +1,13 @@
 ﻿// admin/settings.js — 알림 설정 페이지 스크립트
-import { requireAdmin, signOut } from '/js/auth.js'
+import { requireAdminAuth, adminLogout } from '/js/utils/admin-auth.js'
 import { supabase } from '/js/config.js'
 import { getNotificationSettings, saveNotificationSettings, testTelegramConnection, sendHourlyReport } from '/js/api/notifications.js'
 
 // 관리자 접근 제어
-await requireAdmin()
-
-try {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) {
-    // 관리자 이메일 표시
-    const nameEl = document.getElementById('admin-user-name')
-    if (nameEl) nameEl.textContent = user.email
-    const emailEl = document.getElementById('admin-email')
-    if (emailEl) emailEl.textContent = user.email
-  }
-} catch (e) { console.error('[settings] 유저 정보 조회 실패:', e) }
+requireAdminAuth()
 
 document.getElementById('btn-logout')?.addEventListener('click', async () => {
-  await signOut(); window.location.href = '/login.html'
+  adminLogout(); window.location.href = '/admin/login.html'
 })
 document.getElementById('menu-toggle')?.addEventListener('click', () => {
   document.getElementById('admin-sidebar')?.classList.toggle('open')
@@ -152,5 +141,47 @@ if (btnSendReport) {
     btnSendReport.textContent = '📊 지금 리포트 발송'
   })
 }
+
+// 비밀번호 변경
+document.getElementById('btn-change-password')?.addEventListener('click', async function() {
+  const currentPw  = document.getElementById('current-password')?.value?.trim()
+  const newPw      = document.getElementById('new-password')?.value?.trim()
+  const newPwConf  = document.getElementById('new-password-confirm')?.value?.trim()
+  const resultEl   = document.getElementById('pw-change-result')
+
+  const showPwResult = (msg, ok) => {
+    resultEl.textContent = (ok ? '✅ ' : '❌ ') + msg
+    resultEl.style.color = ok ? 'var(--color-success)' : 'var(--color-danger)'
+    resultEl.style.display = 'block'
+    setTimeout(() => { resultEl.style.display = 'none' }, 4000)
+  }
+
+  if (!currentPw || !newPw || !newPwConf) return showPwResult('모든 항목을 입력해 주세요.', false)
+  if (newPw.length < 6) return showPwResult('새 비밀번호는 6자 이상이어야 합니다.', false)
+  if (newPw !== newPwConf) return showPwResult('새 비밀번호가 일치하지 않습니다.', false)
+
+  // 현재 비밀번호 검증
+  const { data: cur, error: curErr } = await supabase
+    .from('hgm_notification_settings')
+    .select('admin_password')
+    .limit(1)
+    .single()
+
+  if (curErr || !cur) return showPwResult('설정 정보를 불러올 수 없습니다.', false)
+  if (cur.admin_password !== currentPw) return showPwResult('현재 비밀번호가 올바르지 않습니다.', false)
+
+  // 새 비밀번호 저장
+  const { error: updErr } = await supabase
+    .from('hgm_notification_settings')
+    .update({ admin_password: newPw })
+    .gte('id', '00000000-0000-0000-0000-000000000000')
+
+  if (updErr) return showPwResult('저장 실패: ' + updErr.message, false)
+
+  document.getElementById('current-password').value = ''
+  document.getElementById('new-password').value = ''
+  document.getElementById('new-password-confirm').value = ''
+  showPwResult('비밀번호가 변경되었습니다.', true)
+})
 
 initPage()

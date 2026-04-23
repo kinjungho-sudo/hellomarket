@@ -1,10 +1,10 @@
 ﻿// admin/reviews.js — 리뷰 관리 페이지 스크립트
-import { requireAdmin, signOut } from '/js/auth.js'
+import { requireAdminAuth, adminLogout } from '/js/utils/admin-auth.js'
 import { supabase } from '/js/config.js'
 import { toggleReviewPublish, deleteReview } from '/js/api/reviews.js'
 
 // 관리자 접근 제어
-await requireAdmin()
+requireAdminAuth()
 
 try {
   const { data: { user } } = await supabase.auth.getUser()
@@ -15,7 +15,7 @@ try {
 } catch (e) { console.error('[reviews] 유저 정보 조회 실패:', e) }
 
 document.getElementById('btn-logout')?.addEventListener('click', async () => {
-  await signOut(); window.location.href = '/login.html'
+  adminLogout(); window.location.href = '/admin/login.html'
 })
 document.getElementById('menu-toggle')?.addEventListener('click', () => {
   document.getElementById('admin-sidebar')?.classList.toggle('open')

@@ -132,20 +132,26 @@
         </div>
       </div>
 
-      <!-- 관리자 계정 정보 카드 -->
+      <!-- 관리자 비밀번호 변경 카드 -->
       <div class="admin-card">
-        <div class="admin-card-title">👤 관리자 계정</div>
-        <div style="font-size:14px; color:var(--color-text-sub); line-height:1.8;">
-          <div>이메일: <strong id="admin-email">로딩 중...</strong></div>
-          <div>역할: <strong>관리자 (admin)</strong></div>
+        <div class="admin-card-title">🔐 관리자 비밀번호 변경</div>
+
+        <div class="admin-form-group">
+          <label>현재 비밀번호</label>
+          <input type="password" class="admin-input" id="current-password" placeholder="현재 비밀번호 입력" autocomplete="current-password">
         </div>
-        <div style="margin-top:16px; padding:16px; background:#fff8e1; border-radius:var(--radius-sm); font-size:13px; color:#795548;">
-          <strong>관리자 권한 부여 방법</strong><br>
-          Supabase SQL Editor에서 아래 쿼리 실행:<br>
-          <code style="display:block; background:#f5f0e8; padding:8px; border-radius:4px; margin-top:8px; font-size:12px;">
-            UPDATE hgm_users SET role = 'admin' WHERE email = '이메일주소';
-          </code>
+        <div class="admin-form-group">
+          <label>새 비밀번호</label>
+          <input type="password" class="admin-input" id="new-password" placeholder="새 비밀번호 입력 (6자 이상)" autocomplete="new-password">
         </div>
+        <div class="admin-form-group">
+          <label>새 비밀번호 확인</label>
+          <input type="password" class="admin-input" id="new-password-confirm" placeholder="새 비밀번호 다시 입력" autocomplete="new-password">
+        </div>
+        <button class="btn btn-primary" id="btn-change-password" style="height:44px; padding:0 32px;">
+          🔑 비밀번호 변경
+        </button>
+        <div id="pw-change-result" style="margin-top:8px; font-size:13px; display:none;"></div>
       </div>
 
     </div>
