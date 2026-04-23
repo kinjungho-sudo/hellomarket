@@ -17,19 +17,38 @@ export async function getSession() {
 
 /**
  * 구글 소셜 로그인 (Supabase OAuth)
- * 로그인 성공 시 현재 origin으로 리다이렉트
+ * 로그인 성공 후 /login.html?callback=1 로 리다이렉트 → 거기서 관리자 여부 판단
  */
 export async function signInWithGoogle() {
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin }
+      options: { redirectTo: window.location.origin + '/login.html?callback=1' }
     })
     if (error) throw error
     return { data, error: null }
   } catch (err) {
     console.error('[HGM] signInWithGoogle 오류:', err)
     return { data: null, error: err }
+  }
+}
+
+/**
+ * 로그인한 사용자를 hgm_users에 upsert (최초 로그인 시 row 생성)
+ */
+export async function upsertUserProfile(user) {
+  try {
+    const { error } = await supabase
+      .from('hgm_users')
+      .upsert({
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.full_name ?? user.email,
+        provider: 'google',
+      }, { onConflict: 'id', ignoreDuplicates: false })
+    if (error) throw error
+  } catch (err) {
+    console.error('[HGM] upsertUserProfile 오류:', err)
   }
 }
 
@@ -93,14 +112,19 @@ export async function requireLogin() {
 }
 
 /**
- * 관리자가 아니면 index.html로 리다이렉트
+ * 관리자가 아니면 리다이렉트
+ * - 비로그인: loginRedirect 저장 후 login.html
+ * - 일반 회원: index.html
  */
 export async function requireAdmin() {
   const { session } = await getSession()
   if (!session) {
+    sessionStorage.setItem('loginRedirect', window.location.pathname)
     window.location.href = '/login.html'
     return
   }
+  // hgm_users row가 없을 경우 자동 생성
+  await upsertUserProfile(session.user)
   const admin = await isAdmin()
   if (!admin) {
     window.location.href = '/index.html'
