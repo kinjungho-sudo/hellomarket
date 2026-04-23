@@ -61,20 +61,29 @@
       font-weight: 700;
     }
 
-    /* 정렬 + 상태 필터 행 */
+    /* 필터 행 공통 */
     .filter-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 0;
-      gap: 16px;
+      padding: 10px 0;
+      gap: 12px;
       flex-wrap: wrap;
+      border-bottom: 1px solid rgba(0,0,0,.05);
     }
-    .filter-row__left { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-row:last-child { border-bottom: none; }
+    .filter-row__left { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .filter-row__label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-text-light);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
 
-    .status-btn {
+    .filter-btn {
       height: 32px;
-      padding: 0 16px;
+      padding: 0 14px;
       border-radius: var(--radius-full);
       font-size: 13px;
       font-weight: 600;
@@ -83,13 +92,100 @@
       color: var(--color-text-sub);
       cursor: pointer;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
-    .status-btn:hover { border-color: var(--color-yellow); color: var(--color-text-on-yellow); background: var(--color-yellow-bg); }
-    .status-btn.active {
-      background: var(--color-yellow);
-      color: var(--color-text-on-yellow);
-      border-color: var(--color-yellow);
+    .filter-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .filter-btn.active {
+      background: var(--color-primary);
+      color: #ffffff;
+      border-color: var(--color-primary);
       font-weight: 700;
+    }
+    /* 배송 뱃지 색상 */
+    .filter-btn.delivery-today.active  { background: #e8f5e9; color: #2d5a3d; border-color: #2d5a3d; }
+    .filter-btn.delivery-wish.active   { background: #e3f2fd; color: #1565c0; border-color: #1565c0; }
+    .filter-btn.delivery-free.active   { background: #fff8e1; color: #f57f17; border-color: #f57f17; }
+
+    /* 가격 슬라이더 영역 */
+    .price-filter-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .price-range-inputs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .price-input {
+      width: 100px;
+      height: 32px;
+      padding: 0 10px;
+      border: 1.5px solid rgba(0,0,0,.15);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-family: var(--font-main);
+      color: var(--color-text);
+      text-align: right;
+    }
+    .price-input:focus { outline: none; border-color: var(--color-primary); }
+    .price-sep { font-size: 13px; color: var(--color-text-light); }
+    .btn-price-apply {
+      height: 32px;
+      padding: 0 16px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 700;
+      border: 1.5px solid var(--color-primary);
+      background: #fff;
+      color: var(--color-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-price-apply:hover { background: var(--color-primary); color: #fff; }
+    .btn-price-reset {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid rgba(0,0,0,.12);
+      background: #fff;
+      color: var(--color-text-light);
+      cursor: pointer;
+    }
+    .btn-price-reset:hover { border-color: var(--color-danger); color: var(--color-danger); }
+
+    /* 활성 필터 뱃지 */
+    .active-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 8px 0 4px;
+    }
+    .active-filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 26px;
+      padding: 0 10px;
+      border-radius: var(--radius-full);
+      background: #f0f7f0;
+      border: 1px solid #c8e0c8;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+    .active-filter-chip button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-primary);
+      font-size: 14px;
+      line-height: 1;
+      padding: 0;
+      margin-left: 2px;
     }
 
     .sort-select {
@@ -103,7 +199,7 @@
       cursor: pointer;
       font-family: var(--font-main);
     }
-    .sort-select:focus { outline: none; border-color: var(--color-yellow); box-shadow: 0 0 0 3px rgba(245,200,66,0.18); }
+    .sort-select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(45,90,61,0.1); }
 
     /* -----------------------------------------------
        상품 목록 영역
@@ -211,12 +307,44 @@
   <!-- 필터 -->
   <div class="filter-section">
     <div class="filter-inner">
-      <div class="category-tabs" id="category-tabs" role="tablist">
-        <!-- JS로 생성 -->
-      </div>
+      <!-- 카테고리 탭 -->
+      <div class="category-tabs" id="category-tabs" role="tablist"></div>
+
+      <!-- 배송유형 필터 -->
       <div class="filter-row">
-        <div class="filter-row__left" id="status-filters">
-          <!-- JS로 생성 -->
+        <div class="filter-row__left">
+          <span class="filter-row__label">배송</span>
+          <button class="filter-btn delivery-today" data-delivery="오늘출발">🚀 오늘출발</button>
+          <button class="filter-btn delivery-wish"  data-delivery="희망일배송">📅 희망일배송</button>
+          <button class="filter-btn delivery-free"  data-delivery="무료배송">🎁 무료배송</button>
+        </div>
+      </div>
+
+      <!-- 가격대 필터 -->
+      <div class="filter-row">
+        <div class="filter-row__left">
+          <span class="filter-row__label">가격대</span>
+          <div class="price-filter-wrap">
+            <div class="price-range-inputs">
+              <input type="number" class="price-input" id="price-min" placeholder="최소" min="0" step="1000">
+              <span class="price-sep">~</span>
+              <input type="number" class="price-input" id="price-max" placeholder="최대" min="0" step="1000">
+              <span class="price-sep" style="font-size:12px;color:#999;">원</span>
+            </div>
+            <button class="btn-price-apply" id="btn-price-apply">적용</button>
+            <button class="btn-price-reset" id="btn-price-reset">초기화</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 기타 필터 + 정렬 -->
+      <div class="filter-row">
+        <div class="filter-row__left">
+          <span class="filter-row__label">기타</span>
+          <button class="filter-btn" data-extra="discount">💸 할인상품</button>
+          <button class="filter-btn" data-extra="free_exchange">🔄 무료교환</button>
+          <button class="filter-btn" data-status="판매중">판매중</button>
+          <button class="filter-btn" data-status="시즌한정">시즌한정</button>
         </div>
         <select class="sort-select" id="sort-select" aria-label="정렬 기준">
           <option value="created_at_desc">최신순</option>
@@ -225,6 +353,9 @@
           <option value="price_desc">높은가격순</option>
         </select>
       </div>
+
+      <!-- 활성 필터 표시 -->
+      <div class="active-filters" id="active-filters" style="display:none;"></div>
     </div>
   </div>
 
@@ -249,7 +380,7 @@
         <a href="#">개인정보처리방침</a>
         <a href="#">이용약관</a>
       </div>
-      <p class="footer-copy">© 2026 헬로우가든마켓(건민농원). All rights reserved.</p>
+      <p class="footer-copy">© 2026 헬로우가든마켓. All rights reserved.</p>
     </div>
   </footer>
 
@@ -258,78 +389,134 @@
   <script type="module">
     import { updateNavAuth } from '/js/auth.js'
     import { updateCartBadge, addToCart } from '/js/utils/cart.js'
-    import { getProducts } from '/js/api/products.js'
+    import { supabase } from '/js/config.js'
     import { trackEvent } from '/js/api/analytics.js'
     import { getSessionId } from '/js/utils/session.js'
 
     // 햄버거 메뉴
-    const hamburger = document.getElementById('hamburger')
-    const mobileMenu = document.getElementById('mobile-menu')
-    hamburger.addEventListener('click', () => {
-      mobileMenu.classList.toggle('open')
-      hamburger.classList.toggle('open')
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('open')
+      document.getElementById('hamburger').classList.toggle('open')
     })
-
     updateNavAuth()
     updateCartBadge()
 
     // ---- 상수 ----
-    const CATEGORIES = [
-      { value: '', label: '전체' },
-      { value: '관엽식물', label: '관엽식물' },
-      { value: '다육식물', label: '다육식물' },
-      { value: '꽃나무', label: '꽃나무' },
-      { value: '화분·용기', label: '화분·용기' },
-      { value: '희귀식물', label: '희귀식물' },
-      { value: '토양·비료', label: '토양·비료' },
-    ]
-    const STATUS_FILTERS = [
-      { value: '', label: '전체' },
-      { value: 'active', label: '판매중' },
-      { value: 'season', label: '시즌한정' },
-    ]
+    const CATEGORIES = ['전체','관엽식물','다육식물','꽃나무','화분/용기','희귀식물','토양/비료','공기정화','구근식물']
     const PAGE_SIZE = 12
 
-    // ---- 상태 ----
+    // ---- 필터 상태 ----
     let state = {
       category: '',
-      status: '',
+      status: '',        // '판매중' | '시즌한정' | ''
+      delivery: '',      // '오늘출발' | '희망일배송' | '무료배송' | ''
+      priceMin: null,
+      priceMax: null,
+      discount: false,
+      freeExchange: false,
       sort: 'created_at_desc',
       offset: 0,
-      hasMore: false,
       loading: false,
     }
 
     // ---- 토스트 ----
-    function showToast(msg, type) {
+    function showToast(msg, type = '') {
       const el = document.getElementById('toast')
       el.textContent = msg
       el.className = 'toast show' + (type ? ' ' + type : '')
       setTimeout(() => { el.className = 'toast' }, 2800)
     }
 
-    // ---- 정렬 파싱 ----
-    function parseSortOption(val) {
-      switch (val) {
-        case 'view_count_desc': return { orderBy: 'view_count', ascending: false }
-        case 'price_asc':       return { orderBy: 'price', ascending: true }
-        case 'price_desc':      return { orderBy: 'price', ascending: false }
-        default:                return { orderBy: 'created_at', ascending: false }
+    // ---- 활성 필터 칩 렌더 ----
+    function renderActiveFilters() {
+      const wrap = document.getElementById('active-filters')
+      wrap.textContent = ''
+      const chips = []
+
+      if (state.delivery)     chips.push({ label: state.delivery,       clear: () => { state.delivery = '';      resetDeliveryBtns(); } })
+      if (state.priceMin !== null || state.priceMax !== null) {
+        const label = (state.priceMin ?? 0).toLocaleString() + '원 ~ ' + (state.priceMax !== null ? state.priceMax.toLocaleString() + '원' : '제한없음')
+        chips.push({ label, clear: () => { state.priceMin = null; state.priceMax = null; document.getElementById('price-min').value = ''; document.getElementById('price-max').value = ''; } })
       }
+      if (state.discount)     chips.push({ label: '할인상품',   clear: () => { state.discount = false;     document.querySelector('[data-extra="discount"]').classList.remove('active'); } })
+      if (state.freeExchange) chips.push({ label: '무료교환',   clear: () => { state.freeExchange = false; document.querySelector('[data-extra="free_exchange"]').classList.remove('active'); } })
+      if (state.status)       chips.push({ label: state.status, clear: () => { state.status = '';         document.querySelectorAll('[data-status]').forEach(b => b.classList.remove('active')); } })
+
+      if (chips.length === 0) { wrap.style.display = 'none'; return }
+      wrap.style.display = 'flex'
+
+      chips.forEach(chip => {
+        const el = document.createElement('div')
+        el.className = 'active-filter-chip'
+        const text = document.createElement('span')
+        text.textContent = chip.label
+        const btn = document.createElement('button')
+        btn.textContent = '×'
+        btn.setAttribute('aria-label', chip.label + ' 필터 제거')
+        btn.addEventListener('click', () => { chip.clear(); state.offset = 0; loadProducts(false); })
+        el.appendChild(text)
+        el.appendChild(btn)
+        wrap.appendChild(el)
+      })
     }
 
-    // ---- 상품 카드 DOM 생성 ----
+    function resetDeliveryBtns() {
+      document.querySelectorAll('[data-delivery]').forEach(b => b.classList.remove('active'))
+    }
+
+    // ---- Supabase 직접 쿼리 (클라이언트 사이드 필터링 지원) ----
+    async function fetchProducts() {
+      let query = supabase
+        .from('hgm_products')
+        .select('*')
+        .eq('is_published', true)
+
+      if (state.category)   query = query.eq('category', state.category)
+      if (state.status)     query = query.eq('status', state.status)
+      if (state.delivery)   query = query.eq('delivery_type', state.delivery)
+      if (state.discount)   query = query.not('original_price', 'is', null)
+      if (state.freeExchange) query = query.eq('is_free_exchange', true)
+      if (state.priceMin !== null) query = query.gte('price', state.priceMin)
+      if (state.priceMax !== null) query = query.lte('price', state.priceMax)
+
+      // 정렬
+      const sortMap = {
+        'created_at_desc': { col: 'created_at', asc: false },
+        'view_count_desc': { col: 'view_count',  asc: false },
+        'price_asc':       { col: 'price',       asc: true  },
+        'price_desc':      { col: 'price',       asc: false },
+      }
+      const s = sortMap[state.sort] || sortMap['created_at_desc']
+      query = query.order(s.col, { ascending: s.asc })
+        .range(state.offset, state.offset + PAGE_SIZE - 1)
+
+      const { data, error } = await query
+      if (error) { console.error('[shop] 상품 조회 실패:', error); return [] }
+      return data || []
+    }
+
+    // ---- 상품 카드 생성 ----
     function createProductCard(p) {
       const card = document.createElement('div')
       card.className = 'product-card'
       card.style.cursor = 'pointer'
       card.addEventListener('click', () => { window.location.href = '/product.html?id=' + p.id })
 
-      // 뱃지
+      // 배송 뱃지
+      if (p.delivery_type) {
+        const dBadge = document.createElement('span')
+        const dcls = p.delivery_type === '오늘출발' ? 'badge-sale' : p.delivery_type === '무료배송' ? 'badge-new' : 'badge-season'
+        dBadge.className = 'product-card__badge ' + dcls
+        dBadge.style.top = '38px'
+        dBadge.textContent = p.delivery_type
+        card.appendChild(dBadge)
+      }
+
+      // 상태 뱃지
       const badgeMap = [
         { cond: p.is_new,              cls: 'badge-new',    text: 'NEW' },
-        { cond: p.status === 'season', cls: 'badge-season', text: '시즌한정' },
-        { cond: p.status === 'sold_out', cls: 'badge-sold', text: '품절' },
+        { cond: p.status === '시즌한정', cls: 'badge-season', text: '시즌한정' },
+        { cond: p.status === '품절',    cls: 'badge-sold',  text: '품절' },
       ]
       for (const b of badgeMap) {
         if (b.cond) {
@@ -341,16 +528,16 @@
         }
       }
 
-      // 위시리스트 버튼
+      // 위시리스트
       const wishBtn = document.createElement('button')
       wishBtn.className = 'wishlist-btn'
       wishBtn.setAttribute('aria-label', '위시리스트')
       wishBtn.textContent = '♡'
       wishBtn.addEventListener('click', (e) => {
         e.stopPropagation()
-        const isActive = wishBtn.classList.toggle('active')
-        wishBtn.textContent = isActive ? '♥' : '♡'
-        showToast(isActive ? '위시리스트에 추가했어요 ♥' : '위시리스트에서 제거했어요', '')
+        const on = wishBtn.classList.toggle('active')
+        wishBtn.textContent = on ? '♥' : '♡'
+        showToast(on ? '위시리스트에 추가했어요 ♥' : '위시리스트에서 제거했어요')
       })
       card.appendChild(wishBtn)
 
@@ -361,7 +548,7 @@
       img.src = p.image_url || '/assets/images/placeholder.svg'
       img.alt = p.name
       img.loading = 'lazy'
-      img.onerror = function() { this.src = '/assets/images/placeholder.svg' }
+      img.onerror = () => { img.src = '/assets/images/placeholder.svg' }
       imgWrap.appendChild(img)
       card.appendChild(imgWrap)
 
@@ -369,28 +556,45 @@
       const body = document.createElement('div')
       body.className = 'product-card__body'
 
+      // 무료교환 태그
+      if (p.is_free_exchange) {
+        const tag = document.createElement('span')
+        tag.style.cssText = 'font-size:11px;font-weight:700;color:#2d5a3d;background:#e8f5e9;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:4px;'
+        tag.textContent = '🔄 무료교환'
+        body.appendChild(tag)
+      }
+
       const nameEl = document.createElement('p')
       nameEl.className = 'product-card__name'
       nameEl.textContent = p.name
+      body.appendChild(nameEl)
 
+      const priceWrap = document.createElement('div')
+      priceWrap.style.cssText = 'display:flex;align-items:baseline;gap:6px;'
       const priceEl = document.createElement('p')
       priceEl.className = 'product-card__price'
       priceEl.textContent = Number(p.price).toLocaleString() + '원'
-      if (p.original_price) {
-        const orig = document.createElement('span')
-        orig.className = 'product-card__original-price'
-        orig.textContent = Number(p.original_price).toLocaleString() + '원'
-        priceEl.appendChild(orig)
+      priceWrap.appendChild(priceEl)
+      // 할인 전 가격
+      if (p.original_price && p.original_price > p.price) {
+        const origEl = document.createElement('span')
+        origEl.style.cssText = 'font-size:12px;color:#aaa;text-decoration:line-through;'
+        origEl.textContent = Number(p.original_price).toLocaleString() + '원'
+        priceWrap.appendChild(origEl)
+        // 할인율
+        const rate = Math.round((1 - p.price / p.original_price) * 100)
+        const rateEl = document.createElement('span')
+        rateEl.style.cssText = 'font-size:12px;font-weight:800;color:#f44336;'
+        rateEl.textContent = rate + '%'
+        priceWrap.appendChild(rateEl)
       }
-
-      body.appendChild(nameEl)
-      body.appendChild(priceEl)
+      body.appendChild(priceWrap)
       card.appendChild(body)
 
-      // 액션
+      // 장바구니
       const actions = document.createElement('div')
       actions.className = 'product-card__actions'
-      const soldOut = p.status === 'sold_out' || p.status === 'inactive'
+      const soldOut = p.status === '품절'
       const cartBtn = document.createElement('button')
       cartBtn.className = 'btn-cart'
       if (soldOut) {
@@ -415,7 +619,7 @@
       const grid = document.getElementById('products-grid')
       if (!append) grid.textContent = ''
 
-      if (!products || products.error || products.length === 0) {
+      if (!products || products.length === 0) {
         if (!append) {
           const empty = document.createElement('div')
           empty.style.gridColumn = '1/-1'
@@ -430,26 +634,21 @@
           empty.appendChild(text)
           grid.appendChild(empty)
         }
-        state.hasMore = false
         document.getElementById('load-more-wrap').style.display = 'none'
         return
       }
 
       products.forEach(p => grid.appendChild(createProductCard(p)))
-
-      state.hasMore = products.length >= PAGE_SIZE
-      document.getElementById('load-more-wrap').style.display = state.hasMore ? 'block' : 'none'
+      document.getElementById('load-more-wrap').style.display = products.length >= PAGE_SIZE ? 'block' : 'none'
     }
 
     // ---- 데이터 로드 ----
     async function loadProducts(append) {
       if (state.loading) return
       state.loading = true
-
       const grid = document.getElementById('products-grid')
       const countEl = document.getElementById('products-count')
-      const loadMoreBtn = document.getElementById('btn-load-more')
-      loadMoreBtn.disabled = true
+      document.getElementById('btn-load-more').disabled = true
 
       if (!append) {
         grid.textContent = ''
@@ -462,24 +661,13 @@
         countEl.textContent = ''
       }
 
-      const { orderBy, ascending } = parseSortOption(state.sort)
-      const params = {
-        limit: PAGE_SIZE,
-        offset: state.offset,
-        orderBy,
-        ascending,
-      }
-      if (state.category) params.category = state.category
-      if (state.status) params.status = state.status
+      const data = await fetchProducts()
+      renderActiveFilters()
 
-      const data = await getProducts(params)
-
-      if (!append && countEl) {
-        const n = (data && !data.error) ? data.length : 0
-        const countText = document.createTextNode('')
+      if (!append) {
         countEl.textContent = ''
         const strong = document.createElement('strong')
-        strong.textContent = n >= PAGE_SIZE ? PAGE_SIZE + '+' : String(n)
+        strong.textContent = data.length >= PAGE_SIZE ? PAGE_SIZE + '+' : String(data.length)
         countEl.appendChild(document.createTextNode('상품 '))
         countEl.appendChild(strong)
         countEl.appendChild(document.createTextNode('개'))
@@ -487,51 +675,101 @@
 
       renderProducts(data, append)
       state.loading = false
-      loadMoreBtn.disabled = false
+      document.getElementById('btn-load-more').disabled = false
     }
 
     // ---- 카테고리 탭 ----
-    function buildCategoryTabs() {
-      const wrap = document.getElementById('category-tabs')
-      wrap.textContent = ''
-      CATEGORIES.forEach(cat => {
-        const btn = document.createElement('button')
-        btn.className = 'category-tab' + (cat.value === state.category ? ' active' : '')
-        btn.textContent = cat.label
-        btn.setAttribute('role', 'tab')
-        btn.addEventListener('click', () => {
-          if (state.category === cat.value) return
-          state.category = cat.value
-          state.offset = 0
-          wrap.querySelectorAll('.category-tab').forEach(b => b.classList.remove('active'))
-          btn.classList.add('active')
-          loadProducts(false)
-        })
-        wrap.appendChild(btn)
+    const tabWrap = document.getElementById('category-tabs')
+    CATEGORIES.forEach(cat => {
+      const val = cat === '전체' ? '' : cat
+      const btn = document.createElement('button')
+      btn.className = 'category-tab' + (val === state.category ? ' active' : '')
+      btn.textContent = cat
+      btn.setAttribute('role', 'tab')
+      btn.addEventListener('click', () => {
+        if (state.category === val) return
+        state.category = val
+        state.offset = 0
+        tabWrap.querySelectorAll('.category-tab').forEach(b => b.classList.remove('active'))
+        btn.classList.add('active')
+        loadProducts(false)
       })
-    }
+      tabWrap.appendChild(btn)
+    })
 
-    // ---- 상태 필터 버튼 ----
-    function buildStatusFilters() {
-      const wrap = document.getElementById('status-filters')
-      wrap.textContent = ''
-      STATUS_FILTERS.forEach(sf => {
-        const btn = document.createElement('button')
-        btn.className = 'status-btn' + (sf.value === state.status ? ' active' : '')
-        btn.textContent = sf.label
-        btn.addEventListener('click', () => {
-          if (state.status === sf.value) return
-          state.status = sf.value
-          state.offset = 0
-          wrap.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'))
+    // ---- 배송 필터 ----
+    document.querySelectorAll('[data-delivery]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.dataset.delivery
+        if (state.delivery === val) {
+          state.delivery = ''
+          btn.classList.remove('active')
+        } else {
+          state.delivery = val
+          resetDeliveryBtns()
           btn.classList.add('active')
-          loadProducts(false)
-        })
-        wrap.appendChild(btn)
+        }
+        state.offset = 0
+        loadProducts(false)
       })
-    }
+    })
 
-    // ---- 정렬 변경 ----
+    // ---- 가격 필터 ----
+    document.getElementById('btn-price-apply').addEventListener('click', () => {
+      const minVal = document.getElementById('price-min').value
+      const maxVal = document.getElementById('price-max').value
+      state.priceMin = minVal !== '' ? Number(minVal) : null
+      state.priceMax = maxVal !== '' ? Number(maxVal) : null
+      state.offset = 0
+      loadProducts(false)
+    })
+    document.getElementById('btn-price-reset').addEventListener('click', () => {
+      state.priceMin = null
+      state.priceMax = null
+      document.getElementById('price-min').value = ''
+      document.getElementById('price-max').value = ''
+      state.offset = 0
+      loadProducts(false)
+    })
+    // 엔터키로도 적용
+    ['price-min','price-max'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('btn-price-apply').click()
+      })
+    })
+
+    // ---- 기타 필터 (할인/무료교환) ----
+    document.querySelector('[data-extra="discount"]').addEventListener('click', (e) => {
+      state.discount = !state.discount
+      e.currentTarget.classList.toggle('active', state.discount)
+      state.offset = 0
+      loadProducts(false)
+    })
+    document.querySelector('[data-extra="free_exchange"]').addEventListener('click', (e) => {
+      state.freeExchange = !state.freeExchange
+      e.currentTarget.classList.toggle('active', state.freeExchange)
+      state.offset = 0
+      loadProducts(false)
+    })
+
+    // ---- 상태 필터 (판매중/시즌한정) ----
+    document.querySelectorAll('[data-status]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.dataset.status
+        if (state.status === val) {
+          state.status = ''
+          btn.classList.remove('active')
+        } else {
+          state.status = val
+          document.querySelectorAll('[data-status]').forEach(b => b.classList.remove('active'))
+          btn.classList.add('active')
+        }
+        state.offset = 0
+        loadProducts(false)
+      })
+    })
+
+    // ---- 정렬 ----
     document.getElementById('sort-select').addEventListener('change', (e) => {
       state.sort = e.target.value
       state.offset = 0
@@ -544,11 +782,8 @@
       loadProducts(true)
     })
 
-    // ---- 초기화 ----
-    buildCategoryTabs()
-    buildStatusFilters()
+    // ---- 초기 로드 ----
     loadProducts(false)
-
     trackEvent({ eventType: 'page_view', page: 'shop', sessionId: getSessionId() })
   </script>
 </body>

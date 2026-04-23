@@ -141,6 +141,25 @@
     }
     .btn-zipcode:hover { border-color: var(--color-primary); color: var(--color-primary); }
     .btn-order-confirm { width: 100%; height: 48px; font-size: 15px; font-weight: 800; margin-top: 8px; }
+    /* 결제 위젯 컨테이너 */
+    #payment-widget-area { display: none; margin-top: 20px; }
+    #payment-widget-area.visible { display: block; }
+    #payment-widget { min-height: 200px; }
+    #agreement-widget { margin-top: 8px; }
+    .step-indicator {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+    }
+    .step-dot {
+      width: 24px; height: 24px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; flex-shrink: 0;
+    }
+    .step-dot.active { background: var(--color-primary); color: #fff; }
+    .step-dot.done { background: var(--color-success); color: #fff; }
+    .step-dot.inactive { background: rgba(0,0,0,0.1); color: var(--color-text-light); }
+    .step-label { font-size: 13px; color: var(--color-text-sub); }
+    .step-label.active { font-weight: 700; color: var(--color-text); }
+    .step-arrow { font-size: 11px; color: var(--color-text-light); }
     .toast-container { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
     .toast { padding: 12px 24px; border-radius: var(--radius-full); font-size: 14px; font-weight: 600; color: #fff; background: var(--color-text); box-shadow: var(--shadow-md); opacity: 0; transform: translateY(12px); transition: opacity 0.25s, transform 0.25s; white-space: nowrap; }
     .toast.show { opacity: 1; transform: translateY(0); }
@@ -237,7 +256,18 @@
   <div class="modal-overlay" id="order-modal">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <button class="modal-close" id="modal-close" aria-label="닫기">✕</button>
-      <h2 class="modal-box__title" id="modal-title">배송 정보 입력</h2>
+      <h2 class="modal-box__title" id="modal-title">주문하기</h2>
+
+      <!-- 단계 표시기 -->
+      <div class="step-indicator">
+        <div class="step-dot active" id="step-dot-1">1</div>
+        <span class="step-label active" id="step-label-1">배송 정보</span>
+        <span class="step-arrow">›</span>
+        <div class="step-dot inactive" id="step-dot-2">2</div>
+        <span class="step-label" id="step-label-2">결제</span>
+      </div>
+
+      <!-- STEP 1: 배송 정보 -->
       <form id="order-form" novalidate>
         <div class="form-group">
           <label for="receiver-name">받는 분 이름 <span style="color:var(--color-danger)">*</span></label>
@@ -275,8 +305,16 @@
           <label for="delivery-memo-custom">배송 메모 직접 입력</label>
           <input type="text" id="delivery-memo-custom" placeholder="배송 시 요청 사항을 입력해 주세요" maxlength="100" />
         </div>
-        <button type="submit" class="btn btn-primary btn-order-confirm">주문 완료</button>
+        <button type="submit" class="btn btn-primary btn-order-confirm">다음 → 결제하기</button>
       </form>
+
+      <!-- STEP 2: TossPayments 결제 위젯 -->
+      <div id="payment-widget-area">
+        <div id="payment-widget"></div>
+        <div id="agreement-widget"></div>
+        <button class="btn btn-primary btn-order-confirm" id="btn-pay-confirm" style="margin-top:16px;">결제하기</button>
+        <button class="btn btn-ghost" id="btn-pay-back" style="width:100%;margin-top:8px;">← 배송 정보 수정</button>
+      </div>
     </div>
   </div>
 
@@ -286,9 +324,15 @@
     import { getCart, removeFromCart, updateCartQuantity, clearCart, getCartTotal, getDeliveryFee, updateCartBadge } from '/js/utils/cart.js'
     import { formatPrice } from '/js/utils/format.js'
     import { getSession } from '/js/auth.js'
-    import { createOrder } from '/js/api/orders.js'
-    import { sendOrderAlert } from '/js/api/notifications.js'
     import { updateNavAuth } from '/js/auth.js'
+
+    // TossPayments 클라이언트 키 (테스트)
+    const TOSS_CLIENT_KEY = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eo8'
+
+    let tossPayments = null
+    let paymentWidgetInstance = null
+    let savedReceiverInfo = null
+    let savedUserId = null
 
     /* --------------------------------------------------
        토스트
@@ -309,8 +353,7 @@
     }
 
     /* --------------------------------------------------
-       DOM 빌더 — createElement 기반 (XSS-safe)
-       사용자 데이터는 textContent / setAttribute 로만 삽입
+       DOM 빌더 (XSS-safe)
     -------------------------------------------------- */
     function buildCartItem(item) {
       const wrap = document.createElement('div')
@@ -437,10 +480,34 @@
     })
 
     /* --------------------------------------------------
-       모달
+       모달 열기/닫기
     -------------------------------------------------- */
-    function openModal()  { document.getElementById('order-modal').classList.add('active');    document.body.style.overflow = 'hidden' }
-    function closeModal() { document.getElementById('order-modal').classList.remove('active'); document.body.style.overflow = '' }
+    function openModal() {
+      document.getElementById('order-modal').classList.add('active')
+      document.body.style.overflow = 'hidden'
+      // STEP 1 표시
+      document.getElementById('order-form').style.display = 'block'
+      document.getElementById('payment-widget-area').classList.remove('visible')
+      setStep(1)
+    }
+    function closeModal() {
+      document.getElementById('order-modal').classList.remove('active')
+      document.body.style.overflow = ''
+    }
+
+    function setStep(n) {
+      const dot1 = document.getElementById('step-dot-1')
+      const dot2 = document.getElementById('step-dot-2')
+      const lbl1 = document.getElementById('step-label-1')
+      const lbl2 = document.getElementById('step-label-2')
+      if (n === 1) {
+        dot1.className = 'step-dot active'; lbl1.className = 'step-label active'
+        dot2.className = 'step-dot inactive'; lbl2.className = 'step-label'
+      } else {
+        dot1.className = 'step-dot done'; lbl1.className = 'step-label'
+        dot2.className = 'step-dot active'; lbl2.className = 'step-label active'
+      }
+    }
 
     document.getElementById('modal-close').addEventListener('click', closeModal)
     document.getElementById('order-modal').addEventListener('click', function(e) {
@@ -448,12 +515,13 @@
     })
 
     /* --------------------------------------------------
-       주문하기
+       주문하기 버튼
     -------------------------------------------------- */
     document.getElementById('btn-order').addEventListener('click', async function() {
       if (getCart().length === 0) { showToast('장바구니가 비어있어요.', 'error'); return }
       const sess = await getSession()
       if (!sess.session) { window.location.href = '/login.html?redirect=/cart.html'; return }
+      savedUserId = sess.session.user.id
       openModal()
     })
 
@@ -483,7 +551,7 @@
     })
 
     /* --------------------------------------------------
-       주문 폼 제출
+       STEP 1 → STEP 2: 배송 정보 저장 후 결제 위젯 로드
     -------------------------------------------------- */
     document.getElementById('order-form').addEventListener('submit', async function(e) {
       e.preventDefault()
@@ -500,34 +568,90 @@
       if (!phone)              { showToast('연락처를 입력해 주세요.', 'error'); return }
       if (!zipcode || !address){ showToast('주소를 입력해 주세요.', 'error'); return }
 
-      const sess = await getSession()
-      if (!sess.session) { showToast('로그인이 필요합니다.', 'error'); return }
+      savedReceiverInfo = { name, phone, zipcode, address, addressDetail, deliveryMemo }
 
-      const orderItems = getCart().map(function(item) {
-        return { productId: item.id, productName: item.name, quantity: item.quantity, price: item.price }
-      })
-      const receiverInfo = { name: name, phone: phone, address: address, addressDetail: addressDetail, zipcode: zipcode, deliveryMemo: deliveryMemo }
+      // STEP 2로 전환
+      document.getElementById('order-form').style.display = 'none'
+      document.getElementById('payment-widget-area').classList.add('visible')
+      setStep(2)
+      document.getElementById('modal-title').textContent = '결제'
 
-      const submitBtn = document.querySelector('.btn-order-confirm')
-      submitBtn.disabled = true
-      submitBtn.textContent = '주문 처리 중...'
+      await loadPaymentWidget()
+    })
+
+    /* --------------------------------------------------
+       TossPayments 결제 위젯 로드
+    -------------------------------------------------- */
+    async function loadPaymentWidget() {
+      const total = getCartTotal() + getDeliveryFee()
+      const tossOrderId = 'hgm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8)
+      sessionStorage.setItem('hgm_toss_order_id', tossOrderId)
+      sessionStorage.setItem('hgm_toss_amount', String(total))
+      sessionStorage.setItem('hgm_receiver', JSON.stringify(savedReceiverInfo))
+      sessionStorage.setItem('hgm_cart_snapshot', JSON.stringify(getCart()))
+      sessionStorage.setItem('hgm_user_id', savedUserId)
 
       try {
-        const result = await createOrder(sess.session.user.id, orderItems, receiverInfo)
-        if (result.error) throw new Error(result.error)
+        // TossPayments SDK는 non-module script로 로드됨
+        tossPayments = window.TossPayments(TOSS_CLIENT_KEY)
+        const customerKey = 'hgm-' + savedUserId.slice(0, 12)
+        paymentWidgetInstance = tossPayments.widgets({ customerKey })
 
-        try { await sendOrderAlert(result) }
-        catch (alertErr) { console.warn('[cart] 주문 알림 발송 실패 (무시):', alertErr) }
-
-        clearCart()
-        closeModal()
-        showToast('주문이 완료되었습니다! 🌻', 'success')
-        setTimeout(function() { window.location.href = '/mypage.html' }, 1500)
+        await paymentWidgetInstance.setAmount({ currency: 'KRW', value: total })
+        await Promise.all([
+          paymentWidgetInstance.renderPaymentMethods({
+            selector: '#payment-widget',
+            variantKey: 'DEFAULT',
+          }),
+          paymentWidgetInstance.renderAgreement({
+            selector: '#agreement-widget',
+            variantKey: 'AGREEMENT',
+          }),
+        ])
       } catch (err) {
-        console.error('[cart] 주문 실패:', err)
-        showToast('주문 처리 중 오류가 발생했습니다. 다시 시도해 주세요.', 'error')
-        submitBtn.disabled = false
-        submitBtn.textContent = '주문 완료'
+        console.error('[cart] 결제 위젯 로드 실패:', err)
+        showToast('결제 창을 불러오는 데 실패했습니다. 새로고침 후 다시 시도해 주세요.', 'error')
+      }
+    }
+
+    /* --------------------------------------------------
+       뒤로가기 (STEP 2 → STEP 1)
+    -------------------------------------------------- */
+    document.getElementById('btn-pay-back').addEventListener('click', function() {
+      document.getElementById('payment-widget-area').classList.remove('visible')
+      document.getElementById('order-form').style.display = 'block'
+      document.getElementById('modal-title').textContent = '주문하기'
+      setStep(1)
+    })
+
+    /* --------------------------------------------------
+       결제하기 버튼 — TossPayments requestPayment 호출
+    -------------------------------------------------- */
+    document.getElementById('btn-pay-confirm').addEventListener('click', async function() {
+      if (!paymentWidgetInstance) { showToast('결제 위젯을 아직 불러오는 중입니다.', 'error'); return }
+      const btn = document.getElementById('btn-pay-confirm')
+      btn.disabled = true
+      btn.textContent = '결제 진행 중...'
+
+      const total = getCartTotal() + getDeliveryFee()
+      const tossOrderId = sessionStorage.getItem('hgm_toss_order_id')
+      const isProd = !window.location.hostname.includes('localhost')
+      const baseUrl = isProd ? 'https://hellowgardenmarket.vercel.app' : window.location.origin
+
+      try {
+        await paymentWidgetInstance.requestPayment({
+          orderId: tossOrderId,
+          orderName: getCart().length === 1 ? getCart()[0].name : getCart()[0].name + ' 외 ' + (getCart().length - 1) + '건',
+          successUrl: baseUrl + '/order-complete.html?status=success',
+          failUrl: baseUrl + '/order-complete.html?status=fail',
+          customerName: savedReceiverInfo.name,
+          customerMobilePhone: savedReceiverInfo.phone.replace(/-/g, ''),
+        })
+      } catch (err) {
+        console.error('[cart] 결제 요청 오류:', err)
+        showToast(err.message || '결제 중 오류가 발생했습니다.', 'error')
+        btn.disabled = false
+        btn.textContent = '결제하기'
       }
     })
 
@@ -538,9 +662,6 @@
     updateNavAuth()
     updateCartBadge()
 
-    /* --------------------------------------------------
-       햄버거 메뉴
-    -------------------------------------------------- */
     const hamburger  = document.getElementById('hamburger')
     const mobileMenu = document.getElementById('mobile-menu')
     hamburger.addEventListener('click', function() {
@@ -549,6 +670,8 @@
     })
   </script>
 
+  <!-- TossPayments SDK (non-module) -->
+  <script src="https://js.tosspayments.com/v2/standard"></script>
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>
 
 </body>

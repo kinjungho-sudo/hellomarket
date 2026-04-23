@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>주문 결과 | 헬로우가든마켓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <style>
+    .result-page {
+      min-height: calc(100vh - 64px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 48px 24px; background: var(--color-bg);
+    }
+    .result-card {
+      background: #fff; border-radius: var(--radius-lg);
+      border: 1.5px solid rgba(0,0,0,0.07); box-shadow: var(--shadow-md);
+      padding: 52px 40px 44px; max-width: 480px; width: 100%; text-align: center;
+    }
+    @media (max-width: 480px) { .result-card { padding: 36px 24px 28px; } }
+    .result-icon { font-size: 64px; line-height: 1; margin-bottom: 16px; }
+    .result-title { font-size: 26px; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 8px; color: var(--color-text); }
+    .result-title.success { color: var(--color-primary); }
+    .result-title.fail    { color: var(--color-danger); }
+    .result-desc { font-size: 15px; color: var(--color-text-sub); line-height: 1.65; margin-bottom: 32px; }
+    .order-info { background: var(--color-bg-section); border-radius: var(--radius-md); padding: 20px 24px; margin-bottom: 28px; text-align: left; }
+    .order-info__row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; color: var(--color-text-sub); }
+    .order-info__row:last-child { margin-bottom: 0; }
+    .order-info__row strong { color: var(--color-text); font-weight: 700; }
+    .result-actions { display: flex; flex-direction: column; gap: 10px; }
+    .result-actions .btn { height: 44px; font-size: 14px; font-weight: 700; }
+    .spinner-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 32px 0; }
+    .spinner { width: 40px; height: 40px; border: 3px solid rgba(45,90,61,0.15); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-text { font-size: 15px; color: var(--color-text-sub); }
+    .cart-badge { position: absolute; top: -6px; right: -8px; background: var(--color-danger); color: #fff; border-radius: var(--radius-full); font-size: 11px; font-weight: 700; min-width: 18px; height: 18px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
+    .mobile-menu.open { display: block; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <nav class="container">
+    <a href="/index.html" class="nav-logo"><img src="/assets/logo/logo.png" alt="헬로우가든마켓" style="width:32px;height:32px;object-fit:contain;"> Hello Garden Market</a>
+    <ul class="nav-links">
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div id="nav-auth"></div>
+      <a href="/cart.html" class="cart-icon" style="position:relative;">🛒 <span id="cart-count" class="cart-badge">0</span></a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="메뉴"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <ul>
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+  </div>
+</header>
+
+<main class="result-page">
+  <div class="result-card" id="result-card">
+    <div class="spinner-wrap" id="loading-view">
+      <div class="spinner"></div>
+      <p class="spinner-text">결제 확인 중...</p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="nav-logo" style="margin-bottom:12px;"><span class="logo-icon">🌻</span> Hello Garden Market</div>
+    <div class="footer-links">
+      <a href="/about.html">매장 소개</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">이용약관</a>
+    </div>
+    <p class="footer-copy">© 2026 헬로우가든마켓. All rights reserved.</p>
+  </div>
+</footer>
+
+<script type="module">
+  import { updateNavAuth } from '/js/auth.js'
+  import { updateCartBadge, clearCart } from '/js/utils/cart.js'
+  import { formatPrice } from '/js/utils/format.js'
+  import { sendOrderAlert } from '/js/api/notifications.js'
+
+  updateNavAuth()
+  updateCartBadge()
+
+  const hamburger = document.getElementById('hamburger')
+  const mobileMenu = document.getElementById('mobile-menu')
+  hamburger.addEventListener('click', function() {
+    mobileMenu.classList.toggle('open')
+    hamburger.classList.toggle('open')
+  })
+
+  const params = new URLSearchParams(window.location.search)
+  const status = params.get('status')
+
+  if (status === 'fail') {
+    renderFail(params.get('message') || '결제가 취소되었거나 오류가 발생했습니다.')
+  } else {
+    const paymentKey = params.get('paymentKey')
+    const orderId    = params.get('orderId')
+    const amount     = Number(params.get('amount'))
+    const receiverInfo = JSON.parse(sessionStorage.getItem('hgm_receiver') || 'null')
+    const cartSnapshot = JSON.parse(sessionStorage.getItem('hgm_cart_snapshot') || '[]')
+    const userId       = sessionStorage.getItem('hgm_user_id')
+
+    if (!paymentKey || !orderId || !amount || !receiverInfo || !userId) {
+      renderFail('결제 정보가 올바르지 않습니다. 다시 시도해 주세요.')
+    } else {
+      confirmPayment(paymentKey, orderId, amount, receiverInfo, cartSnapshot, userId)
+    }
+  }
+
+  async function confirmPayment(paymentKey, orderId, amount, receiverInfo, cartItems, userId) {
+    try {
+      const res = await fetch('/api/confirm-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentKey,
+          orderId,
+          amount,
+          orderData: {
+            userId,
+            receiverInfo,
+            items: cartItems.map(function(item) {
+              return { productId: item.id, productName: item.name, quantity: item.quantity, price: item.price }
+            }),
+          },
+        }),
+      })
+
+      const result = await res.json()
+      if (!res.ok || !result.success) {
+        renderFail(result.error || '주문 처리 중 오류가 발생했습니다.')
+        return
+      }
+
+      clearCart()
+      sessionStorage.removeItem('hgm_toss_order_id')
+      sessionStorage.removeItem('hgm_toss_amount')
+      sessionStorage.removeItem('hgm_receiver')
+      sessionStorage.removeItem('hgm_cart_snapshot')
+      sessionStorage.removeItem('hgm_user_id')
+
+      try {
+        await sendOrderAlert({
+          order_number: result.orderNumber,
+          total_amount: result.amount,
+          receiver_name: receiverInfo.name,
+          items: cartItems,
+        })
+      } catch (_) {}
+
+      renderSuccess(result)
+    } catch (err) {
+      console.error('[order-complete] 결제 확인 오류:', err)
+      renderFail('서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.')
+    }
+  }
+
+  function makeInfoRow(label, value) {
+    const row = document.createElement('div')
+    row.className = 'order-info__row'
+    const lbl = document.createElement('span')
+    lbl.textContent = label
+    const val = document.createElement('strong')
+    val.textContent = value
+    row.appendChild(lbl)
+    row.appendChild(val)
+    return row
+  }
+
+  function makeBtn(href, cls, text) {
+    const a = document.createElement('a')
+    a.href = href
+    a.className = cls
+    a.textContent = text
+    return a
+  }
+
+  function renderSuccess(result) {
+    const card = document.getElementById('result-card')
+    card.replaceChildren()
+
+    const icon = document.createElement('div')
+    icon.className = 'result-icon'
+    icon.textContent = '🌻'
+
+    const title = document.createElement('h1')
+    title.className = 'result-title success'
+    title.textContent = '주문이 완료되었어요!'
+
+    const desc = document.createElement('p')
+    desc.className = 'result-desc'
+    desc.textContent = '식물이 소중히 배달될 예정이에요. 주문 내역은 마이페이지에서 확인하실 수 있어요.'
+
+    const info = document.createElement('div')
+    info.className = 'order-info'
+    info.appendChild(makeInfoRow('주문번호', result.orderNumber))
+    info.appendChild(makeInfoRow('결제 금액', formatPrice(result.amount)))
+    info.appendChild(makeInfoRow('결제 수단', result.paymentMethod || '-'))
+
+    const actions = document.createElement('div')
+    actions.className = 'result-actions'
+    actions.appendChild(makeBtn('/mypage.html', 'btn btn-primary', '주문 내역 보기'))
+    actions.appendChild(makeBtn('/shop.html', 'btn btn-ghost', '쇼핑 계속하기'))
+
+    card.appendChild(icon)
+    card.appendChild(title)
+    card.appendChild(desc)
+    card.appendChild(info)
+    card.appendChild(actions)
+  }
+
+  function renderFail(message) {
+    const card = document.getElementById('result-card')
+    card.replaceChildren()
+
+    const icon = document.createElement('div')
+    icon.className = 'result-icon'
+    icon.textContent = '😢'
+
+    const title = document.createElement('h1')
+    title.className = 'result-title fail'
+    title.textContent = '결제가 실패했어요'
+
+    const desc = document.createElement('p')
+    desc.className = 'result-desc'
+    desc.textContent = message
+
+    const actions = document.createElement('div')
+    actions.className = 'result-actions'
+    actions.appendChild(makeBtn('/cart.html', 'btn btn-primary', '장바구니로 돌아가기'))
+    actions.appendChild(makeBtn('/index.html', 'btn btn-ghost', '홈으로'))
+
+    card.appendChild(icon)
+    card.appendChild(title)
+    card.appendChild(desc)
+    card.appendChild(actions)
+  }
+</script>
+
+</body>
+</html>
