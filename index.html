@@ -99,17 +99,61 @@
     ==================================================== */
     .hero {
       min-height: clamp(400px, 55vw, 560px);
-      background:
-        linear-gradient(to bottom,
-          rgba(0,0,0,0.1) 0%,
-          rgba(0,0,0,0.3) 50%,
-          rgba(0,0,0,0.68) 100%),
-        url('/assets/images/hero-bg.jpg') center center / cover no-repeat;
       display: flex;
       align-items: flex-end;
       color: #fff;
       position: relative;
       overflow: hidden;
+    }
+    /* 슬라이드쇼 — 배경 이미지 레이어 */
+    .hero__slides {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .hero__slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+    .hero__slide.active {
+      opacity: 1;
+    }
+    /* 그라디언트 오버레이 */
+    .hero__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+        rgba(0,0,0,0.08) 0%,
+        rgba(0,0,0,0.28) 50%,
+        rgba(0,0,0,0.65) 100%);
+      z-index: 1;
+    }
+    /* 슬라이드 인디케이터 (하단 점) */
+    .hero__dots {
+      position: absolute;
+      bottom: 18px;
+      right: 28px;
+      display: flex;
+      gap: 7px;
+      z-index: 3;
+    }
+    .hero__dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.45);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+      border: none;
+      padding: 0;
+    }
+    .hero__dot.active {
+      background: #fff;
+      transform: scale(1.3);
     }
     .hero__inner {
       width: 100%;
@@ -486,8 +530,20 @@
     </div>
   </section>
 
-  <!-- 히어로 — 매장 실사 -->
-  <section class="hero">
+  <!-- 히어로 — 슬라이드쇼 배너 -->
+  <section class="hero" id="hero">
+    <!-- 배경 슬라이드 이미지 -->
+    <div class="hero__slides" id="hero-slides">
+      <div class="hero__slide active" style="background-image:url('/assets/images/banner1.jpg')"></div>
+      <div class="hero__slide" style="background-image:url('/assets/images/banner2.jpg')"></div>
+      <div class="hero__slide" style="background-image:url('/assets/images/banner3.jpg')"></div>
+      <div class="hero__slide" style="background-image:url('/assets/images/banner4.jpg')"></div>
+      <div class="hero__slide" style="background-image:url('/assets/images/banner5.jpg')"></div>
+      <div class="hero__slide" style="background-image:url('/assets/images/banner6.jpg')"></div>
+    </div>
+    <div class="hero__overlay"></div>
+    <!-- 인디케이터 점 -->
+    <div class="hero__dots" id="hero-dots"></div>
     <div class="hero__inner">
       <div>
         <span class="hero__area-tag">📍 고양 식물마켓</span>
@@ -506,6 +562,42 @@
       </div>
     </div>
   </section>
+
+  <script>
+    (function() {
+      const slides = document.querySelectorAll('.hero__slide')
+      const dotsWrap = document.getElementById('hero-dots')
+      let current = 0
+      let timer
+
+      // 인디케이터 점 생성
+      slides.forEach((_, i) => {
+        const dot = document.createElement('button')
+        dot.className = 'hero__dot' + (i === 0 ? ' active' : '')
+        dot.setAttribute('aria-label', '슬라이드 ' + (i + 1))
+        dot.addEventListener('click', () => goTo(i))
+        dotsWrap.appendChild(dot)
+      })
+
+      function goTo(idx) {
+        slides[current].classList.remove('active')
+        dotsWrap.children[current].classList.remove('active')
+        current = idx
+        slides[current].classList.add('active')
+        dotsWrap.children[current].classList.add('active')
+        resetTimer()
+      }
+
+      function next() { goTo((current + 1) % slides.length) }
+
+      function resetTimer() {
+        clearInterval(timer)
+        timer = setInterval(next, 4500)
+      }
+
+      resetTimer()
+    })()
+  </script>
 
   <!-- 섹션 2: 신상 입고 -->
   <section class="section-new">
