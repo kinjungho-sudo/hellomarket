@@ -26,7 +26,6 @@
       align-items: center;
       gap: 24px;
       margin-bottom: 24px;
-      position: relative;
     }
     .profile-avatar {
       width: 64px; height: 64px;
@@ -47,19 +46,19 @@
       background: #e8f5e9; color: var(--color-primary);
     }
     .profile-badge.join { background: var(--color-bg-section); color: var(--color-text-light); }
-    /* 로그아웃 — 우측 상단 */
+    /* 로그아웃 — 프로필 우측 끝에 flex로 정렬 */
     .logout-btn {
-      position: absolute; top: 24px; right: 28px;
+      margin-left: auto; flex-shrink: 0;
       height: 34px; padding: 0 16px;
       background: none; border: 1.5px solid rgba(0,0,0,0.14);
       border-radius: var(--radius-sm); font-size: 13px; font-weight: 600;
       color: var(--color-text-sub); cursor: pointer; transition: all 0.2s;
-      white-space: nowrap;
+      white-space: nowrap; align-self: flex-start;
     }
     .logout-btn:hover { border-color: var(--color-danger); color: var(--color-danger); }
     @media (max-width: 600px) {
       .profile-header { flex-wrap: wrap; padding: 20px; }
-      .logout-btn { position: static; margin-top: 8px; width: 100%; }
+      .logout-btn { margin-left: 0; width: 100%; align-self: auto; }
     }
 
     /* ── 탭 네비게이션 ── */
