@@ -61,6 +61,9 @@ CREATE TABLE IF NOT EXISTS hgm_orders (
   id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   order_number    text UNIQUE,
   user_id         uuid REFERENCES hgm_users(id),
+  is_guest        boolean DEFAULT false,
+  orderer_name    text,
+  orderer_email   text,
   total_price     int4,
   status          text DEFAULT '주문완료' CHECK (
                     status IN ('주문완료','결제완료','배송준비','배송중','배송완료','취소')

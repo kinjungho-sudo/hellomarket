@@ -2,6 +2,8 @@
 import { requireAdminAuth, adminLogout } from '/js/utils/admin-auth.js'
 import { supabase } from '/js/config.js'
 import { getPosts, createPost, updatePost, deletePost } from '/js/api/posts.js'
+import { sendNewArrivalAlert } from '/js/api/notifications.js'
+import { getNotifyUsers } from '/js/api/users.js'
 
 // 관리자 접근 제어
 requireAdminAuth()
@@ -261,6 +263,29 @@ async function savePost() {
       result = await createPost(postData)
     }
     if (result.error) throw new Error(result.error)
+
+    // 입고 소식 신규 발행 시 → 텔레그램 + 이메일 알림 발송
+    const isNewPost = !currentEditId
+    const isNewArrival = postData.type === 'new_arrival'
+    const isPublished = postData.is_published
+    if (isNewPost && isNewArrival && isPublished) {
+      // 텔레그램 발송
+      const notifyUsers = await getNotifyUsers('notify_new')
+      sendNewArrivalAlert(postData, notifyUsers.length).catch(e =>
+        console.warn('[posts] 신상 입고 텔레그램 알림 실패:', e)
+      )
+
+      // 이메일 발송 (Vercel Serverless Function)
+      fetch('/api/send-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post: { ...postData, image_url: result.image_url }, notifyType: 'notify_new' }),
+      })
+        .then(r => r.json())
+        .then(r => console.log('[posts] 이메일 발송 결과:', r))
+        .catch(e => console.warn('[posts] 이메일 발송 실패:', e))
+    }
+
     closeModal()
     await loadPosts()
   } catch (err) {

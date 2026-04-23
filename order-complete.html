@@ -34,10 +34,6 @@
     .order-info__row strong { color: var(--color-text); font-weight: 700; }
     .result-actions { display: flex; flex-direction: column; gap: 10px; }
     .result-actions .btn { height: 44px; font-size: 14px; font-weight: 700; }
-    .spinner-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 32px 0; }
-    .spinner { width: 40px; height: 40px; border: 3px solid rgba(45,90,61,0.15); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner-text { font-size: 15px; color: var(--color-text-sub); }
     .cart-badge { position: absolute; top: -6px; right: -8px; background: var(--color-danger); color: #fff; border-radius: var(--radius-full); font-size: 11px; font-weight: 700; min-width: 18px; height: 18px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
     .mobile-menu.open { display: block; }
     .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -79,12 +75,7 @@
 </header>
 
 <main class="result-page">
-  <div class="result-card" id="result-card">
-    <div class="spinner-wrap" id="loading-view">
-      <div class="spinner"></div>
-      <p class="spinner-text">결제 확인 중...</p>
-    </div>
-  </div>
+  <div class="result-card" id="result-card"></div>
 </main>
 
 <footer class="footer">
@@ -101,9 +92,8 @@
 
 <script type="module">
   import { updateNavAuth } from '/js/auth.js'
-  import { updateCartBadge, clearCart } from '/js/utils/cart.js'
+  import { updateCartBadge } from '/js/utils/cart.js'
   import { formatPrice } from '/js/utils/format.js'
-  import { sendOrderAlert } from '/js/api/notifications.js'
 
   updateNavAuth()
   updateCartBadge()
@@ -114,85 +104,6 @@
     mobileMenu.classList.toggle('open')
     hamburger.classList.toggle('open')
   })
-
-  const params = new URLSearchParams(window.location.search)
-  const status = params.get('status')
-
-  if (status === 'fail') {
-    renderFail(params.get('message') || '결제가 취소되었거나 오류가 발생했습니다.')
-  } else {
-    const paymentKey = params.get('paymentKey')
-    const orderId    = params.get('orderId')
-    const amount     = Number(params.get('amount'))
-    const receiverInfo = JSON.parse(sessionStorage.getItem('hgm_receiver') || 'null')
-    const cartSnapshot = JSON.parse(sessionStorage.getItem('hgm_cart_snapshot') || '[]')
-    const userId       = sessionStorage.getItem('hgm_user_id') || null
-    const isGuest      = sessionStorage.getItem('hgm_is_guest') === '1'
-
-    if (!paymentKey || !orderId || !amount || !receiverInfo) {
-      renderFail('결제 정보가 올바르지 않습니다. 다시 시도해 주세요.')
-    } else {
-      confirmPayment(paymentKey, orderId, amount, receiverInfo, cartSnapshot, userId, isGuest)
-    }
-  }
-
-  async function confirmPayment(paymentKey, orderId, amount, receiverInfo, cartItems, userId, isGuest) {
-    try {
-      const res = await fetch('/api/confirm-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          paymentKey,
-          orderId,
-          amount,
-          orderData: {
-            userId,
-            isGuest,
-            receiverInfo,
-            items: cartItems.map(function(item) {
-              return { productId: item.id, productName: item.name, quantity: item.quantity, price: item.price }
-            }),
-          },
-        }),
-      })
-
-      const result = await res.json()
-      if (!res.ok || !result.success) {
-        renderFail(result.error || '주문 처리 중 오류가 발생했습니다.')
-        return
-      }
-
-      clearCart()
-
-      // 즉시 구매 모드였다면 원래 장바구니 복원
-      const cartBackupRaw = sessionStorage.getItem('hgm_cart_buynow_backup')
-      if (cartBackupRaw !== null) {
-        localStorage.setItem('hgm_cart', cartBackupRaw)
-        sessionStorage.removeItem('hgm_cart_buynow_backup')
-      }
-
-      sessionStorage.removeItem('hgm_toss_order_id')
-      sessionStorage.removeItem('hgm_toss_amount')
-      sessionStorage.removeItem('hgm_receiver')
-      sessionStorage.removeItem('hgm_cart_snapshot')
-      sessionStorage.removeItem('hgm_user_id')
-      sessionStorage.removeItem('hgm_is_guest')
-
-      try {
-        await sendOrderAlert({
-          order_number: result.orderNumber,
-          total_amount: result.amount,
-          receiver_name: receiverInfo.name,
-          items: cartItems,
-        })
-      } catch (_) {}
-
-      renderSuccess(result)
-    } catch (err) {
-      console.error('[order-complete] 결제 확인 오류:', err)
-      renderFail('서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.')
-    }
-  }
 
   function makeInfoRow(label, value) {
     const row = document.createElement('div')
@@ -214,7 +125,7 @@
     return a
   }
 
-  function renderSuccess(result) {
+  function renderSuccess(orderNumber, amount) {
     const card = document.getElementById('result-card')
     card.replaceChildren()
 
@@ -232,9 +143,8 @@
 
     const info = document.createElement('div')
     info.className = 'order-info'
-    info.appendChild(makeInfoRow('주문번호', result.orderNumber))
-    info.appendChild(makeInfoRow('결제 금액', formatPrice(result.amount)))
-    info.appendChild(makeInfoRow('결제 수단', result.paymentMethod || '-'))
+    if (orderNumber) info.appendChild(makeInfoRow('주문번호', orderNumber))
+    if (amount)      info.appendChild(makeInfoRow('주문 금액', formatPrice(Number(amount))))
 
     const actions = document.createElement('div')
     actions.className = 'result-actions'
@@ -258,7 +168,7 @@
 
     const title = document.createElement('h1')
     title.className = 'result-title fail'
-    title.textContent = '결제가 실패했어요'
+    title.textContent = '주문이 실패했어요'
 
     const desc = document.createElement('p')
     desc.className = 'result-desc'
@@ -273,6 +183,18 @@
     card.appendChild(title)
     card.appendChild(desc)
     card.appendChild(actions)
+  }
+
+  // URL 파라미터에서 결과 읽기
+  const params = new URLSearchParams(window.location.search)
+  const status      = params.get('status')
+  const orderNumber = params.get('orderNumber')
+  const amount      = params.get('amount')
+
+  if (status === 'success') {
+    renderSuccess(orderNumber, amount)
+  } else {
+    renderFail(params.get('message') || '주문 처리 중 오류가 발생했습니다. 다시 시도해 주세요.')
   }
 </script>
 

@@ -307,11 +307,21 @@
         <div class="notify-card">
           <div class="notify-item">
             <div>
-              <div class="notify-label">신상 입고 알림</div>
-              <div class="notify-desc">새로운 식물이 입고되면 알려드려요</div>
+              <div class="notify-label">📧 신규 상품 이메일 알림</div>
+              <div class="notify-desc">새로운 식물이 등록되면 이메일로 알려드려요</div>
             </div>
             <label class="toggle-wrap">
-              <input type="checkbox" id="notify-new" />
+              <input type="checkbox" id="notify-new-product" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notify-item">
+            <div>
+              <div class="notify-label">📦 주문 완료 이메일 알림</div>
+              <div class="notify-desc">주문 완료 시 이메일로 주문 내역 카드를 보내드려요</div>
+            </div>
+            <label class="toggle-wrap">
+              <input type="checkbox" id="notify-order" checked />
               <span class="toggle-slider"></span>
             </label>
           </div>
@@ -402,7 +412,8 @@
     }
 
     if (userInfo.profile) {
-      document.getElementById('notify-new').checked = !!userInfo.profile.notify_new
+      document.getElementById('notify-new-product').checked = !!userInfo.profile.email_notify_new_product
+      document.getElementById('notify-order').checked = userInfo.profile.email_notify_order !== false
       document.getElementById('notify-sale').checked = !!userInfo.profile.notify_sale
     }
   }
@@ -620,7 +631,8 @@
     submitBtn.disabled = true
     submitBtn.textContent = '저장 중...'
     const result = await updateUser(userId, {
-      notify_new: document.getElementById('notify-new').checked,
+      email_notify_new_product: document.getElementById('notify-new-product').checked,
+      email_notify_order: document.getElementById('notify-order').checked,
       notify_sale: document.getElementById('notify-sale').checked,
     })
     submitBtn.disabled = false

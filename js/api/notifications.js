@@ -278,3 +278,29 @@ export async function sendHourlyReport() {
     return { error: err.message }
   }
 }
+
+/**
+ * 신상 입고 알림 — 관리자가 입고 소식(new_arrival)을 발행할 때 호출
+ * notify_new = true 인 회원 수와 포스트 정보를 텔레그램으로 전송
+ * (개별 회원 이메일 발송은 Phase 3, 현재는 관리자 채널에 요약 발송)
+ * @param {Object} post - 입고 소식 포스트 객체 ({ title, content })
+ * @param {number} notifyCount - 알림 수신 동의 회원 수
+ */
+export async function sendNewArrivalAlert(post, notifyCount) {
+  try {
+    const message = [
+      '🌿 <b>신상 입고 소식이 등록되었어요!</b>',
+      '',
+      `📰 <b>제목:</b> ${post.title}`,
+      post.content ? `📝 <b>내용:</b> ${post.content.slice(0, 100)}${post.content.length > 100 ? '...' : ''}` : '',
+      '',
+      `👥 알림 수신 동의 회원: <b>${notifyCount}명</b>`,
+      `🔗 <a href="https://hellowgardenmarket.vercel.app/new.html">입고 소식 보기</a>`,
+    ].filter(Boolean).join('\n')
+
+    return await sendTelegram(message)
+  } catch (err) {
+    console.error('[sendNewArrivalAlert] 신상 입고 알림 발송 실패:', err)
+    return { error: err.message }
+  }
+}

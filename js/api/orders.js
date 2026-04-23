@@ -1,6 +1,37 @@
 import { supabase } from '../config.js'
 import { sendOrderAlert } from './notifications.js'
 
+const SUPABASE_URL = 'https://gqynptpjomcqzxyykqic.supabase.co'
+
+// 주문 완료 이메일 발송 (Edge Function 호출)
+async function sendOrderEmail(orderId, toEmail) {
+  try {
+    if (!toEmail) return
+    await fetch(`${SUPABASE_URL}/functions/v1/send-order-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: orderId, to_email: toEmail }),
+    })
+  } catch (e) {
+    console.warn('[sendOrderEmail] 이메일 발송 실패:', e)
+  }
+}
+
+// 신규 상품 알림 이메일 발송 (Edge Function 호출, 관리자 전용)
+export async function sendNewProductEmail(productId) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-new-product-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: productId }),
+    })
+    return await res.json()
+  } catch (e) {
+    console.warn('[sendNewProductEmail] 이메일 발송 실패:', e)
+    return { error: String(e) }
+  }
+}
+
 /**
  * 주문번호 생성 (HGM-YYYYMMDD-XXX 형식)
  * 예: HGM-20260423-001
@@ -81,6 +112,12 @@ export async function createOrder(userId, items, receiverInfo) {
 
     // 텔레그램 주문 알림 발송 (실패해도 주문은 정상 처리)
     sendOrderAlert(result).catch((e) => console.warn('[createOrder] 텔레그램 알림 실패:', e))
+
+    // 주문 완료 이메일 발송 (주문자 이메일이 있을 때만)
+    const recipientEmail = receiverInfo.ordererEmail || receiverInfo.email || null
+    if (recipientEmail) {
+      sendOrderEmail(order.id, recipientEmail).catch((e) => console.warn('[createOrder] 이메일 발송 실패:', e))
+    }
 
     return result
   } catch (err) {

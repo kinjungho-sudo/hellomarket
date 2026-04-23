@@ -2,6 +2,7 @@
 import { requireAdminAuth, adminLogout } from '/js/utils/admin-auth.js'
 import { supabase } from '/js/config.js'
 import { getProducts, createProduct, updateProduct, deleteProduct } from '/js/api/products.js'
+import { sendNewProductEmail } from '/js/api/orders.js'
 
 // 관리자 접근 제어
 requireAdminAuth()
@@ -318,6 +319,7 @@ async function saveProduct() {
     }
 
     let result
+    const isNew = !currentEditId
     if (currentEditId) {
       result = await updateProduct(currentEditId, productData)
     } else {
@@ -325,6 +327,20 @@ async function saveProduct() {
     }
 
     if (result.error) throw new Error(result.error)
+
+    // 신규 상품 등록 시 이메일 알림 발송 여부 확인
+    if (isNew && result.id) {
+      const sendEmail = confirm(`✅ 상품이 등록되었습니다!\n\n신규 상품 알림 이메일을 구독 회원에게 발송할까요?\n(수신 동의한 회원에게만 발송됩니다)`)
+      if (sendEmail) {
+        const emailResult = await sendNewProductEmail(result.id)
+        if (emailResult.error) {
+          alert('이메일 발송 중 오류: ' + emailResult.error)
+        } else {
+          alert(`📧 이메일이 ${emailResult.sent ?? 0}명에게 발송되었습니다!`)
+        }
+      }
+    }
+
     closeModal()
     await loadProducts()
   } catch (err) {

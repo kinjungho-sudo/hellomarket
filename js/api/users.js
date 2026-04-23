@@ -216,6 +216,26 @@ export async function getShippingInfo(userId) {
 }
 
 /**
+ * 알림 수신 동의 회원 목록 조회
+ * @param {'notify_new'|'notify_sale'} type - 알림 유형 컬럼명
+ * @returns {Array} - 이메일/이름이 있는 회원 목록
+ */
+export async function getNotifyUsers(type) {
+  try {
+    const { data, error } = await supabase
+      .from('hgm_users')
+      .select('id, name, email')
+      .eq(type, true)
+
+    if (error) throw error
+    return data || []
+  } catch (err) {
+    console.error('[getNotifyUsers] 알림 수신 회원 조회 실패:', err)
+    return []
+  }
+}
+
+/**
  * 전체 회원 수 조회 (관리자 대시보드용)
  */
 export async function getUserCount() {
