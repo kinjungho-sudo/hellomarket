@@ -12,62 +12,213 @@
   <link rel="stylesheet" href="/css/common.css" />
   <link rel="stylesheet" href="/css/components.css" />
   <style>
-    /* ---- 히어로 ---- */
-    .hero {
-      min-height: 560px;
-      background:
-        linear-gradient(160deg, rgba(26,61,40,0.92) 0%, rgba(45,90,61,0.85) 60%, rgba(74,124,89,0.80) 100%),
-        url('/assets/images/hero-bg.jpg') center/cover no-repeat;
+    /* ====================================================
+       브랜드 배너 — 크림 배경 + 로고 캐릭터 + 브랜드명
+    ==================================================== */
+    .brand-banner {
+      background: linear-gradient(180deg, #fff9e3 0%, #fef0b0 100%);
+      border-bottom: 3px solid #f5c842;
+      overflow: hidden;
+      position: relative;
+    }
+    .brand-banner__inner {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 28px 24px 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0;
+      position: relative;
+    }
+    /* 텍스트 영역 */
+    .brand-banner__text {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      padding-bottom: 24px;
+    }
+    .brand-banner__sub {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--color-green-dark);
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
-      color: #fff;
-      padding: 80px 24px;
+      gap: 6px;
     }
-    .hero__inner { max-width: 680px; }
-    .hero__label {
+    .brand-banner__title {
+      font-family: var(--font-serif);
+      font-size: clamp(40px, 9vw, 76px);
+      font-weight: 900;
+      color: var(--color-green-dark);
+      line-height: 1.0;
+      letter-spacing: -0.04em;
+      position: relative;
       display: inline-block;
-      background: var(--color-accent);
-      color: #333;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+    }
+    /* 타이틀 아래 노란 밑줄 강조 */
+    .brand-banner__title::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0; right: 0;
+      height: 8px;
+      background: var(--color-yellow);
+      border-radius: 4px;
+      z-index: -1;
+      transform: skewX(-3deg);
+    }
+    /* 반짝이 장식 */
+    .sp {
+      position: absolute;
+      pointer-events: none;
+      z-index: 3;
+      line-height: 1;
+      animation: sp-bounce 2.5s ease-in-out infinite;
+    }
+    .sp-1 { font-size: 28px; top: 24px; left: 6%;  animation-delay: 0s; }
+    .sp-2 { font-size: 20px; top: 16px; right: 8%; animation-delay: 0.6s; }
+    .sp-3 { font-size: 16px; top: 56px; left: 18%; animation-delay: 1.2s; }
+    .sp-4 { font-size: 22px; top: 40px; right: 22%; animation-delay: 0.9s; }
+    @keyframes sp-bounce {
+      0%,100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+      50%      { transform: scale(1.25) rotate(15deg); opacity: 0.75; }
+    }
+    /* 로고 캐릭터 이미지 */
+    .brand-banner__logo {
+      width: clamp(110px, 20vw, 180px);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+      /* 아래 바닥에 딱 붙이기 */
+      align-self: flex-end;
+      /* 살짝 튀어나오는 효과 */
+      filter: drop-shadow(0 -4px 12px rgba(245,200,66,0.35));
+      animation: logo-float 3.5s ease-in-out infinite;
+    }
+    @keyframes logo-float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+    /* 배경 잎 데코 */
+    .brand-banner__deco {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .deco-leaf {
+      position: absolute;
+      font-size: 60px;
+      opacity: 0.13;
+      line-height: 1;
+    }
+    .dl-1 { top: -8px;  left: -12px;  transform: rotate(-25deg); }
+    .dl-2 { top: -8px;  right: -12px; transform: rotate(20deg) scaleX(-1); }
+    .dl-3 { bottom: 0;  left: 42%;    transform: rotate(8deg);  font-size: 40px; opacity: 0.09; }
+
+    /* ====================================================
+       히어로 — 매장 실사 풀스크린
+    ==================================================== */
+    .hero {
+      min-height: clamp(460px, 70vw, 640px);
+      background:
+        linear-gradient(to bottom,
+          rgba(0,0,0,0.04) 0%,
+          rgba(0,0,0,0.22) 45%,
+          rgba(0,0,0,0.62) 100%),
+        url('/assets/images/hero-bg.jpg') center 25% / cover no-repeat;
+      display: flex;
+      align-items: flex-end;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero__inner {
+      width: 100%;
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 28px 48px;
+      position: relative;
+      z-index: 2;
+    }
+    /* 고양 식물마켓 서브 태그 */
+    .hero__area-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
       padding: 5px 14px;
       border-radius: var(--radius-full);
-      margin-bottom: 20px;
+      margin-bottom: 10px;
+      letter-spacing: 0.06em;
+    }
+    /* hello! 말풍선 */
+    .hero__bubble {
+      display: inline-block;
+      background: #fff;
+      color: var(--color-green-dark);
+      font-size: 14px;
+      font-weight: 900;
+      padding: 6px 18px;
+      border-radius: 22px 22px 22px 5px;
+      margin-bottom: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.22);
+      letter-spacing: 0.03em;
+      position: relative;
+    }
+    .hero__bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -8px; left: 16px;
+      border: 6px solid transparent;
+      border-top-color: #fff;
+      border-bottom: none;
+    }
+    .hero__sub-copy {
+      font-size: clamp(14px, 2.8vw, 18px);
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
+      line-height: 1.4;
     }
     .hero__headline {
       font-family: var(--font-serif);
-      font-size: clamp(32px, 5vw, 58px);
-      font-weight: 700;
-      line-height: 1.22;
-      letter-spacing: -0.03em;
-      margin-bottom: 18px;
+      font-size: clamp(42px, 8.5vw, 86px);
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -0.04em;
+      margin-bottom: 32px;
+      color: #fff;
+      text-shadow: 2px 5px 16px rgba(0,0,0,0.4);
     }
-    .hero__sub {
-      font-size: clamp(14px, 2vw, 17px);
-      line-height: 1.7;
-      color: rgba(255,255,255,.78);
-      margin-bottom: 36px;
+    .hero__headline .hl {
+      color: var(--color-yellow);
     }
     .hero__cta {
       display: flex;
       gap: 12px;
-      justify-content: center;
       flex-wrap: wrap;
-      margin-bottom: 28px;
+      margin-bottom: 20px;
     }
     .hero__reassurance {
       display: flex;
-      gap: 20px;
-      justify-content: center;
+      gap: 16px;
       flex-wrap: wrap;
-      font-size: 12.5px;
-      color: rgba(255,255,255,.58);
+      font-size: 12px;
+      color: rgba(255,255,255,.6);
     }
-    .hero__reassurance span { display: flex; align-items: center; gap: 5px; }
+    .hero__reassurance span { display: flex; align-items: center; gap: 4px; }
 
     /* ---- 섹션 공통 ---- */
     .section-header {
@@ -315,7 +466,10 @@
 
   <header class="header">
     <nav class="container">
-      <a href="/index.html" class="nav-logo"><span class="logo-icon">🌻</span> Hello Garden Market</a>
+      <a href="/index.html" class="nav-logo">
+        <img src="/assets/logo/logo.png" alt="헬로우가든마켓 로고" style="width:32px;height:32px;object-fit:contain;">
+        Hello Garden Market
+      </a>
       <ul class="nav-links">
         <li><a href="/index.html">홈</a></li>
         <li><a href="/shop.html">쇼핑하기</a></li>
@@ -346,20 +500,47 @@
     </div>
   </header>
 
-  <!-- 섹션 1: 히어로 -->
+  <!-- 브랜드 배너 -->
+  <section class="brand-banner">
+    <div class="brand-banner__deco">
+      <span class="deco-leaf dl-1">🌿</span>
+      <span class="deco-leaf dl-2">🌿</span>
+      <span class="deco-leaf dl-3">🌱</span>
+    </div>
+    <span class="sp sp-1">✦</span>
+    <span class="sp sp-2">✦</span>
+    <span class="sp sp-3">✦</span>
+    <span class="sp sp-4">✦</span>
+    <div class="brand-banner__inner">
+      <div class="brand-banner__text">
+        <p class="brand-banner__sub">고양 가든센터, 합리적인 식물 쇼핑!</p>
+        <h2 class="brand-banner__title">헬로우가든마켓</h2>
+      </div>
+      <img
+        src="/assets/logo/logo.png"
+        alt="헬로우가든마켓 캐릭터"
+        class="brand-banner__logo"
+      />
+    </div>
+  </section>
+
+  <!-- 히어로 — 매장 실사 -->
   <section class="hero">
     <div class="hero__inner">
-      <span class="hero__label">🌻 헬로우가든마켓</span>
-      <h1 class="hero__headline">고향 가든센터,<br>합리적인 식물 쇼핑</h1>
-      <p class="hero__sub">수백 종의 식물을 온라인에서 구경하고<br>마음에 드는 건 매장에서 직접 만나보세요</p>
+      <div>
+        <span class="hero__area-tag">📍 고양 식물마켓</span>
+      </div>
+      <div class="hero__bubble">hello! 👋</div>
+      <p class="hero__sub-copy">식집사들이 사랑하는 핫플레이스!</p>
+      <h1 class="hero__headline"><span class="hl">헬로우</span>가든마켓</h1>
       <div class="hero__cta">
-        <a href="/shop.html" class="btn btn-primary btn-lg">쇼핑하기 →</a>
+        <a href="/shop.html" class="btn btn-primary btn-lg">온라인 쇼핑하기 →</a>
         <a href="/gallery.html" class="btn btn-outline-white btn-lg">매장 구경하기</a>
       </div>
       <div class="hero__reassurance">
-        <span>🚚 전국 배송</span>
-        <span>📦 안전한 포장</span>
-        <span>🌿 식물 전문가 상담</span>
+        <span>🚚 전국 배송 가능</span>
+        <span>📦 안전 포장</span>
+        <span>🌿 수백 종 보유</span>
       </div>
     </div>
   </section>
