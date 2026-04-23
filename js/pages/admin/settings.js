@@ -142,6 +142,91 @@ if (btnSendReport) {
   })
 }
 
+// ── 이메일 설정 저장 ──
+document.getElementById('btn-save-email-settings')?.addEventListener('click', async function() {
+  const apiKey   = document.getElementById('resend-api-key')?.value?.trim()
+  const fromEmail = document.getElementById('resend-from-email')?.value?.trim()
+  const notifyNewProduct = document.getElementById('toggle-email-new-product')?.checked ?? true
+  const notifyOrder = document.getElementById('toggle-email-order')?.checked ?? true
+  const resultEl = document.getElementById('email-save-result')
+
+  const show = (msg, ok) => {
+    resultEl.textContent = (ok ? '✅ ' : '❌ ') + msg
+    resultEl.style.color = ok ? 'var(--color-success)' : 'var(--color-danger)'
+    resultEl.style.display = 'block'
+    setTimeout(() => { resultEl.style.display = 'none' }, 4000)
+  }
+
+  this.disabled = true
+  try {
+    const { error } = await supabase
+      .from('hgm_notification_settings')
+      .update({
+        resend_api_key: apiKey || null,
+        from_email: fromEmail || null,
+        notify_new_product: notifyNewProduct,
+        notify_order_confirm: notifyOrder,
+        updated_at: new Date().toISOString(),
+      })
+      .gte('id', '00000000-0000-0000-0000-000000000000')
+    if (error) throw error
+    show('이메일 설정이 저장되었습니다!', true)
+  } catch (e) {
+    show('저장 실패: ' + e.message, false)
+  } finally {
+    this.disabled = false
+  }
+})
+
+// ── 테스트 이메일 발송 ──
+document.getElementById('btn-test-email')?.addEventListener('click', async function() {
+  const SUPABASE_URL = 'https://gqynptpjomcqzxyykqic.supabase.co'
+  const resultEl = document.getElementById('email-save-result')
+  const show = (msg, ok) => {
+    resultEl.textContent = (ok ? '✅ ' : '❌ ') + msg
+    resultEl.style.color = ok ? 'var(--color-success)' : 'var(--color-danger)'
+    resultEl.style.display = 'block'
+  }
+
+  this.disabled = true
+  this.textContent = '발송 중...'
+  try {
+    // 첫 번째 상품을 테스트 대상으로 사용
+    const { data: products } = await supabase.from('hgm_products').select('id').limit(1)
+    if (!products?.length) throw new Error('테스트할 상품이 없습니다.')
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-new-product-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_id: products[0].id,
+        recipients: ['kinjungho@gmail.com'],
+      }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || '발송 실패')
+    show(`테스트 이메일이 발송되었습니다! (kinjungho@gmail.com)`, true)
+  } catch (e) {
+    show('발송 실패: ' + e.message, false)
+  } finally {
+    this.disabled = false
+    this.textContent = '📨 테스트 이메일 발송'
+  }
+})
+
+// ── 이메일 설정 로딩 ──
+async function loadEmailSettings() {
+  const { data } = await supabase.from('hgm_notification_settings').select('resend_api_key,from_email,notify_new_product,notify_order_confirm').limit(1).single()
+  if (!data) return
+  if (data.resend_api_key) document.getElementById('resend-api-key').value = data.resend_api_key
+  if (data.from_email) document.getElementById('resend-from-email').value = data.from_email
+  const np = document.getElementById('toggle-email-new-product')
+  if (np) np.checked = data.notify_new_product !== false
+  const oc = document.getElementById('toggle-email-order')
+  if (oc) oc.checked = data.notify_order_confirm !== false
+}
+loadEmailSettings()
+
 // 비밀번호 변경
 document.getElementById('btn-change-password')?.addEventListener('click', async function() {
   const currentPw  = document.getElementById('current-password')?.value?.trim()

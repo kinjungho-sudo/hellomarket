@@ -132,6 +132,62 @@
         </div>
       </div>
 
+      <!-- 이메일 알림 설정 카드 -->
+      <div class="admin-card">
+        <div class="admin-card-title">📧 이메일 알림 설정 (Resend)</div>
+
+        <div class="admin-form-group">
+          <label>Resend API Key</label>
+          <input type="password" class="admin-input" id="resend-api-key"
+            placeholder="re_xxxxxxxxxxxxxxxxxxxx">
+          <div style="font-size:12px; color:var(--color-text-light); margin-top:4px;">
+            <a href="https://resend.com" target="_blank" style="color:var(--color-primary);">resend.com</a>에서 무료 가입 후 API Key를 발급받으세요. (무료 3,000건/월)
+          </div>
+        </div>
+
+        <div class="admin-form-group">
+          <label>발신 이메일</label>
+          <input type="text" class="admin-input" id="resend-from-email"
+            placeholder="헬로우가든마켓 <noreply@hellogarden.kr>">
+          <div style="font-size:12px; color:var(--color-text-light); margin-top:4px;">
+            Resend에서 도메인 인증한 이메일만 사용 가능합니다. 미인증 시 onboarding@resend.dev 사용.
+          </div>
+        </div>
+
+        <div style="margin-top:4px; margin-bottom:20px;">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">신규 상품 이메일 알림</div>
+              <div class="toggle-desc">새 상품 등록 시 수신 동의 회원에게 자동 이메일 발송</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-email-new-product" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">주문 완료 이메일 알림</div>
+              <div class="toggle-desc">주문 완료 시 구매자에게 주문 내역 카드 이메일 자동 발송</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-email-order" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" id="btn-save-email-settings" style="height:44px; padding:0 32px;">
+            💾 이메일 설정 저장
+          </button>
+          <button class="btn btn-ghost" id="btn-test-email" style="height:44px;">
+            📨 테스트 이메일 발송
+          </button>
+        </div>
+        <div id="email-save-result" style="margin-top:10px; font-size:13px; display:none;"></div>
+      </div>
+
       <!-- 관리자 비밀번호 변경 카드 -->
       <div class="admin-card">
         <div class="admin-card-title">🔐 관리자 비밀번호 변경</div>
