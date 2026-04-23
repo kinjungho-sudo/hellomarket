@@ -292,7 +292,6 @@
   </div>
 </footer>
 
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=6677fdfbb0481ed7f679a12f804ccf7b&libraries=services"></script>
 <script type="module">
   import { updateNavAuth } from '/js/auth.js'
   import { updateCartBadge } from '/js/utils/cart.js'
@@ -306,10 +305,10 @@
   updateCartBadge()
 </script>
 <script>
-  // 카카오맵 초기화 — 주소로 좌표 검색 후 마커 표시
-  kakao.maps.load(function() {
+  // 카카오맵 SDK 동적 로드 후 초기화
+  function initKakaoMap() {
     const container = document.getElementById('kakao-map')
-    const options = { center: new kakao.maps.LatLng(37.5665, 126.9780), level: 4 }
+    const options = { center: new kakao.maps.LatLng(37.6370, 126.8850), level: 4 }
     const map = new kakao.maps.Map(container, options)
 
     const geocoder = new kakao.maps.services.Geocoder()
@@ -317,16 +316,21 @@
       if (status === kakao.maps.services.Status.OK) {
         const coords = new kakao.maps.LatLng(result[0].y, result[0].x)
         map.setCenter(coords)
-
         const marker = new kakao.maps.Marker({ map, position: coords })
-
         const infowindow = new kakao.maps.InfoWindow({
           content: '<div style="padding:10px 14px;font-size:13px;font-weight:700;color:#2d5a3d;white-space:nowrap;">🌻 헬로우가든마켓(건민농원)</div>'
         })
         infowindow.open(map, marker)
       }
     })
-  })
+  }
+
+  const script = document.createElement('script')
+  script.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=6677fdfbb0481ed7f679a12f804ccf7b&libraries=services&autoload=false'
+  script.onload = function() {
+    kakao.maps.load(initKakaoMap)
+  }
+  document.head.appendChild(script)
 </script>
 </body>
 </html>
