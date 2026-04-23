@@ -161,23 +161,38 @@ export async function updateNavAuth() {
         navAuthEl.appendChild(adminLink)
       }
 
-      // 마이페이지 링크
+      // 마이페이지 + 로그아웃 인라인 묶음
+      const userNav = document.createElement('div')
+      userNav.style.cssText = 'display:flex; align-items:center; gap:4px;'
+
       const mypageLink = document.createElement('a')
       mypageLink.href = '/mypage.html'
       mypageLink.className = 'nav-link'
       mypageLink.textContent = '마이페이지'
-      navAuthEl.appendChild(mypageLink)
+      userNav.appendChild(mypageLink)
 
-      // 로그아웃 버튼
+      const divider = document.createElement('span')
+      divider.textContent = '|'
+      divider.style.cssText = 'color:var(--color-text-light); font-size:12px; opacity:0.4;'
+      userNav.appendChild(divider)
+
       const logoutBtn = document.createElement('button')
-      logoutBtn.className = 'btn btn-ghost'
       logoutBtn.id = 'btn-logout'
       logoutBtn.textContent = '로그아웃'
+      logoutBtn.style.cssText = [
+        'background:none; border:none; cursor:pointer; padding:4px 6px;',
+        'font-size:13px; color:var(--color-text-light);',
+        'font-family:inherit; transition:color 0.2s;',
+      ].join('')
+      logoutBtn.addEventListener('mouseenter', () => { logoutBtn.style.color = 'var(--color-danger)' })
+      logoutBtn.addEventListener('mouseleave', () => { logoutBtn.style.color = 'var(--color-text-light)' })
       logoutBtn.addEventListener('click', async () => {
         await signOut()
         window.location.href = '/index.html'
       })
-      navAuthEl.appendChild(logoutBtn)
+      userNav.appendChild(logoutBtn)
+
+      navAuthEl.appendChild(userNav)
     } else {
       // 로그인 링크
       const loginLink = document.createElement('a')
