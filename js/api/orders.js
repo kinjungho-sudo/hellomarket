@@ -3,14 +3,14 @@ import { sendOrderAlert } from './notifications.js'
 
 const SUPABASE_URL = 'https://gqynptpjomcqzxyykqic.supabase.co'
 
-// 주문 완료 이메일 발송 (Edge Function 호출)
-async function sendOrderEmail(orderId, toEmail) {
+// 주문 완료 이메일 발송 (Vercel Serverless)
+async function sendOrderEmail(order, toEmail) {
   try {
     if (!toEmail) return
-    await fetch(`${SUPABASE_URL}/functions/v1/send-order-email`, {
+    await fetch('/api/order-confirm-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ order_id: orderId, to_email: toEmail }),
+      body: JSON.stringify({ order, toEmail }),
     })
   } catch (e) {
     console.warn('[sendOrderEmail] 이메일 발송 실패:', e)
@@ -116,7 +116,7 @@ export async function createOrder(userId, items, receiverInfo) {
     // 주문 완료 이메일 발송 (주문자 이메일이 있을 때만)
     const recipientEmail = receiverInfo.ordererEmail || receiverInfo.email || null
     if (recipientEmail) {
-      sendOrderEmail(order.id, recipientEmail).catch((e) => console.warn('[createOrder] 이메일 발송 실패:', e))
+      sendOrderEmail(result, recipientEmail).catch((e) => console.warn('[createOrder] 이메일 발송 실패:', e))
     }
 
     return result
