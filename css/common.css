@@ -150,6 +150,7 @@ header nav,
   gap: 8px;
   align-items: center;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .nav-actions a,
@@ -169,6 +170,16 @@ header nav,
 .nav-actions button:hover {
   color: var(--color-green-dark);
   background: var(--color-yellow-bg);
+}
+
+/* 로그인 버튼 강조 */
+#nav-auth .btn,
+#nav-auth .btn-primary {
+  height: 34px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 /* ====================================================
@@ -396,6 +407,10 @@ footer,
   .hamburger {
     display: flex;
   }
+  /* 모바일에서 nav-actions 내 로그인 버튼 숨김 (모바일 메뉴에서 표시) */
+  .nav-actions #nav-auth {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -405,6 +420,56 @@ footer,
   .section {
     padding: 52px 0;
   }
+
+  /* 모바일 메뉴 내 로그인 영역 */
+  .mobile-menu .mobile-auth {
+    padding: 12px 16px 16px;
+    border-top: 1px solid rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mobile-menu .mobile-auth a,
+  .mobile-menu .mobile-auth button {
+    display: block;
+    width: 100%;
+    padding: 13px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--color-text);
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--font-main);
+    border-radius: 0;
+  }
+  .mobile-menu .mobile-auth a:hover,
+  .mobile-menu .mobile-auth button:hover {
+    background: var(--color-yellow-bg);
+    color: var(--color-text-on-yellow);
+  }
+
+  /* 모바일 뒤로가기 버튼 공통 */
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+    height: 36px;
+    padding: 0 14px;
+    background: none;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-sub);
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: var(--font-main);
+  }
+  .btn-back:hover { border-color: var(--color-primary); color: var(--color-primary); background: #f0f7f2; }
 }
 
 @media (max-width: 480px) {
@@ -419,5 +484,16 @@ footer,
     flex-direction: column;
     gap: 10px;
     align-items: center;
+  }
+
+  /* 초소형 화면 버튼 크기 보정 */
+  .btn, .btn-primary, .btn-secondary {
+    height: 42px;
+    font-size: 14px;
+  }
+  .btn-back {
+    height: 34px;
+    font-size: 12px;
+    padding: 0 12px;
   }
 }

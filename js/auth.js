@@ -142,51 +142,74 @@ export async function updateNavAuth() {
   try {
     const { session } = await getSession()
     const navAuthEl = document.getElementById('nav-auth')
-    if (!navAuthEl) return
+    const mobileAuthEl = document.getElementById('mobile-auth')
 
-    // 기존 자식 요소 제거 후 DOM API로 재구성 (XSS 방지)
-    navAuthEl.textContent = ''
+    // 데스크톱 nav-auth
+    if (navAuthEl) {
+      navAuthEl.textContent = ''
 
-    if (session) {
-      // 마이페이지 + 로그아웃 인라인 묶음
-      const userNav = document.createElement('div')
-      userNav.style.cssText = 'display:flex; align-items:center; gap:4px;'
+      if (session) {
+        const userNav = document.createElement('div')
+        userNav.style.cssText = 'display:flex; align-items:center; gap:4px;'
 
-      const mypageLink = document.createElement('a')
-      mypageLink.href = '/mypage.html'
-      mypageLink.className = 'nav-link'
-      mypageLink.textContent = '마이페이지'
-      userNav.appendChild(mypageLink)
+        const mypageLink = document.createElement('a')
+        mypageLink.href = '/mypage.html'
+        mypageLink.className = 'nav-link'
+        mypageLink.textContent = '마이페이지'
+        userNav.appendChild(mypageLink)
 
-      const divider = document.createElement('span')
-      divider.textContent = '|'
-      divider.style.cssText = 'color:var(--color-text-light); font-size:12px; opacity:0.4;'
-      userNav.appendChild(divider)
+        const divider = document.createElement('span')
+        divider.textContent = '|'
+        divider.style.cssText = 'color:var(--color-text-light); font-size:12px; opacity:0.4;'
+        userNav.appendChild(divider)
 
-      const logoutBtn = document.createElement('button')
-      logoutBtn.id = 'btn-logout'
-      logoutBtn.textContent = '로그아웃'
-      logoutBtn.style.cssText = [
-        'background:none; border:none; cursor:pointer; padding:4px 6px;',
-        'font-size:13px; color:var(--color-text-light);',
-        'font-family:inherit; transition:color 0.2s;',
-      ].join('')
-      logoutBtn.addEventListener('mouseenter', () => { logoutBtn.style.color = 'var(--color-danger)' })
-      logoutBtn.addEventListener('mouseleave', () => { logoutBtn.style.color = 'var(--color-text-light)' })
-      logoutBtn.addEventListener('click', async () => {
-        await signOut()
-        window.location.href = '/index.html'
-      })
-      userNav.appendChild(logoutBtn)
+        const logoutBtn = document.createElement('button')
+        logoutBtn.id = 'btn-logout'
+        logoutBtn.textContent = '로그아웃'
+        logoutBtn.style.cssText = [
+          'background:none; border:none; cursor:pointer; padding:4px 6px;',
+          'font-size:13px; color:var(--color-text-light);',
+          'font-family:inherit; transition:color 0.2s;',
+        ].join('')
+        logoutBtn.addEventListener('mouseenter', () => { logoutBtn.style.color = 'var(--color-danger)' })
+        logoutBtn.addEventListener('mouseleave', () => { logoutBtn.style.color = 'var(--color-text-light)' })
+        logoutBtn.addEventListener('click', async () => {
+          await signOut()
+          window.location.href = '/index.html'
+        })
+        userNav.appendChild(logoutBtn)
+        navAuthEl.appendChild(userNav)
+      } else {
+        const loginLink = document.createElement('a')
+        loginLink.href = '/login.html'
+        loginLink.className = 'btn btn-primary'
+        loginLink.textContent = '로그인'
+        navAuthEl.appendChild(loginLink)
+      }
+    }
 
-      navAuthEl.appendChild(userNav)
-    } else {
-      // 로그인 링크
-      const loginLink = document.createElement('a')
-      loginLink.href = '/login.html'
-      loginLink.className = 'btn btn-primary'
-      loginLink.textContent = '로그인'
-      navAuthEl.appendChild(loginLink)
+    // 모바일 메뉴 내 인증 영역
+    if (mobileAuthEl) {
+      mobileAuthEl.textContent = ''
+      if (session) {
+        const mypageLink = document.createElement('a')
+        mypageLink.href = '/mypage.html'
+        mypageLink.textContent = '👤 마이페이지'
+        mobileAuthEl.appendChild(mypageLink)
+
+        const logoutBtn = document.createElement('button')
+        logoutBtn.textContent = '로그아웃'
+        logoutBtn.addEventListener('click', async () => {
+          await signOut()
+          window.location.href = '/index.html'
+        })
+        mobileAuthEl.appendChild(logoutBtn)
+      } else {
+        const loginLink = document.createElement('a')
+        loginLink.href = '/login.html'
+        loginLink.textContent = '🔑 로그인'
+        mobileAuthEl.appendChild(loginLink)
+      }
     }
   } catch (err) {
     console.error('[HGM] updateNavAuth 오류:', err)
