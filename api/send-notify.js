@@ -126,9 +126,9 @@ export default async function handler(req, res) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: `헬로우가든마켓 <${FROM_EMAIL}>`,
+            from: `Hello Garden Market <${FROM_EMAIL}>`,
             to: [user.email],
-            subject: `🌿 [헬로우가든마켓] ${post.title}`,
+            subject: `[Hello Garden Market] ${post.title}`,
             html: makeEmailHtml(userName, post),
           }),
         })
