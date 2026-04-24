@@ -64,21 +64,7 @@
     .hort-summary { font-size: 13px; color: var(--color-text-sub); line-height: 1.5; }
     .hort-arrow { font-size: 18px; color: var(--color-text-light); flex-shrink: 0; align-self: center; }
 
-    .yt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
-    @media (max-width: 640px) { .yt-grid { grid-template-columns: 1fr; } }
-    .yt-card { background: #fff; border-radius: var(--radius-md); border: 1.5px solid rgba(0,0,0,0.07); box-shadow: var(--shadow-sm); overflow: hidden; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; display: block; }
-    .yt-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-    .yt-thumb { position: relative; aspect-ratio: 16/9; background: #111; display: block; overflow: hidden; }
-    .yt-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .yt-play { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.28); transition: background 0.2s; }
-    .yt-card:hover .yt-play { background: rgba(0,0,0,0.15); }
-    .yt-play-icon { width: 52px; height: 52px; background: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-    .yt-play-icon svg { width: 22px; height: 22px; fill: #fff; margin-left: 3px; }
-    .yt-body { padding: 14px 16px 16px; }
-    .yt-title { font-size: 14px; font-weight: 700; color: var(--color-text); line-height: 1.45; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .yt-meta { font-size: 12px; color: var(--color-text-light); }
-
-    .state-box { text-align: center; padding: 80px 24px; color: var(--color-text-light); }
+.state-box { text-align: center; padding: 80px 24px; color: var(--color-text-light); }
     .state-box .icon { font-size: 48px; margin-bottom: 16px; }
     .state-box p { font-size: 15px; }
 
@@ -149,7 +135,6 @@
       <button class="tab-item" data-tab="hgm">🌻 헬로우가든 소식</button>
       <button class="tab-item" data-tab="hortnews">📰 원예 뉴스</button>
       <button class="tab-item" data-tab="guide">📖 가드닝 배울거리</button>
-      <button class="tab-item" data-tab="youtube">▶ 유튜브</button>
     </div>
   </div>
 </div>
@@ -190,14 +175,6 @@
   </div>
 </div>
 
-<div class="tab-panel" id="panel-youtube">
-  <div class="container">
-    <div class="section-label">YOUTUBE</div>
-    <div class="section-h2">유튜브 소식</div>
-    <div class="section-desc">가드닝 유튜브 채널에서 엄선한 영상들</div>
-    <div id="youtube-container"></div>
-  </div>
-</div>
 
 <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal" id="modal">
@@ -251,7 +228,6 @@
         loaded.add(tab)
         if (tab === 'hgm')      loadHgmPosts()
         if (tab === 'hortnews') renderHortNews()
-        if (tab === 'youtube')  renderYoutube()
       }
     })
   })
@@ -392,53 +368,7 @@
     renderPostsGrid('guide-container', Array.isArray(result) ? result : [], '📖', '아직 등록된 가이드가 없어요')
   }
 
-  // ── 탭 5: 유튜브 (큐레이션) ─────────────────────
-  const YOUTUBE_LIST = [
-    { title: '몬스테라 물 주기의 모든 것 — 언제, 얼마나, 어떻게', channel: '식물생활', videoId: 'Tzin1DgexsE', date: '2026.04.18' },
-    { title: '초보자를 위한 다육식물 분갈이 완전 정복', channel: '가드닝TV', videoId: 'WsELHEEL0nY', date: '2026.04.12' },
-    { title: '공기정화식물 TOP 10 — 실내에 두면 좋은 식물', channel: '그린라이프', videoId: 'IHNzOHi8sJs', date: '2026.04.05' },
-    { title: '베란다 텃밭 만들기 — 상추부터 방울토마토까지', channel: '도시농부', videoId: 'Wl4vBiL5gFk', date: '2026.03.30' },
-    { title: '희귀식물 구매 전 꼭 알아야 할 것들', channel: '식물덕후', videoId: 'IHNzOHi8sJs', date: '2026.03.22' },
-    { title: '봄 화단 꾸미기 — 계절별 식물 배치 가이드', channel: '가드닝TV', videoId: 'WsELHEEL0nY', date: '2026.03.15' },
-  ]
-
-  function renderYoutube() {
-    const container = document.getElementById('youtube-container')
-    if (!container) return
-    const grid = el('div', 'yt-grid')
-    YOUTUBE_LIST.forEach(v => {
-      const card = document.createElement('a')
-      card.className = 'yt-card'
-      card.href = 'https://www.youtube.com/watch?v=' + v.videoId
-      card.target = '_blank'; card.rel = 'noopener noreferrer'
-
-      const thumb = el('div', 'yt-thumb')
-      const img = document.createElement('img')
-      img.src = 'https://img.youtube.com/vi/' + v.videoId + '/mqdefault.jpg'
-      img.alt = v.title; img.loading = 'lazy'
-      img.onerror = () => { thumb.style.background = 'var(--color-bg-section)'; img.remove() }
-
-      const play = el('div', 'yt-play')
-      const playIcon = el('div', 'yt-play-icon')
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-      svg.setAttribute('viewBox', '0 0 24 24')
-      const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
-      poly.setAttribute('points', '5,3 19,12 5,21')
-      poly.setAttribute('fill', '#fff')
-      svg.appendChild(poly); playIcon.appendChild(svg); play.appendChild(playIcon)
-      thumb.appendChild(img); thumb.appendChild(play)
-
-      const body = el('div', 'yt-body')
-      body.appendChild(el('div', 'yt-title', v.title))
-      body.appendChild(el('div', 'yt-meta', v.channel + ' · ' + v.date))
-
-      card.appendChild(thumb); card.appendChild(body)
-      grid.appendChild(card)
-    })
-    container.appendChild(grid)
-  }
-
-  // ── 초기 로드 ────────────────────────────────────
+// ── 초기 로드 ────────────────────────────────────
   loaded.add('arrival'); loaded.add('guide')
   Promise.all([loadArrival(), loadGuide()])
 </script>
