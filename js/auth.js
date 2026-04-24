@@ -56,6 +56,54 @@ export async function upsertUserProfile(user) {
 }
 
 /**
+ * 이메일+비밀번호 회원가입
+ * @param {string} email
+ * @param {string} password
+ * @param {string} name
+ * @param {string} phone
+ */
+export async function signUpWithEmail(email, password, name, phone) {
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: name } },
+    })
+    if (error) throw error
+
+    // hgm_users row 생성
+    if (data.user) {
+      await supabase.from('hgm_users').upsert({
+        id: data.user.id,
+        email,
+        name,
+        phone,
+        provider: 'email',
+      }, { onConflict: 'id', ignoreDuplicates: false })
+    }
+
+    return { data, error: null }
+  } catch (err) {
+    console.error('[HGM] signUpWithEmail 오류:', err)
+    return { data: null, error: err }
+  }
+}
+
+/**
+ * 이메일+비밀번호 로그인
+ */
+export async function signInWithEmail(email, password) {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) throw error
+    return { data, error: null }
+  } catch (err) {
+    console.error('[HGM] signInWithEmail 오류:', err)
+    return { data: null, error: err }
+  }
+}
+
+/**
  * 네이버 소셜 로그인 (Supabase OAuth)
  */
 export async function signInWithNaver() {
