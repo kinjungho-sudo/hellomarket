@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>소식 | 헬로우가든마켓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <style>
+    .post-wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 100px; }
+
+    .post-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--color-text-sub);
+      text-decoration: none; margin-bottom: 28px;
+      transition: color 0.2s;
+    }
+    .post-back:hover { color: var(--color-primary); }
+
+    .post-type-badge {
+      display: inline-block; font-size: 11px; font-weight: 800;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--color-primary); background: rgba(45,90,61,0.08);
+      border-radius: var(--radius-sm); padding: 4px 10px; margin-bottom: 14px;
+    }
+
+    .post-title {
+      font-size: clamp(22px, 4vw, 34px); font-weight: 900;
+      letter-spacing: -0.03em; color: var(--color-text);
+      line-height: 1.35; margin-bottom: 12px;
+    }
+
+    .post-meta { font-size: 13px; color: var(--color-text-light); margin-bottom: 28px; }
+
+    .post-hero-img {
+      width: 100%; aspect-ratio: 16/9;
+      border-radius: var(--radius-lg); overflow: hidden;
+      background: var(--color-bg-section);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 72px; margin-bottom: 36px;
+    }
+    .post-hero-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .post-content {
+      font-size: 16px; color: var(--color-text);
+      line-height: 1.85; white-space: pre-line;
+    }
+
+    .post-actions { margin-top: 40px; padding-top: 28px; border-top: 1.5px solid rgba(0,0,0,0.07); display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .state-box { text-align: center; padding: 100px 24px; color: var(--color-text-light); }
+    .state-box .icon { font-size: 52px; margin-bottom: 16px; }
+    .state-box p { font-size: 15px; margin-bottom: 20px; }
+
+    .cart-badge { position: absolute; top: -6px; right: -8px; background: var(--color-danger); color: #fff; border-radius: var(--radius-full); font-size: 11px; font-weight: 700; min-width: 18px; height: 18px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
+    .mobile-menu.open { display: block; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <nav class="container">
+    <a href="/index.html" class="nav-logo"><img src="/assets/logo/logo.png" alt="헬로우가든마켓" style="width:32px;height:32px;object-fit:contain;"> Hello Garden Market</a>
+    <ul class="nav-links">
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html" class="active">새소식</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div id="nav-auth"></div>
+      <a href="/cart.html" class="cart-icon" style="position:relative;">🛒 <span id="cart-count" class="cart-badge">0</span></a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="메뉴"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <ul>
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/shop.html">쇼핑하기</a></li>
+      <li><a href="/new.html">새소식</a></li>
+      <li><a href="/gallery.html">매장 구경하기</a></li>
+      <li><a href="/qna.html">묻고 답하기</a></li>
+      <li><a href="/review-event.html">리뷰 이벤트</a></li>
+      <li><a href="/about.html">매장 소개</a></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+  <div class="post-wrap" id="post-wrap">
+    <div class="state-box">
+      <div class="icon">🌿</div>
+      <p>불러오는 중...</p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="nav-logo" style="margin-bottom:12px;"><span class="logo-icon">🌻</span> Hello Garden Market</div>
+    <div class="footer-links">
+      <a href="/about.html">매장 소개</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">이용약관</a>
+    </div>
+    <p class="footer-copy">© 2026 헬로우가든마켓. All rights reserved.</p>
+  </div>
+</footer>
+
+<a href="/cart.html" class="cart-fab" id="cart-fab" aria-label="장바구니">
+  <span class="cart-fab__icon">🛒</span>
+  <span class="cart-fab__badge" id="cart-fab-count">0</span>
+</a>
+
+<script type="module">
+  import { updateNavAuth } from '/js/auth.js'
+  import { updateCartBadge } from '/js/utils/cart.js'
+  import { supabase } from '/js/config.js'
+
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobile-menu').classList.toggle('open')
+    document.getElementById('hamburger').classList.toggle('open')
+  })
+  updateNavAuth()
+  updateCartBadge()
+
+  function formatDate(iso) {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return d.getFullYear() + '년 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일'
+  }
+
+  function strip(str) { return str ? str.replace(/<[^>]*>/g, '') : '' }
+
+  function typeLabel(type) {
+    if (type === 'new_arrival') return '🌱 새로 들어왔어요'
+    if (type === 'guide')       return '📖 가드닝 가이드'
+    if (type === 'hgm_news')    return '🌻 헬로우가든 소식'
+    return '소식'
+  }
+
+  function renderError(msg) {
+    const wrap = document.getElementById('post-wrap')
+    wrap.textContent = ''
+    const box = document.createElement('div')
+    box.className = 'state-box'
+    const icon = document.createElement('div')
+    icon.className = 'icon'
+    icon.textContent = '🌿'
+    const p = document.createElement('p')
+    p.textContent = msg
+    const a = document.createElement('a')
+    a.className = 'btn btn-outline'
+    a.href = '/new.html'
+    a.textContent = '새소식으로 돌아가기'
+    box.appendChild(icon); box.appendChild(p); box.appendChild(a)
+    wrap.appendChild(box)
+  }
+
+  async function loadPost() {
+    const params = new URLSearchParams(location.search)
+    const id = params.get('id')
+    if (!id) { renderError('포스트 ID가 없습니다.'); return }
+
+    const { data: post, error } = await supabase
+      .from('hgm_posts')
+      .select('*')
+      .eq('id', id)
+      .eq('is_published', true)
+      .single()
+
+    if (error || !post) { renderError('포스트를 찾을 수 없습니다.'); return }
+
+    document.title = (post.title || '소식') + ' | 헬로우가든마켓'
+
+    const wrap = document.getElementById('post-wrap')
+    wrap.textContent = ''
+
+    // 뒤로가기
+    const back = document.createElement('a')
+    back.className = 'post-back'
+    back.href = '/new.html'
+    back.textContent = '← 새소식으로 돌아가기'
+    wrap.appendChild(back)
+
+    // 타입 배지
+    const badge = document.createElement('div')
+    badge.className = 'post-type-badge'
+    badge.textContent = typeLabel(post.type)
+    wrap.appendChild(badge)
+
+    // 제목
+    const title = document.createElement('h1')
+    title.className = 'post-title'
+    title.textContent = post.title || ''
+    wrap.appendChild(title)
+
+    // 날짜
+    const meta = document.createElement('div')
+    meta.className = 'post-meta'
+    meta.textContent = formatDate(post.created_at)
+    wrap.appendChild(meta)
+
+    // 이미지
+    const heroImg = document.createElement('div')
+    heroImg.className = 'post-hero-img'
+    if (post.image_url) {
+      const img = document.createElement('img')
+      img.src = post.image_url
+      img.alt = post.title || ''
+      img.onerror = () => { heroImg.textContent = '🌿' }
+      heroImg.appendChild(img)
+    } else {
+      heroImg.textContent = post.type === 'guide' ? '📖' : '🌱'
+    }
+    wrap.appendChild(heroImg)
+
+    // 본문
+    const content = document.createElement('div')
+    content.className = 'post-content'
+    content.textContent = strip(post.content || '')
+    wrap.appendChild(content)
+
+    // 액션 버튼
+    const actions = document.createElement('div')
+    actions.className = 'post-actions'
+    if (post.product_id) {
+      const buyBtn = document.createElement('a')
+      buyBtn.className = 'btn btn-primary'
+      buyBtn.href = '/product.html?id=' + encodeURIComponent(post.product_id)
+      buyBtn.textContent = '바로 구매하기'
+      actions.appendChild(buyBtn)
+    }
+    const backBtn = document.createElement('a')
+    backBtn.className = 'btn btn-outline'
+    backBtn.href = '/new.html'
+    backBtn.textContent = '목록으로'
+    actions.appendChild(backBtn)
+    wrap.appendChild(actions)
+  }
+
+  loadPost()
+</script>
+</body>
+</html>
