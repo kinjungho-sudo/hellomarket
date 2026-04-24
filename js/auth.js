@@ -122,7 +122,6 @@ export async function requireLogin() {
 export async function requireAdmin() {
   const { session } = await getSession()
   if (!session) {
-    sessionStorage.setItem('loginRedirect', window.location.pathname)
     window.location.href = '/login.html'
     return
   }

@@ -28,8 +28,10 @@ async function checkAlreadyLoggedIn() {
   try {
     const { session } = await getSession()
     if (session) {
-      const returnUrl = sessionStorage.getItem('loginReturnUrl') || '/mypage.html'
+      const saved = sessionStorage.getItem('loginReturnUrl') || ''
       sessionStorage.removeItem('loginReturnUrl')
+      // admin 경로는 무시하고 마이페이지로
+      const returnUrl = (saved && !saved.startsWith('/admin')) ? saved : '/mypage.html'
       window.location.href = returnUrl
     }
   } catch (err) {
