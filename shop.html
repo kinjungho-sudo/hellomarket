@@ -290,7 +290,7 @@
       padding: 80px 24px;
       color: var(--color-text-light);
     }
-    .products-empty__icon { font-size: 48px; margin-bottom: 16px; }
+    .products-empty__icon { font-size: 40px; margin-bottom: 16px; }
     .products-empty__text { font-size: 15px; }
 
     .products-loading {
@@ -359,6 +359,18 @@
 
       /* 카테고리 탭 padding 줄이기 */
       .category-tab { padding: 10px 12px; font-size: 13px; }
+    }
+
+    @media (max-width: 640px) {
+      .shop-main { padding: 24px 0 60px; }
+      .load-more-wrap { margin-top: 32px; }
+      .btn-load-more { height: 44px; padding: 0 32px; font-size: 14px; }
+      .products-empty { padding: 60px 16px; }
+      .products-empty__icon { font-size: 36px; }
+    }
+
+    @media (max-width: 480px) {
+      .shop-main { padding: 20px 0 50px; }
     }
   </style>
 </head>

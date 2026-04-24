@@ -146,6 +146,36 @@
     .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    @media (max-width: 640px) {
+      .page-hero { padding: 44px 0 36px; }
+      .qna-section { padding: 36px 0 60px; }
+      .qna-topbar { margin-bottom: 16px; }
+      .qna-topbar h2 { font-size: 17px; }
+      .state-box .icon { font-size: 36px; }
+      /* 테이블을 모바일 카드형으로 */
+      .qna-table thead { display: none; }
+      .qna-table, .qna-table tbody, .qna-table tr, .qna-table td {
+        display: block; width: 100%;
+      }
+      .qna-table tr {
+        border: 1.5px solid rgba(0,0,0,0.08); border-radius: var(--radius-sm);
+        margin-bottom: 8px; padding: 12px 14px;
+      }
+      .qna-table td { padding: 2px 0; border: none; }
+      .qna-table td.center { text-align: left; }
+      .qna-num { font-size: 11px; }
+      .modal { max-width: 100%; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+      .modal-overlay { align-items: flex-end; padding: 0; }
+      .modal-header { padding: 20px 20px 0; }
+      .modal-body { padding: 16px 20px 24px; }
+      .modal-title { font-size: 18px; }
+    }
+
+    @media (max-width: 480px) {
+      .form-actions { flex-direction: column; }
+      .form-actions .btn { width: 100%; }
+    }
   </style>
 </head>
 <body>

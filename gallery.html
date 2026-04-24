@@ -152,6 +152,16 @@
     .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    @media (max-width: 640px) {
+      .state-box { padding: 52px 16px; }
+      .state-box .icon { font-size: 36px; }
+      .modal-image { font-size: 48px; }
+      .modal { max-width: 100%; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+      .modal-body { padding: 18px 20px 24px; }
+      .modal-overlay { align-items: flex-end; padding: 0; }
+      .modal-title { font-size: 18px; }
+    }
   </style>
 </head>
 <body>
