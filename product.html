@@ -12,11 +12,24 @@
   <link rel="stylesheet" href="/css/common.css" />
   <link rel="stylesheet" href="/css/components.css" />
   <style>
+    /* 뒤로가기 버튼 */
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-bottom: 20px;
+      height: 36px; padding: 0 14px;
+      background: none; border: 1.5px solid rgba(0,0,0,0.12);
+      border-radius: var(--radius-full);
+      font-size: 13px; font-weight: 600; color: var(--color-text-sub);
+      cursor: pointer; transition: all 0.18s;
+      font-family: var(--font-main);
+    }
+    .btn-back:hover { border-color: var(--color-primary); color: var(--color-primary); background: #f0f7f2; }
+
     /* -----------------------------------------------
        상품 상세 레이아웃
     ----------------------------------------------- */
     .product-detail {
-      padding: 48px 0 80px;
+      padding: 32px 0 80px;
     }
 
     /* 2컬럼 레이아웃 */
@@ -704,6 +717,9 @@
   <main>
     <section class="product-detail">
       <div class="container">
+        <button class="btn-back" onclick="history.length > 1 ? history.back() : (location.href='/shop.html')">
+          ← 뒤로가기
+        </button>
         <div id="product-detail-inner">
           <!-- JS로 렌더링 -->
           <div class="detail-loading"><div class="loading-spinner"></div></div>
