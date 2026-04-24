@@ -305,6 +305,61 @@
       .category-tab { padding: 12px 14px; font-size: 13px; }
       .shop-main { padding: 32px 0 60px; }
     }
+
+    /* ── 모바일 필터 접기/펼치기 ── */
+    .filter-toggle-bar {
+      display: none;
+    }
+    .filter-toggle-btn {
+      display: flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid rgba(0,0,0,.15);
+      background: #fff; font-size: 13px; font-weight: 700;
+      color: var(--color-text-sub); cursor: pointer;
+      transition: all 0.18s;
+    }
+    .filter-toggle-btn.has-filter {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: #f0f7f2;
+    }
+    .filter-toggle-btn .filter-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--color-primary); display: none;
+    }
+    .filter-toggle-btn.has-filter .filter-dot { display: block; }
+
+    .collapsible-filters {
+      transition: max-height 0.28s ease, opacity 0.22s ease;
+      overflow: hidden;
+    }
+
+    @media (max-width: 768px) {
+      /* 검색바는 항상 표시, 나머지 필터 영역 제어 */
+      .filter-toggle-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 8px 0 6px; gap: 8px;
+      }
+      .filter-toggle-bar .sort-wrap { flex-shrink: 0; }
+      .filter-toggle-bar .sort-wrap .sort-select {
+        height: 34px; font-size: 12px; padding: 0 8px;
+      }
+
+      /* 카테고리 탭은 항상 표시 */
+      .collapsible-filters {
+        max-height: 0; opacity: 0;
+      }
+      .collapsible-filters.open {
+        max-height: 400px; opacity: 1;
+      }
+
+      /* 검색바 아래 여백 줄이기 */
+      .search-bar-wrap { padding: 10px 0 6px; }
+
+      /* 카테고리 탭 padding 줄이기 */
+      .category-tab { padding: 10px 12px; font-size: 13px; }
+    }
   </style>
 </head>
 <body>
@@ -376,49 +431,70 @@
       <!-- 카테고리 탭 -->
       <div class="category-tabs" id="category-tabs" role="tablist"></div>
 
-      <!-- 배송유형 필터 -->
-      <div class="filter-row">
-        <div class="filter-row__left">
-          <span class="filter-row__label">배송</span>
-          <button class="filter-btn delivery-today" data-delivery="오늘출발">🚀 오늘출발</button>
-          <button class="filter-btn delivery-wish"  data-delivery="희망일배송">📅 희망일배송</button>
-          <button class="filter-btn delivery-free"  data-delivery="무료배송">🎁 무료배송</button>
+      <!-- 모바일 전용: 필터 토글 + 정렬 한 줄 -->
+      <div class="filter-toggle-bar">
+        <button class="filter-toggle-btn" id="filter-toggle-btn" aria-expanded="false">
+          <span>⚙ 필터</span>
+          <span class="filter-dot"></span>
+        </button>
+        <div class="sort-wrap">
+          <select class="sort-select" id="sort-select-mobile" aria-label="정렬 기준">
+            <option value="created_at_desc">최신순</option>
+            <option value="view_count_desc">인기순</option>
+            <option value="price_asc">낮은가격순</option>
+            <option value="price_desc">높은가격순</option>
+          </select>
         </div>
       </div>
 
-      <!-- 가격대 필터 -->
-      <div class="filter-row">
-        <div class="filter-row__left">
-          <span class="filter-row__label">가격대</span>
-          <div class="price-filter-wrap">
-            <div class="price-range-inputs">
-              <input type="number" class="price-input" id="price-min" placeholder="최소" min="0" step="1000">
-              <span class="price-sep">~</span>
-              <input type="number" class="price-input" id="price-max" placeholder="최대" min="0" step="1000">
-              <span class="price-sep" style="font-size:12px;color:#999;">원</span>
-            </div>
-            <button class="btn-price-apply" id="btn-price-apply">적용</button>
-            <button class="btn-price-reset" id="btn-price-reset">초기화</button>
+      <!-- 접히는 필터 (모바일에서 숨김, 버튼으로 펼침) -->
+      <div class="collapsible-filters" id="collapsible-filters">
+
+        <!-- 배송유형 필터 -->
+        <div class="filter-row">
+          <div class="filter-row__left">
+            <span class="filter-row__label">배송</span>
+            <button class="filter-btn delivery-today" data-delivery="오늘출발">🚀 오늘출발</button>
+            <button class="filter-btn delivery-wish"  data-delivery="희망일배송">📅 희망일배송</button>
+            <button class="filter-btn delivery-free"  data-delivery="무료배송">🎁 무료배송</button>
           </div>
         </div>
-      </div>
 
-      <!-- 기타 필터 + 정렬 -->
-      <div class="filter-row">
-        <div class="filter-row__left">
-          <span class="filter-row__label">기타</span>
-          <button class="filter-btn" data-extra="discount">💸 할인상품</button>
-          <button class="filter-btn" data-extra="free_exchange">🔄 무료교환</button>
-          <button class="filter-btn" data-status="판매중">판매중</button>
-          <button class="filter-btn" data-status="시즌한정">시즌한정</button>
+        <!-- 가격대 필터 -->
+        <div class="filter-row">
+          <div class="filter-row__left">
+            <span class="filter-row__label">가격대</span>
+            <div class="price-filter-wrap">
+              <div class="price-range-inputs">
+                <input type="number" class="price-input" id="price-min" placeholder="최소" min="0" step="1000">
+                <span class="price-sep">~</span>
+                <input type="number" class="price-input" id="price-max" placeholder="최대" min="0" step="1000">
+                <span class="price-sep" style="font-size:12px;color:#999;">원</span>
+              </div>
+              <button class="btn-price-apply" id="btn-price-apply">적용</button>
+              <button class="btn-price-reset" id="btn-price-reset">초기화</button>
+            </div>
+          </div>
         </div>
-        <select class="sort-select" id="sort-select" aria-label="정렬 기준">
-          <option value="created_at_desc">최신순</option>
-          <option value="view_count_desc">인기순</option>
-          <option value="price_asc">낮은가격순</option>
-          <option value="price_desc">높은가격순</option>
-        </select>
-      </div>
+
+        <!-- 기타 필터 + 정렬 (데스크톱) -->
+        <div class="filter-row">
+          <div class="filter-row__left">
+            <span class="filter-row__label">기타</span>
+            <button class="filter-btn" data-extra="discount">💸 할인상품</button>
+            <button class="filter-btn" data-extra="free_exchange">🔄 무료교환</button>
+            <button class="filter-btn" data-status="판매중">판매중</button>
+            <button class="filter-btn" data-status="시즌한정">시즌한정</button>
+          </div>
+          <select class="sort-select" id="sort-select" aria-label="정렬 기준">
+            <option value="created_at_desc">최신순</option>
+            <option value="view_count_desc">인기순</option>
+            <option value="price_asc">낮은가격순</option>
+            <option value="price_desc">높은가격순</option>
+          </select>
+        </div>
+
+      </div><!-- /collapsible-filters -->
 
       <!-- 활성 필터 표시 -->
       <div class="active-filters" id="active-filters" style="display:none;"></div>
@@ -574,6 +650,10 @@
         el.appendChild(btn)
         wrap.appendChild(el)
       })
+
+      // 모바일 필터 버튼 활성 상태 업데이트
+      const hasActive = chips.length > 0
+      document.getElementById('filter-toggle-btn')?.classList.toggle('has-filter', hasActive)
     }
 
     function resetDeliveryBtns() {
@@ -1004,6 +1084,28 @@
       state.offset = 0
       loadProducts(false)
       searchInput.focus()
+    })
+
+    // ---- 모바일 필터 토글 ----
+    const filterToggleBtn = document.getElementById('filter-toggle-btn')
+    const collapsibleFilters = document.getElementById('collapsible-filters')
+
+    filterToggleBtn?.addEventListener('click', () => {
+      const isOpen = collapsibleFilters.classList.toggle('open')
+      filterToggleBtn.setAttribute('aria-expanded', isOpen)
+      filterToggleBtn.querySelector('span:first-child').textContent = isOpen ? '✕ 닫기' : '⚙ 필터'
+    })
+
+    // 모바일 정렬 select → 데스크톱 select와 동기화
+    const sortSelectMobile = document.getElementById('sort-select-mobile')
+    sortSelectMobile?.addEventListener('change', (e) => {
+      state.sort = e.target.value
+      document.getElementById('sort-select').value = e.target.value
+      state.offset = 0
+      loadProducts(false)
+    })
+    document.getElementById('sort-select').addEventListener('change', (e) => {
+      if (sortSelectMobile) sortSelectMobile.value = e.target.value
     })
 
     // ---- 초기 로드 ----
