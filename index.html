@@ -515,20 +515,13 @@
     }
     .store-info__value { font-size: 14px; color: var(--color-text); line-height: 1.6; }
     .store-info__value .closed { color: var(--color-danger); font-weight: 600; }
-    .map-placeholder {
+    .map-embed {
       border-radius: var(--radius-md);
-      background: var(--color-bg-section);
-      border: 1px dashed var(--color-border-strong);
+      overflow: hidden;
       height: 280px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 10px;
-      color: var(--color-text-light);
+      box-shadow: var(--shadow-sm);
     }
-    .map-placeholder__icon { font-size: 36px; }
-    .map-placeholder__text { font-size: 13px; font-weight: 500; }
+    .map-embed iframe { width: 100%; height: 100%; border: none; display: block; }
 
     /* ---- 로딩 / 빈 상태 ---- */
     .products-empty {
@@ -791,9 +784,14 @@
             </div>
           </div>
         </div>
-        <div class="map-placeholder">
-          <div class="map-placeholder__icon">🗺️</div>
-          <div class="map-placeholder__text">지도는 주소 확정 후 업데이트 예정입니다</div>
+        <div class="map-embed">
+          <iframe
+            src="https://www.google.com/maps?q=경기+고양시+덕양구+큰골길+61&output=embed&hl=ko"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="헬로우가든마켓 위치"
+          ></iframe>
         </div>
       </div>
     </div>
