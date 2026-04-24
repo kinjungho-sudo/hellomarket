@@ -58,33 +58,28 @@
 
     /* 지도 */
     .map-section { padding: 0 0 80px; background: #fff; }
-    .map-iframe-wrap {
-      width: 100%; height: 380px;
+    .map-card {
       border-radius: var(--radius-md);
-      overflow: hidden;
-      box-shadow: var(--shadow-md);
+      background: var(--color-bg-section);
+      border: 1.5px solid rgba(0,0,0,0.07);
+      padding: 36px 36px 32px;
+      display: flex; flex-direction: column; gap: 20px;
     }
-    .map-iframe-wrap iframe {
-      width: 100%; height: 100%;
-      border: none; display: block;
+    .map-card__address { display: flex; align-items: flex-start; gap: 16px; }
+    .map-card__pin { font-size: 36px; flex-shrink: 0; margin-top: 2px; }
+    .map-card__name { font-size: 18px; font-weight: 800; color: var(--color-text); margin-bottom: 6px; }
+    .map-card__addr { font-size: 15px; color: var(--color-text-sub); line-height: 1.7; }
+    .map-card__buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-map {
+      height: 40px; padding: 0 20px; border-radius: var(--radius-full);
+      font-size: 14px; font-weight: 700; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1.5px solid; transition: all 0.2s;
     }
-    .map-address-bar {
-      display: flex; align-items: center; gap: 8px;
-      margin-top: 14px;
-      font-size: 14px; color: var(--color-text-sub);
-    }
-    .map-address-bar strong { color: var(--color-text); font-weight: 700; }
-    .btn-navi {
-      margin-left: auto;
-      height: 32px; padding: 0 14px;
-      border-radius: var(--radius-full);
-      background: var(--color-primary); color: #fff;
-      font-size: 12px; font-weight: 700;
-      border: none; cursor: pointer; text-decoration: none;
-      display: inline-flex; align-items: center; gap: 4px;
-      transition: background 0.2s;
-    }
-    .btn-navi:hover { background: var(--color-primary-dark); }
+    .btn-map--kakao { background: #FEE500; color: #000; border-color: #FEE500; }
+    .btn-map--kakao:hover { background: #f0d900; border-color: #f0d900; }
+    .btn-map--naver { background: #03C75A; color: #fff; border-color: #03C75A; }
+    .btn-map--naver:hover { background: #02b350; border-color: #02b350; }
 
     /* CTA */
     .about-cta { padding: 80px 0; background: var(--color-primary); text-align: center; }
@@ -261,23 +256,25 @@
 <!-- 지도 -->
 <section class="map-section">
   <div class="container">
-    <div class="map-iframe-wrap">
-      <iframe
-        src="https://www.google.com/maps?q=경기+고양시+덕양구+큰골길+61&output=embed&hl=ko"
-        allowfullscreen
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        title="헬로우가든마켓 위치"
-      ></iframe>
-    </div>
-    <div class="map-address-bar">
-      <span>📍</span>
-      <span><strong>헬로우가든마켓</strong> &nbsp;경기 고양시 덕양구 큰골길 61</span>
-      <a class="btn-navi"
-         href="https://map.kakao.com/link/search/경기%20고양시%20덕양구%20큰골길%2061"
-         target="_blank" rel="noopener">
-        🗺️ 카카오맵으로 보기
-      </a>
+    <div class="map-card">
+      <div class="map-card__address">
+        <span class="map-card__pin">📍</span>
+        <div>
+          <div class="map-card__name">헬로우가든마켓 (건민농원)</div>
+          <div class="map-card__addr">
+            경기도 고양시 덕양구 큰골길 61<br>
+            주차 가능 &nbsp;·&nbsp; 평일 09:00~18:00 &nbsp;·&nbsp; 토 09:00~17:00 &nbsp;·&nbsp; 일 휴무
+          </div>
+        </div>
+      </div>
+      <div class="map-card__buttons">
+        <a class="btn-map btn-map--kakao"
+           href="https://map.kakao.com/link/search/경기+고양시+덕양구+큰골길+61"
+           target="_blank" rel="noopener">🗺 카카오맵</a>
+        <a class="btn-map btn-map--naver"
+           href="https://map.naver.com/v5/search/경기+고양시+덕양구+큰골길+61"
+           target="_blank" rel="noopener">🗺 네이버맵</a>
+      </div>
     </div>
   </div>
 </section>
