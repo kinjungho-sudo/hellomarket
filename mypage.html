@@ -200,6 +200,69 @@
       font-size: 13px; font-weight: 700; text-decoration: none;
     }
 
+    /* ── 리뷰 작성 모달 ── */
+    .review-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .review-modal-overlay.open { display: flex; }
+    .review-modal {
+      background: #fff; border-radius: var(--radius-lg); width: 100%; max-width: 500px;
+      max-height: 90vh; overflow-y: auto; padding: 28px 28px 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .review-modal-title { font-size: 18px; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 20px; }
+    .review-product-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #f0f7f2; color: var(--color-primary); border-radius: var(--radius-full);
+      padding: 5px 14px; font-size: 13px; font-weight: 700; margin-bottom: 18px;
+    }
+    .review-star-row { display: flex; align-items: center; gap: 4px; margin-bottom: 16px; }
+    .review-star-row .star-label { font-size: 13px; color: var(--color-text-sub); margin-left: 6px; }
+    .star-input { display: flex; flex-direction: row-reverse; gap: 2px; }
+    .star-input input { display: none; }
+    .star-input label {
+      font-size: 30px; color: #ddd; cursor: pointer; transition: color 0.12s; line-height: 1;
+    }
+    .star-input label:hover,
+    .star-input label:hover ~ label,
+    .star-input input:checked ~ label { color: #f5c842; }
+    .review-field { margin-bottom: 14px; }
+    .review-field label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--color-text); }
+    .review-input {
+      width: 100%; border: 1.5px solid rgba(0,0,0,0.14); border-radius: var(--radius-sm);
+      padding: 10px 12px; font-size: 14px; font-family: var(--font-main);
+      transition: border-color 0.18s; background: #fff;
+    }
+    .review-input:focus { outline: none; border-color: var(--color-primary); }
+    textarea.review-input { resize: vertical; min-height: 100px; }
+    .review-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn-review-cancel {
+      height: 40px; padding: 0 20px; border: 1.5px solid rgba(0,0,0,0.14);
+      border-radius: var(--radius-sm); background: #fff; font-size: 13px; font-weight: 600;
+      color: var(--color-text-sub); cursor: pointer; transition: all 0.18s;
+    }
+    .btn-review-cancel:hover { border-color: var(--color-text-sub); }
+    .btn-review-submit {
+      height: 40px; padding: 0 24px; background: var(--color-primary); border: none;
+      border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; color: #fff;
+      cursor: pointer; transition: background 0.18s;
+    }
+    .btn-review-submit:hover { background: var(--color-primary-dark); }
+    .btn-review-submit:disabled { background: #aaa; cursor: not-allowed; }
+
+    /* 리뷰 쓰기 버튼 (주문 카드 내) */
+    .btn-write-review {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 28px; padding: 0 12px; border-radius: var(--radius-full);
+      border: 1.5px solid var(--color-primary); background: #fff;
+      font-size: 12px; font-weight: 700; color: var(--color-primary);
+      cursor: pointer; transition: all 0.18s; white-space: nowrap;
+    }
+    .btn-write-review:hover { background: var(--color-primary); color: #fff; }
+    .btn-write-review.done { border-color: #aaa; color: #aaa; cursor: default; }
+    .order-review-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
     /* ── 로그아웃 ── */
     .logout-section { text-align: center; padding: 28px 0 8px; }
     .logout-btn {
@@ -392,6 +455,43 @@
   </div>
 </footer>
 
+<!-- 리뷰 작성 모달 -->
+<div class="review-modal-overlay" id="review-modal-overlay">
+  <div class="review-modal" role="dialog" aria-modal="true" aria-labelledby="review-modal-heading">
+    <div class="review-modal-title" id="review-modal-heading">⭐ 리뷰 작성</div>
+    <div class="review-product-tag" id="review-modal-product-tag">상품명</div>
+    <form id="review-form" novalidate>
+      <input type="hidden" id="review-order-id">
+      <input type="hidden" id="review-product-id">
+      <!-- 별점 -->
+      <div class="review-star-row">
+        <div class="star-input" id="star-input">
+          <input type="radio" name="rating" id="r5" value="5"><label for="r5">★</label>
+          <input type="radio" name="rating" id="r4" value="4"><label for="r4">★</label>
+          <input type="radio" name="rating" id="r3" value="3" checked><label for="r3">★</label>
+          <input type="radio" name="rating" id="r2" value="2"><label for="r2">★</label>
+          <input type="radio" name="rating" id="r1" value="1"><label for="r1">★</label>
+        </div>
+        <span class="star-label" id="star-label-text">별점을 선택하세요</span>
+      </div>
+      <!-- 제목 -->
+      <div class="review-field">
+        <label for="review-title">제목</label>
+        <input type="text" class="review-input" id="review-title" placeholder="한 줄 후기를 입력해주세요" maxlength="80">
+      </div>
+      <!-- 내용 -->
+      <div class="review-field">
+        <label for="review-content">내용</label>
+        <textarea class="review-input" id="review-content" placeholder="구매한 식물의 상태, 배송, 포장 등 솔직하게 작성해주세요 😊" maxlength="1000"></textarea>
+      </div>
+      <div class="review-modal-actions">
+        <button type="button" class="btn-review-cancel" id="review-cancel-btn">취소</button>
+        <button type="submit" class="btn-review-submit" id="review-submit-btn">리뷰 등록</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <a href="/cart.html" class="cart-fab" id="cart-fab" aria-label="장바구니">
   <span class="cart-fab__icon">🛒</span>
   <span class="cart-fab__badge" id="cart-fab-count">0</span>
@@ -565,6 +665,19 @@
 
       card.appendChild(header); card.appendChild(divider)
       card.appendChild(itemsRow); card.appendChild(detailRow); card.appendChild(footer)
+
+      // 배송완료 주문에만 상품별 리뷰 버튼 표시
+      if (order.status === '배송완료' && items.length) {
+        const reviewRow = mk('div', 'order-review-row')
+        items.forEach(item => {
+          const btn = mk('button', 'btn-write-review')
+          btn.textContent = '⭐ ' + (item.product_name || '상품') + ' 리뷰 쓰기'
+          btn.addEventListener('click', () => openReviewModal(order.id, item.product_id, item.product_name))
+          reviewRow.appendChild(btn)
+        })
+        card.appendChild(reviewRow)
+      }
+
       list.appendChild(card)
     })
   }
@@ -826,6 +939,105 @@
       listEl.appendChild(emptyState('⚠️', '리뷰를 불러오지 못했어요'))
     }
   }
+
+  // ═══════════════════════════════════════════════════
+  // 리뷰 작성 모달
+  // ═══════════════════════════════════════════════════
+  const STAR_LABELS = { 1: '별로예요', 2: '아쉬워요', 3: '보통이에요', 4: '좋아요', 5: '최고예요!' }
+
+  function openReviewModal(orderId, productId, productName) {
+    document.getElementById('review-order-id').value   = orderId   || ''
+    document.getElementById('review-product-id').value = productId || ''
+    document.getElementById('review-modal-product-tag').textContent = '🌿 ' + (productName || '상품')
+    document.getElementById('review-title').value   = ''
+    document.getElementById('review-content').value = ''
+    // 별점 기본값 5
+    const r5 = document.getElementById('r5')
+    if (r5) { r5.checked = true }
+    document.getElementById('star-label-text').textContent = STAR_LABELS[5]
+    document.getElementById('review-modal-overlay').classList.add('open')
+    document.getElementById('review-title').focus()
+  }
+
+  function closeReviewModal() {
+    document.getElementById('review-modal-overlay').classList.remove('open')
+  }
+
+  // 별점 선택 시 라벨 업데이트
+  document.querySelectorAll('.star-input input').forEach(input => {
+    input.addEventListener('change', () => {
+      document.getElementById('star-label-text').textContent = STAR_LABELS[input.value] || ''
+    })
+  })
+
+  document.getElementById('review-cancel-btn').addEventListener('click', closeReviewModal)
+  document.getElementById('review-modal-overlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeReviewModal()
+  })
+
+  document.getElementById('review-form').addEventListener('submit', async e => {
+    e.preventDefault()
+    const btn = document.getElementById('review-submit-btn')
+    const title   = document.getElementById('review-title').value.trim()
+    const content = document.getElementById('review-content').value.trim()
+    const orderId   = document.getElementById('review-order-id').value   || null
+    const productId = document.getElementById('review-product-id').value || null
+    const rating  = parseInt(
+      document.querySelector('.star-input input:checked')?.value || '5'
+    )
+
+    if (!content) {
+      document.getElementById('review-content').focus()
+      document.getElementById('review-content').style.borderColor = 'var(--color-danger)'
+      setTimeout(() => { document.getElementById('review-content').style.borderColor = '' }, 1500)
+      return
+    }
+
+    btn.disabled = true; btn.textContent = '등록 중...'
+    try {
+      const { error } = await supabase.from('hgm_reviews').insert({
+        user_id:    userId,
+        order_id:   orderId,
+        product_id: productId,
+        title:      title || null,
+        content,
+        rating,
+        is_published: true,
+      })
+      if (error) throw error
+      closeReviewModal()
+      // 내 리뷰 탭 새로고침
+      loaded.reviews = false
+      // 만약 이미 리뷰 탭이 열려있으면 즉시 재로드
+      if (document.getElementById('tab-reviews').classList.contains('active')) {
+        loaded.reviews = true; loadMyReviews()
+      }
+      // 작성 성공 토스트
+      showToast('리뷰가 등록되었어요 🌿')
+    } catch (err) {
+      alert('등록 실패: ' + (err.message || '다시 시도해주세요.'))
+    } finally {
+      btn.disabled = false; btn.textContent = '리뷰 등록'
+    }
+  })
+
+  // 간단한 토스트 메시지
+  function showToast(msg) {
+    const t = mk('div')
+    t.textContent = msg
+    t.style.cssText = [
+      'position:fixed;bottom:90px;left:50%;transform:translateX(-50%)',
+      'background:#2d5a3d;color:#fff;padding:10px 22px;border-radius:var(--radius-full)',
+      'font-size:14px;font-weight:700;z-index:2000;pointer-events:none',
+      'animation:toastIn .25s ease',
+    ].join(';')
+    document.body.appendChild(t)
+    setTimeout(() => t.remove(), 2400)
+  }
+  // 토스트 애니메이션 키프레임
+  const toastStyle = document.createElement('style')
+  toastStyle.textContent = '@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}'
+  document.head.appendChild(toastStyle)
 
   // ═══════════════════════════════════════════════════
   // ⑤ 알림 설정 저장
