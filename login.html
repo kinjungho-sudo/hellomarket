@@ -53,7 +53,8 @@
       background: #fff; border: 1.5px solid rgba(0,0,0,0.18); color: #3c3c3c;
     }
     .btn-google:hover { background: #f7f7f7; box-shadow: var(--shadow-sm); transform: translateY(-1px); }
-    .btn-naver { background: #03c75a; color: #fff; opacity: 0.45; cursor: not-allowed; }
+    .btn-naver { background: #03c75a; color: #fff; }
+    .btn-naver:hover { background: #02b350; box-shadow: var(--shadow-sm); transform: translateY(-1px); }
 
     .social-icon { width: 20px; height: 20px; flex-shrink: 0; }
 
@@ -166,11 +167,11 @@
         </svg>
         <span>구글로 로그인</span>
       </button>
-      <button class="btn-social btn-naver" type="button" disabled aria-disabled="true">
+      <button class="btn-social btn-naver" id="btn-naver" type="button">
         <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z" fill="#fff"/>
         </svg>
-        <span>네이버 로그인 (준비 중)</span>
+        <span>네이버로 로그인</span>
       </button>
     </div>
 
@@ -216,7 +217,7 @@
 
 <script type="module">
   import { updateCartBadge } from '/js/utils/cart.js'
-  import { signInWithGoogle, onAuthStateChange, getSession, isAdmin, upsertUserProfile } from '/js/auth.js'
+  import { signInWithGoogle, signInWithNaver, onAuthStateChange, getSession, isAdmin, upsertUserProfile } from '/js/auth.js'
   import { supabase } from '/js/config.js'
 
   document.getElementById('hamburger').addEventListener('click', () => {
@@ -324,6 +325,19 @@
     if (error) {
       this.disabled = false
       if (span) span.textContent = '구글로 로그인'
+      alert('로그인 중 오류가 발생했어요. 다시 시도해주세요.')
+    }
+  })
+
+  // ── 네이버 로그인 버튼 ──────────────────────────────
+  document.getElementById('btn-naver').addEventListener('click', async function() {
+    this.disabled = true
+    const span = this.querySelector('span')
+    if (span) span.textContent = '로그인 중...'
+    const { error } = await signInWithNaver()
+    if (error) {
+      this.disabled = false
+      if (span) span.textContent = '네이버로 로그인'
       alert('로그인 중 오류가 발생했어요. 다시 시도해주세요.')
     }
   })

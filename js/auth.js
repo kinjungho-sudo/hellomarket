@@ -56,6 +56,25 @@ export async function upsertUserProfile(user) {
 }
 
 /**
+ * 네이버 소셜 로그인 (Supabase OAuth)
+ */
+export async function signInWithNaver() {
+  try {
+    const isProd = !window.location.hostname.includes('localhost')
+    const baseUrl = isProd ? 'https://hellowgardenmarket.vercel.app' : window.location.origin
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'naver',
+      options: { redirectTo: baseUrl + '/login.html?callback=1' }
+    })
+    if (error) throw error
+    return { data, error: null }
+  } catch (err) {
+    console.error('[HGM] signInWithNaver 오류:', err)
+    return { data: null, error: err }
+  }
+}
+
+/**
  * 로그아웃
  */
 export async function signOut() {
