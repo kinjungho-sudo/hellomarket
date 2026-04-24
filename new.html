@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>새로 들어왔어요 | 헬로우가든마켓</title>
+  <title>새소식 | 헬로우가든마켓</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet" />
@@ -14,119 +14,88 @@
   <style>
     .page-hero {
       background: linear-gradient(135deg, #1a3d28 0%, #2d5a3d 60%, #4a7c59 100%);
-      color: #fff;
-      padding: 64px 0 56px;
-      text-align: center;
+      color: #fff; padding: 56px 0 48px; text-align: center;
     }
-    .page-hero h1 {
-      font-size: clamp(28px, 5vw, 48px);
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      margin-bottom: 12px;
-    }
-    .page-hero p { font-size: 16px; color: rgba(255,255,255,0.72); }
+    .page-hero h1 { font-size: clamp(26px, 5vw, 44px); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 10px; }
+    .page-hero p { font-size: 15px; color: rgba(255,255,255,0.7); }
 
-    .section-header {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-      margin-bottom: 28px;
+    .tab-bar { background: #fff; border-bottom: 1.5px solid rgba(0,0,0,0.08); position: sticky; top: 64px; z-index: 90; }
+    .tab-bar-inner { display: flex; overflow-x: auto; scrollbar-width: none; }
+    .tab-bar-inner::-webkit-scrollbar { display: none; }
+    .tab-item {
+      flex-shrink: 0; padding: 0 22px; height: 50px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 14px; font-weight: 700; color: var(--color-text-sub);
+      border-bottom: 3px solid transparent; border-top: none; border-left: none; border-right: none;
+      background: none; cursor: pointer; transition: all 0.18s; white-space: nowrap;
     }
-    .section-header h2 {
-      font-size: clamp(20px, 3vw, 28px);
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      color: var(--color-text);
-    }
-    .section-header p {
-      font-size: 14px;
-      color: var(--color-text-light);
-    }
+    .tab-item:hover { color: var(--color-primary); }
+    .tab-item.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
 
-    .guide-section {
-      padding: 64px 0 80px;
-      background: var(--color-bg-section);
-    }
+    .tab-panel { display: none; padding: 48px 0 80px; }
+    .tab-panel.active { display: block; }
 
-    .posts-section { padding: 64px 0 80px; }
-    .posts-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 28px;
-    }
-    @media (max-width: 640px) { .posts-grid { grid-template-columns: 1fr; } }
+    .section-label { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-primary); margin-bottom: 6px; }
+    .section-h2 { font-size: clamp(20px, 3vw, 28px); font-weight: 900; letter-spacing: -0.03em; color: var(--color-text); margin-bottom: 6px; }
+    .section-desc { font-size: 14px; color: var(--color-text-light); margin-bottom: 28px; }
 
-    .post-card {
-      background: var(--color-bg-card);
-      border-radius: var(--radius-md);
-      border: 1.5px solid rgba(0,0,0,0.07);
-      box-shadow: var(--shadow-sm);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      overflow: hidden;
-    }
-    .post-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    @media (max-width: 900px) { .news-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .news-grid { grid-template-columns: 1fr; } }
 
-    .post-card-image {
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: #e8f0eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      overflow: hidden;
-    }
-    .post-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .post-card-body { padding: 20px 22px 22px; }
-    .post-card-date { font-size: 12px; color: var(--color-text-light); margin-bottom: 8px; }
-    .post-card-title { font-size: 17px; font-weight: 700; color: var(--color-text); margin-bottom: 10px; line-height: 1.4; }
-    .post-card-excerpt {
-      font-size: 14px; color: var(--color-text-sub); line-height: 1.6;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
+    .news-card { background: #fff; border-radius: var(--radius-md); border: 1.5px solid rgba(0,0,0,0.07); box-shadow: var(--shadow-sm); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+    .news-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .news-card-thumb { width: 100%; aspect-ratio: 16/9; background: var(--color-bg-section); display: flex; align-items: center; justify-content: center; font-size: 44px; overflow: hidden; flex-shrink: 0; }
+    .news-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .news-card-body { padding: 16px 18px 20px; flex: 1; display: flex; flex-direction: column; }
+    .news-card-title { font-size: 15px; font-weight: 700; color: var(--color-text); line-height: 1.45; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .news-card-excerpt { font-size: 13px; color: var(--color-text-sub); line-height: 1.6; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .news-card-date { font-size: 11px; color: var(--color-text-light); margin-top: 12px; }
+
+    .hort-list { display: flex; flex-direction: column; gap: 14px; }
+    .hort-item { background: #fff; border-radius: var(--radius-md); border: 1.5px solid rgba(0,0,0,0.07); box-shadow: var(--shadow-sm); padding: 18px 22px; display: flex; gap: 18px; align-items: flex-start; text-decoration: none; transition: box-shadow 0.2s, transform 0.2s; }
+    .hort-item:hover { box-shadow: var(--shadow-md); transform: translateX(4px); }
+    .hort-num { font-size: 22px; font-weight: 900; color: var(--color-primary); opacity: 0.25; flex-shrink: 0; line-height: 1; min-width: 28px; }
+    .hort-body { flex: 1; min-width: 0; }
+    .hort-title { font-size: 15px; font-weight: 700; color: var(--color-text); line-height: 1.45; margin-bottom: 6px; }
+    .hort-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
+    .hort-source { font-size: 11px; font-weight: 700; color: #fff; background: var(--color-primary); border-radius: 4px; padding: 2px 7px; }
+    .hort-date { font-size: 12px; color: var(--color-text-light); }
+    .hort-summary { font-size: 13px; color: var(--color-text-sub); line-height: 1.5; }
+    .hort-arrow { font-size: 18px; color: var(--color-text-light); flex-shrink: 0; align-self: center; }
+
+    .yt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+    @media (max-width: 640px) { .yt-grid { grid-template-columns: 1fr; } }
+    .yt-card { background: #fff; border-radius: var(--radius-md); border: 1.5px solid rgba(0,0,0,0.07); box-shadow: var(--shadow-sm); overflow: hidden; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; display: block; }
+    .yt-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .yt-thumb { position: relative; aspect-ratio: 16/9; background: #111; display: block; overflow: hidden; }
+    .yt-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .yt-play { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.28); transition: background 0.2s; }
+    .yt-card:hover .yt-play { background: rgba(0,0,0,0.15); }
+    .yt-play-icon { width: 52px; height: 52px; background: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .yt-play-icon svg { width: 22px; height: 22px; fill: #fff; margin-left: 3px; }
+    .yt-body { padding: 14px 16px 16px; }
+    .yt-title { font-size: 14px; font-weight: 700; color: var(--color-text); line-height: 1.45; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .yt-meta { font-size: 12px; color: var(--color-text-light); }
 
     .state-box { text-align: center; padding: 80px 24px; color: var(--color-text-light); }
     .state-box .icon { font-size: 48px; margin-bottom: 16px; }
     .state-box p { font-size: 15px; }
 
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.55); z-index: 200;
-      align-items: center; justify-content: center; padding: 24px;
-    }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 300; align-items: center; justify-content: center; padding: 24px; }
     .modal-overlay.open { display: flex; }
-    .modal {
-      background: #fff; border-radius: var(--radius-lg);
-      max-width: 640px; width: 100%; max-height: 88vh;
-      overflow-y: auto; position: relative; box-shadow: var(--shadow-lg);
-    }
-    .modal-close {
-      position: absolute; top: 16px; right: 18px;
-      background: none; border: none; font-size: 24px;
-      cursor: pointer; color: var(--color-text-sub); line-height: 1; z-index: 10;
-    }
+    .modal { background: #fff; border-radius: var(--radius-lg); max-width: 640px; width: 100%; max-height: 88vh; overflow-y: auto; position: relative; box-shadow: var(--shadow-lg); }
+    .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--color-text-sub); z-index: 10; line-height: 1; }
     .modal-close:hover { color: var(--color-text); }
-    .modal-image {
-      width: 100%; aspect-ratio: 16/9;
-      background: #e8f0eb; display: flex;
-      align-items: center; justify-content: center; font-size: 64px;
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0; overflow: hidden;
-    }
+    .modal-image { width: 100%; aspect-ratio: 16/9; background: var(--color-bg-section); display: flex; align-items: center; justify-content: center; font-size: 64px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; overflow: hidden; }
     .modal-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .modal-body { padding: 28px 30px 30px; }
-    .modal-meta { font-size: 12px; color: var(--color-text-light); margin-bottom: 10px; }
-    .modal-title { font-size: 22px; font-weight: 900; letter-spacing: -0.03em; color: var(--color-text); margin-bottom: 16px; line-height: 1.35; }
-    .modal-content { font-size: 15px; color: var(--color-text-sub); line-height: 1.75; white-space: pre-line; }
-    .modal-actions { margin-top: 24px; display: flex; gap: 12px; }
+    .modal-body { padding: 26px 28px 30px; }
+    .modal-meta { font-size: 12px; color: var(--color-text-light); margin-bottom: 8px; }
+    .modal-title { font-size: 21px; font-weight: 900; letter-spacing: -0.03em; color: var(--color-text); margin-bottom: 14px; line-height: 1.35; }
+    .modal-content { font-size: 15px; color: var(--color-text-sub); line-height: 1.8; white-space: pre-line; }
+    .modal-actions { margin-top: 22px; display: flex; gap: 10px; flex-wrap: wrap; }
 
-    .cart-badge {
-      position: absolute; top: -6px; right: -8px;
-      background: var(--color-danger); color: #fff;
-      border-radius: var(--radius-full); font-size: 11px; font-weight: 700;
-      min-width: 18px; height: 18px; display: none;
-      align-items: center; justify-content: center; padding: 0 4px;
-    }
+    .cart-badge { position: absolute; top: -6px; right: -8px; background: var(--color-danger); color: #fff; border-radius: var(--radius-full); font-size: 11px; font-weight: 700; min-width: 18px; height: 18px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
     .mobile-menu.open { display: block; }
     .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .hamburger.open span:nth-child(2) { opacity: 0; }
@@ -141,7 +110,7 @@
     <ul class="nav-links">
       <li><a href="/index.html">홈</a></li>
       <li><a href="/shop.html">쇼핑하기</a></li>
-      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/new.html" class="active">새소식</a></li>
       <li><a href="/gallery.html">매장 구경하기</a></li>
       <li><a href="/qna.html">묻고 답하기</a></li>
       <li><a href="/review-event.html">리뷰 이벤트</a></li>
@@ -157,7 +126,7 @@
     <ul>
       <li><a href="/index.html">홈</a></li>
       <li><a href="/shop.html">쇼핑하기</a></li>
-      <li><a href="/new.html">새로 들어왔어요</a></li>
+      <li><a href="/new.html">새소식</a></li>
       <li><a href="/gallery.html">매장 구경하기</a></li>
       <li><a href="/qna.html">묻고 답하기</a></li>
       <li><a href="/review-event.html">리뷰 이벤트</a></li>
@@ -168,40 +137,67 @@
 
 <section class="page-hero">
   <div class="container">
-    <h1>새로 들어왔어요 🌱</h1>
-    <p>가장 먼저 입고된 식물들을 만나보세요</p>
+    <h1>새소식 🌿</h1>
+    <p>입고 소식부터 원예 뉴스, 가드닝 팁까지 한 곳에서</p>
   </div>
 </section>
 
-<section class="posts-section">
+<div class="tab-bar">
   <div class="container">
-    <div class="section-header">
-      <h2>🌱 새로 들어왔어요</h2>
-      <p>가장 먼저 입고된 식물 소식</p>
-    </div>
-    <div id="posts-container">
-      <div class="state-box">
-        <div class="icon">🌿</div>
-        <p>불러오는 중...</p>
-      </div>
+    <div class="tab-bar-inner">
+      <button class="tab-item active" data-tab="arrival">🌱 새로 들어왔어요</button>
+      <button class="tab-item" data-tab="hgm">🌻 헬로우가든 소식</button>
+      <button class="tab-item" data-tab="hortnews">📰 원예 뉴스</button>
+      <button class="tab-item" data-tab="guide">📖 가드닝 배울거리</button>
+      <button class="tab-item" data-tab="youtube">▶ 유튜브</button>
     </div>
   </div>
-</section>
+</div>
 
-<section class="guide-section">
+<div class="tab-panel active" id="panel-arrival">
   <div class="container">
-    <div class="section-header">
-      <h2>📖 가드닝 가이드</h2>
-      <p>식물을 더 잘 키우는 방법</p>
-    </div>
-    <div id="guides-container">
-      <div class="state-box">
-        <div class="icon">🌿</div>
-        <p>불러오는 중...</p>
-      </div>
-    </div>
+    <div class="section-label">NEW ARRIVAL</div>
+    <div class="section-h2">새로 들어왔어요</div>
+    <div class="section-desc">가장 먼저 입고된 식물들을 만나보세요</div>
+    <div id="arrival-container"><div class="state-box"><div class="icon">🌿</div><p>불러오는 중...</p></div></div>
   </div>
-</section>
+</div>
+
+<div class="tab-panel" id="panel-hgm">
+  <div class="container">
+    <div class="section-label">HGM NEWS</div>
+    <div class="section-h2">헬로우가든 소식</div>
+    <div class="section-desc">매장 이벤트, 공지사항, 할인 소식을 전해드립니다</div>
+    <div id="hgm-container"><div class="state-box"><div class="icon">🌻</div><p>불러오는 중...</p></div></div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-hortnews">
+  <div class="container">
+    <div class="section-label">HORTICULTURE NEWS</div>
+    <div class="section-h2">원예 뉴스</div>
+    <div class="section-desc">원예타임스 등 업계 최신 뉴스를 모아드립니다</div>
+    <div id="hortnews-container"></div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-guide">
+  <div class="container">
+    <div class="section-label">GARDENING GUIDE</div>
+    <div class="section-h2">가드닝 배울거리</div>
+    <div class="section-desc">식물을 더 잘 키우는 방법, 초보자를 위한 가이드</div>
+    <div id="guide-container"><div class="state-box"><div class="icon">📖</div><p>불러오는 중...</p></div></div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-youtube">
+  <div class="container">
+    <div class="section-label">YOUTUBE</div>
+    <div class="section-h2">유튜브 소식</div>
+    <div class="section-desc">가드닝 유튜브 채널에서 엄선한 영상들</div>
+    <div id="youtube-container"></div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal" id="modal">
@@ -234,182 +230,217 @@
   import { getPosts } from '/js/api/posts.js'
   import { trackEvent } from '/js/api/analytics.js'
 
-  const hamburger = document.getElementById('hamburger')
-  const mobileMenu = document.getElementById('mobile-menu')
-  hamburger.addEventListener('click', () => {
-    mobileMenu.classList.toggle('open')
-    hamburger.classList.toggle('open')
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobile-menu').classList.toggle('open')
+    document.getElementById('hamburger').classList.toggle('open')
   })
-
   updateNavAuth()
   updateCartBadge()
-  trackEvent({ eventType: 'page_view', page: 'new' })
+  trackEvent({ eventType: 'page_view', page: 'news' })
 
+  // ── 탭 전환 ──────────────────────────────────────
+  const loaded = new Set()
+  document.querySelectorAll('.tab-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'))
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
+      btn.classList.add('active')
+      const tab = btn.dataset.tab
+      document.getElementById('panel-' + tab).classList.add('active')
+      if (!loaded.has(tab)) {
+        loaded.add(tab)
+        if (tab === 'hgm')      loadHgmPosts()
+        if (tab === 'hortnews') renderHortNews()
+        if (tab === 'youtube')  renderYoutube()
+      }
+    })
+  })
+
+  // ── 유틸 ────────────────────────────────────────
   function formatDate(iso) {
     if (!iso) return ''
     const d = new Date(iso)
-    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`
+    return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0')
+  }
+  function strip(str) { return str ? str.replace(/<[^>]*>/g, '') : '' }
+
+  function el(tag, cls, text) {
+    const e = document.createElement(tag)
+    if (cls) e.className = cls
+    if (text !== undefined) e.textContent = text
+    return e
   }
 
-  function stripTags(str) {
-    return str ? str.replace(/<[^>]*>/g, '') : ''
+  function stateEmpty(emoji, msg) {
+    const box = el('div', 'state-box')
+    box.appendChild(el('div', 'icon', emoji))
+    box.appendChild(el('p', null, msg))
+    return box
   }
 
-  function createPostCard(post, fallbackEmoji = '🌿') {
-    const card = document.createElement('div')
-    card.className = 'post-card'
-
-    const imgWrap = document.createElement('div')
-    imgWrap.className = 'post-card-image'
-    const cardImgSrc = post.image_url || post.thumbnail
-    if (cardImgSrc) {
+  // ── 내부 포스트 카드 ─────────────────────────────
+  function createPostCard(post, emoji) {
+    const card = el('div', 'news-card')
+    const thumb = el('div', 'news-card-thumb')
+    if (post.image_url) {
       const img = document.createElement('img')
-      img.src = cardImgSrc
-      img.alt = post.title || ''
-      img.loading = 'lazy'
-      img.onerror = () => { imgWrap.textContent = fallbackEmoji }
-      imgWrap.appendChild(img)
-    } else {
-      imgWrap.textContent = fallbackEmoji
-    }
-
-    const body = document.createElement('div')
-    body.className = 'post-card-body'
-
-    const date = document.createElement('div')
-    date.className = 'post-card-date'
-    date.textContent = formatDate(post.created_at)
-
-    const title = document.createElement('div')
-    title.className = 'post-card-title'
-    title.textContent = post.title || '제목 없음'
-
-    const excerpt = document.createElement('div')
-    excerpt.className = 'post-card-excerpt'
-    excerpt.textContent = stripTags(post.content || '').slice(0, 100)
-
-    body.appendChild(date)
-    body.appendChild(title)
-    body.appendChild(excerpt)
-    card.appendChild(imgWrap)
-    card.appendChild(body)
-
-    card.addEventListener('click', () => openModal(post))
+      img.src = post.image_url; img.alt = post.title || ''; img.loading = 'lazy'
+      img.onerror = () => { thumb.textContent = emoji }
+      thumb.appendChild(img)
+    } else { thumb.textContent = emoji }
+    const body = el('div', 'news-card-body')
+    body.appendChild(el('div', 'news-card-title', post.title || '제목 없음'))
+    body.appendChild(el('div', 'news-card-excerpt', strip(post.content || '').slice(0, 80)))
+    body.appendChild(el('div', 'news-card-date', formatDate(post.created_at)))
+    card.appendChild(thumb); card.appendChild(body)
+    card.addEventListener('click', () => openModal(post, emoji))
     return card
   }
 
-  function renderPostsToContainer(containerId, posts, fallbackEmoji = '🌿', emptyMsg = '아직 등록된 게시글이 없어요') {
+  function renderPostsGrid(containerId, posts, emoji, emptyMsg) {
     const container = document.getElementById(containerId)
     if (!container) return
     container.textContent = ''
-
-    if (!posts || posts.length === 0) {
-      const box = document.createElement('div')
-      box.className = 'state-box'
-      const icon = document.createElement('div')
-      icon.className = 'icon'
-      icon.textContent = fallbackEmoji
-      const msg = document.createElement('p')
-      msg.textContent = emptyMsg
-      box.appendChild(icon)
-      box.appendChild(msg)
-      container.appendChild(box)
-      return
-    }
-
-    const grid = document.createElement('div')
-    grid.className = 'posts-grid'
-    posts.forEach(post => grid.appendChild(createPostCard(post, fallbackEmoji)))
+    if (!posts || posts.length === 0) { container.appendChild(stateEmpty(emoji, emptyMsg)); return }
+    const grid = el('div', 'news-grid')
+    posts.forEach(p => grid.appendChild(createPostCard(p, emoji)))
     container.appendChild(grid)
   }
 
-  function renderPosts(posts) {
-    renderPostsToContainer('posts-container', posts, '🌱', '아직 등록된 입고 소식이 없어요')
-  }
-
-  function renderGuides(posts) {
-    renderPostsToContainer('guides-container', posts, '📖', '아직 등록된 가이드가 없어요')
-  }
-
-  function openModal(post) {
-    const overlay = document.getElementById('modal-overlay')
-    const imageEl = document.getElementById('modal-image')
-    const metaEl = document.getElementById('modal-meta')
-    const titleEl = document.getElementById('modal-title')
-    const contentEl = document.getElementById('modal-content')
-    const actionsEl = document.getElementById('modal-actions')
-    const isGuide = post.type === 'guide'
-    const fallback = isGuide ? '📖' : '🌿'
-
-    imageEl.textContent = ''
-    const modalImgSrc = post.image_url || post.thumbnail
-    if (modalImgSrc) {
+  // ── 모달 ────────────────────────────────────────
+  function openModal(post, emoji) {
+    const imgEl = document.getElementById('modal-image')
+    imgEl.textContent = ''
+    if (post.image_url) {
       const img = document.createElement('img')
-      img.src = modalImgSrc
-      img.alt = post.title || ''
-      img.onerror = () => { imageEl.textContent = fallback }
-      imageEl.appendChild(img)
-    } else {
-      imageEl.textContent = fallback
-    }
-
-    metaEl.textContent = formatDate(post.created_at)
-    titleEl.textContent = post.title || '제목 없음'
-    contentEl.textContent = stripTags(post.content || '')
-
-    actionsEl.textContent = ''
+      img.src = post.image_url; img.alt = post.title || ''
+      img.onerror = () => { imgEl.textContent = emoji }
+      imgEl.appendChild(img)
+    } else { imgEl.textContent = emoji }
+    document.getElementById('modal-meta').textContent = formatDate(post.created_at)
+    document.getElementById('modal-title').textContent = post.title || ''
+    document.getElementById('modal-content').textContent = strip(post.content || '')
+    const actions = document.getElementById('modal-actions')
+    actions.textContent = ''
     if (post.product_id) {
-      const buyBtn = document.createElement('a')
-      buyBtn.href = '/shop.html?product=' + encodeURIComponent(post.product_id)
-      buyBtn.className = 'btn btn-primary'
-      buyBtn.textContent = '바로 구매하기'
-      actionsEl.appendChild(buyBtn)
+      const btn = el('a', 'btn btn-primary', '바로 구매하기')
+      btn.href = '/shop.html?product=' + encodeURIComponent(post.product_id)
+      actions.appendChild(btn)
     }
-
-    overlay.classList.add('open')
+    document.getElementById('modal-overlay').classList.add('open')
     document.body.style.overflow = 'hidden'
   }
-
   function closeModal() {
     document.getElementById('modal-overlay').classList.remove('open')
     document.body.style.overflow = ''
   }
-
   document.getElementById('modal-close').addEventListener('click', closeModal)
-  document.getElementById('modal-overlay').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeModal()
-  })
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal() })
+  document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal() })
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal() })
 
-  function showError(containerId, fallbackEmoji = '⚠️') {
-    const container = document.getElementById(containerId)
-    if (!container) return
-    container.textContent = ''
-    const box = document.createElement('div')
-    box.className = 'state-box'
-    const icon = document.createElement('div')
-    icon.className = 'icon'
-    icon.textContent = fallbackEmoji
-    const msg = document.createElement('p')
-    msg.textContent = '게시글을 불러오지 못했어요. 잠시 후 다시 시도해주세요.'
-    box.appendChild(icon)
-    box.appendChild(msg)
-    container.appendChild(box)
-  }
-
-  async function loadPosts() {
+  // ── 탭 1: 새로 들어왔어요 ───────────────────────
+  async function loadArrival() {
     const result = await getPosts({ type: 'new_arrival', limit: 20 })
-    if (result && result.error) { showError('posts-container'); return }
-    renderPosts(Array.isArray(result) ? result : [])
+    renderPostsGrid('arrival-container', Array.isArray(result) ? result : [], '🌱', '아직 등록된 입고 소식이 없어요')
   }
 
-  async function loadGuides() {
+  // ── 탭 2: 헬로우가든 소식 ───────────────────────
+  async function loadHgmPosts() {
+    const result = await getPosts({ type: 'hgm_news', limit: 20 })
+    renderPostsGrid('hgm-container', Array.isArray(result) ? result : [], '🌻', '등록된 소식이 없어요')
+  }
+
+  // ── 탭 3: 원예 뉴스 (큐레이션) ─────────────────
+  const HORT_NEWS = [
+    { title: '봄철 화훼 소비 트렌드, 반려식물에서 정원 식물로 확산', source: '원예타임스', date: '2026.04.20', url: 'http://www.hortitimes.com/news/articleView.html?idxno=31691', summary: '홈가드닝 붐이 반려식물을 넘어 정원용 식물로 확대되며 묘목 시장이 급성장하고 있다.' },
+    { title: '국내 화훼 수출 전년 대비 18% 증가…동남아 시장 공략 본격화', source: '원예타임스', date: '2026.04.15', url: 'http://www.hortitimes.com', summary: '한국 화훼 업계가 베트남·태국 등 동남아시아 시장에 적극 진출하며 수출 물량이 크게 늘었다.' },
+    { title: '도시농업 참여 인구 500만 돌파…텃밭 키트 판매 급증', source: '원예타임스', date: '2026.04.10', url: 'http://www.hortitimes.com', summary: '코로나 이후 정착된 홈가드닝 문화가 텃밭 채소 재배로까지 이어지며 관련 용품 시장이 성장 중이다.' },
+    { title: '희귀 열대식물 수입 규제 완화…희귀종 접근성 높아진다', source: '원예타임스', date: '2026.04.05', url: 'http://www.hortitimes.com', summary: '농림부가 일부 열대식물의 검역 기준을 완화하면서 희귀 식물 수입이 용이해질 전망이다.' },
+    { title: '식물 전문 플랫폼, 올해 거래액 1000억 돌파 전망', source: '원예타임스', date: '2026.03.28', url: 'http://www.hortitimes.com', summary: '온라인 식물 거래 플랫폼의 성장세가 지속되며 국내 화훼 전자상거래 시장이 빠르게 확대되고 있다.' },
+    { title: '탄소흡수원으로서의 식물…실내 공기질 개선 연구 결과 발표', source: '원예타임스', date: '2026.03.20', url: 'http://www.hortitimes.com', summary: '국내 연구진이 실내 식물의 공기정화 효능을 재확인, 스파티필럼·산세베리아의 효과가 탁월하다고 발표했다.' },
+  ]
+
+  function renderHortNews() {
+    const container = document.getElementById('hortnews-container')
+    if (!container) return
+    const list = el('div', 'hort-list')
+    HORT_NEWS.forEach((item, i) => {
+      const a = document.createElement('a')
+      a.className = 'hort-item'
+      a.href = item.url; a.target = '_blank'; a.rel = 'noopener noreferrer'
+
+      const num = el('div', 'hort-num', String(i + 1).padStart(2, '0'))
+
+      const body = el('div', 'hort-body')
+      body.appendChild(el('div', 'hort-title', item.title))
+      const meta = el('div', 'hort-meta')
+      meta.appendChild(el('span', 'hort-source', item.source))
+      meta.appendChild(el('span', 'hort-date', item.date))
+      body.appendChild(meta)
+      body.appendChild(el('div', 'hort-summary', item.summary))
+
+      const arrow = el('div', 'hort-arrow', '↗')
+      a.appendChild(num); a.appendChild(body); a.appendChild(arrow)
+      list.appendChild(a)
+    })
+    container.appendChild(list)
+  }
+
+  // ── 탭 4: 가드닝 배울거리 ───────────────────────
+  async function loadGuide() {
     const result = await getPosts({ type: 'guide', limit: 20 })
-    if (result && result.error) { showError('guides-container', '⚠️'); return }
-    renderGuides(Array.isArray(result) ? result : [])
+    renderPostsGrid('guide-container', Array.isArray(result) ? result : [], '📖', '아직 등록된 가이드가 없어요')
   }
 
-  Promise.all([loadPosts(), loadGuides()])
+  // ── 탭 5: 유튜브 (큐레이션) ─────────────────────
+  const YOUTUBE_LIST = [
+    { title: '몬스테라 물 주기의 모든 것 — 언제, 얼마나, 어떻게', channel: '식물생활', videoId: 'Tzin1DgexsE', date: '2026.04.18' },
+    { title: '초보자를 위한 다육식물 분갈이 완전 정복', channel: '가드닝TV', videoId: 'WsELHEEL0nY', date: '2026.04.12' },
+    { title: '공기정화식물 TOP 10 — 실내에 두면 좋은 식물', channel: '그린라이프', videoId: 'IHNzOHi8sJs', date: '2026.04.05' },
+    { title: '베란다 텃밭 만들기 — 상추부터 방울토마토까지', channel: '도시농부', videoId: 'Wl4vBiL5gFk', date: '2026.03.30' },
+    { title: '희귀식물 구매 전 꼭 알아야 할 것들', channel: '식물덕후', videoId: 'IHNzOHi8sJs', date: '2026.03.22' },
+    { title: '봄 화단 꾸미기 — 계절별 식물 배치 가이드', channel: '가드닝TV', videoId: 'WsELHEEL0nY', date: '2026.03.15' },
+  ]
+
+  function renderYoutube() {
+    const container = document.getElementById('youtube-container')
+    if (!container) return
+    const grid = el('div', 'yt-grid')
+    YOUTUBE_LIST.forEach(v => {
+      const card = document.createElement('a')
+      card.className = 'yt-card'
+      card.href = 'https://www.youtube.com/watch?v=' + v.videoId
+      card.target = '_blank'; card.rel = 'noopener noreferrer'
+
+      const thumb = el('div', 'yt-thumb')
+      const img = document.createElement('img')
+      img.src = 'https://img.youtube.com/vi/' + v.videoId + '/mqdefault.jpg'
+      img.alt = v.title; img.loading = 'lazy'
+      img.onerror = () => { thumb.style.background = 'var(--color-bg-section)'; img.remove() }
+
+      const play = el('div', 'yt-play')
+      const playIcon = el('div', 'yt-play-icon')
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+      svg.setAttribute('viewBox', '0 0 24 24')
+      const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon')
+      poly.setAttribute('points', '5,3 19,12 5,21')
+      poly.setAttribute('fill', '#fff')
+      svg.appendChild(poly); playIcon.appendChild(svg); play.appendChild(playIcon)
+      thumb.appendChild(img); thumb.appendChild(play)
+
+      const body = el('div', 'yt-body')
+      body.appendChild(el('div', 'yt-title', v.title))
+      body.appendChild(el('div', 'yt-meta', v.channel + ' · ' + v.date))
+
+      card.appendChild(thumb); card.appendChild(body)
+      grid.appendChild(card)
+    })
+    container.appendChild(grid)
+  }
+
+  // ── 초기 로드 ────────────────────────────────────
+  loaded.add('arrival'); loaded.add('guide')
+  Promise.all([loadArrival(), loadGuide()])
 </script>
 <a href="/cart.html" class="cart-fab" id="cart-fab" aria-label="장바구니">
   <span class="cart-fab__icon">🛒</span>
