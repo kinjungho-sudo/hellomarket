@@ -72,6 +72,45 @@
     .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ── 추가 정보 입력 모달 ── */
+    .reg-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 500;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .reg-overlay.open { display: flex; }
+    .reg-modal {
+      background: #fff; border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      max-width: 420px; width: 100%; padding: 40px 36px 36px;
+    }
+    .reg-modal__icon { font-size: 36px; margin-bottom: 10px; }
+    .reg-modal__title { font-size: 20px; font-weight: 900; letter-spacing: -0.03em; color: var(--color-text); margin-bottom: 6px; }
+    .reg-modal__desc { font-size: 13px; color: var(--color-text-sub); line-height: 1.6; margin-bottom: 28px; }
+    .reg-field { margin-bottom: 16px; }
+    .reg-field label { display: block; font-size: 13px; font-weight: 700; color: var(--color-text); margin-bottom: 6px; }
+    .reg-field label span { color: var(--color-danger); margin-left: 2px; }
+    .reg-field input {
+      width: 100%; height: 44px; padding: 0 14px;
+      border: 1.5px solid rgba(0,0,0,0.15); border-radius: var(--radius-sm);
+      font-size: 15px; font-family: var(--font-main); color: var(--color-text);
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+    .reg-field input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(45,90,61,0.1); }
+    .reg-field input::placeholder { color: var(--color-text-light); }
+    .reg-field__hint { font-size: 12px; color: var(--color-text-light); margin-top: 5px; }
+    .reg-error { font-size: 13px; color: var(--color-danger); margin-bottom: 12px; min-height: 18px; }
+    .btn-reg-submit {
+      width: 100%; height: 48px; border: none; border-radius: var(--radius-sm);
+      background: var(--color-primary); color: #fff;
+      font-size: 15px; font-weight: 800; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-reg-submit:hover:not(:disabled) { background: var(--color-primary-dark); transform: translateY(-1px); }
+    .btn-reg-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    @media (max-width: 480px) { .reg-modal { padding: 32px 22px 28px; } }
   </style>
 </head>
 <body>
@@ -143,6 +182,26 @@
   </div>
 </main>
 
+<!-- 추가 정보 입력 모달 (신규 가입 시) -->
+<div class="reg-overlay" id="reg-overlay" role="dialog" aria-modal="true" aria-labelledby="reg-title">
+  <div class="reg-modal">
+    <div class="reg-modal__icon">🌿</div>
+    <h2 class="reg-modal__title" id="reg-title">거의 다 됐어요!</h2>
+    <p class="reg-modal__desc">주문 시 필요한 정보를 입력해주세요.<br>나중에 마이페이지에서 수정할 수 있습니다.</p>
+    <div class="reg-field">
+      <label for="reg-name">이름 <span>*</span></label>
+      <input type="text" id="reg-name" placeholder="홍길동" maxlength="20" autocomplete="name" />
+    </div>
+    <div class="reg-field">
+      <label for="reg-phone">휴대폰 번호 <span>*</span></label>
+      <input type="tel" id="reg-phone" placeholder="010-0000-0000" maxlength="13" autocomplete="tel" />
+      <p class="reg-field__hint">주문 배송 알림에 사용됩니다</p>
+    </div>
+    <p class="reg-error" id="reg-error"></p>
+    <button class="btn-reg-submit" id="btn-reg-submit" type="button">가입 완료</button>
+  </div>
+</div>
+
 <footer class="footer">
   <div class="container">
     <div class="nav-logo" style="margin-bottom:12px;"><span class="logo-icon">🌻</span> Hello Garden Market</div>
@@ -158,54 +217,112 @@
 <script type="module">
   import { updateCartBadge } from '/js/utils/cart.js'
   import { signInWithGoogle, onAuthStateChange, getSession, isAdmin, upsertUserProfile } from '/js/auth.js'
+  import { supabase } from '/js/config.js'
 
-  const hamburger = document.getElementById('hamburger')
-  const mobileMenu = document.getElementById('mobile-menu')
-  hamburger.addEventListener('click', () => {
-    mobileMenu.classList.toggle('open')
-    hamburger.classList.toggle('open')
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobile-menu').classList.toggle('open')
+    document.getElementById('hamburger').classList.toggle('open')
   })
-
   updateCartBadge()
 
-  // 로그인 후 관리자 여부 판단 후 리다이렉트
-  async function redirectAfterLogin(user) {
-    // hgm_users에 row 없으면 자동 생성
-    await upsertUserProfile(user)
+  // ── 전화번호 자동 하이픈 ──────────────────────────
+  document.getElementById('reg-phone').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '')
+    if (v.length <= 3) this.value = v
+    else if (v.length <= 7) this.value = v.slice(0,3) + '-' + v.slice(3)
+    else this.value = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11)
+  })
 
+  // ── 신규 사용자 여부 확인 (phone 미등록) ──────────
+  async function isNewUser(userId) {
+    const { data } = await supabase
+      .from('hgm_users')
+      .select('phone')
+      .eq('id', userId)
+      .single()
+    return !data?.phone
+  }
+
+  // ── 최종 리다이렉트 ───────────────────────────────
+  async function doRedirect() {
     const admin = await isAdmin()
-    if (admin) {
-      window.location.href = '/admin/index.html'
-      return
-    }
+    if (admin) { window.location.href = '/admin/index.html'; return }
     const redirectTo = sessionStorage.getItem('loginRedirect') || '/mypage.html'
     sessionStorage.removeItem('loginRedirect')
     window.location.href = redirectTo
   }
 
-  // 이미 로그인 상태이면 바로 리다이렉트
-  const { session } = await getSession()
-  if (session) {
-    await redirectAfterLogin(session.user)
+  // ── 로그인 후 처리 ────────────────────────────────
+  let pendingUser = null
+
+  async function handleAfterLogin(user) {
+    await upsertUserProfile(user)
+    const newUser = await isNewUser(user.id)
+    if (newUser) {
+      // 신규: 구글 이름 미리 채워주기
+      const nameEl = document.getElementById('reg-name')
+      if (nameEl && user.user_metadata?.full_name) {
+        nameEl.value = user.user_metadata.full_name
+      }
+      pendingUser = user
+      document.getElementById('reg-overlay').classList.add('open')
+    } else {
+      await doRedirect()
+    }
   }
 
-  // OAuth 콜백 처리 (구글 로그인 완료 후 이 페이지로 돌아왔을 때)
+  // ── 추가 정보 저장 ────────────────────────────────
+  document.getElementById('btn-reg-submit').addEventListener('click', async () => {
+    const name  = document.getElementById('reg-name').value.trim()
+    const phone = document.getElementById('reg-phone').value.trim()
+    const errEl = document.getElementById('reg-error')
+    errEl.textContent = ''
+
+    if (!name) { errEl.textContent = '이름을 입력해주세요.'; return }
+    if (!phone || phone.replace(/\D/g,'').length < 10) {
+      errEl.textContent = '올바른 휴대폰 번호를 입력해주세요.'; return
+    }
+
+    const btn = document.getElementById('btn-reg-submit')
+    btn.disabled = true
+    btn.textContent = '저장 중...'
+
+    const { error } = await supabase
+      .from('hgm_users')
+      .update({ name, phone, updated_at: new Date().toISOString() })
+      .eq('id', pendingUser.id)
+
+    if (error) {
+      errEl.textContent = '저장에 실패했어요. 다시 시도해주세요.'
+      btn.disabled = false
+      btn.textContent = '가입 완료'
+      return
+    }
+
+    await doRedirect()
+  })
+
+  // ── 초기 세션 확인 ────────────────────────────────
+  const { session } = await getSession()
+  if (session) {
+    await handleAfterLogin(session.user)
+  }
+
+  // ── OAuth 콜백 ────────────────────────────────────
   onAuthStateChange(async (event, newSession) => {
     if (event === 'SIGNED_IN' && newSession) {
-      await redirectAfterLogin(newSession.user)
+      await handleAfterLogin(newSession.user)
     }
   })
 
-  // 구글 로그인 버튼
-  const googleBtn = document.getElementById('btn-google')
-  googleBtn.addEventListener('click', async () => {
-    googleBtn.disabled = true
-    const span = googleBtn.querySelector('span')
+  // ── 구글 로그인 버튼 ──────────────────────────────
+  document.getElementById('btn-google').addEventListener('click', async function() {
+    this.disabled = true
+    const span = this.querySelector('span')
     if (span) span.textContent = '로그인 중...'
-
     const { error } = await signInWithGoogle()
     if (error) {
-      googleBtn.disabled = false
+      this.disabled = false
       if (span) span.textContent = '구글로 로그인'
       alert('로그인 중 오류가 발생했어요. 다시 시도해주세요.')
     }
