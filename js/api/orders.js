@@ -70,7 +70,7 @@ export async function createOrder(userId, items, receiverInfo) {
       orderer_name:   receiverInfo.ordererName || receiverInfo.name,
       orderer_email:  receiverInfo.ordererEmail || null,
       total_price:    totalAmount,
-      status:         '주문완료',
+      status:         '배송준비',
       receiver_name:  receiverInfo.name,
       receiver_phone: receiverInfo.phone,
       address:        receiverInfo.address,
