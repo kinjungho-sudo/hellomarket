@@ -57,35 +57,6 @@
     .section-title { font-size: clamp(20px, 3vw, 28px); font-weight: 900; letter-spacing: -0.03em; }
     .section-desc { font-size: 14px; color: var(--color-text-sub); margin-top: 4px; }
 
-    /* ── 유튜브 영상 ── */
-    .youtube-section {
-      background: var(--color-bg-section);
-      padding: 56px 0 64px;
-    }
-    .youtube-embed-wrap {
-      position: relative; width: 100%; max-width: 800px; margin: 0 auto;
-      border-radius: var(--radius-lg); overflow: hidden;
-      box-shadow: 0 16px 48px rgba(0,0,0,0.18);
-      aspect-ratio: 16/9;
-    }
-    .youtube-embed-wrap iframe {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      border: none;
-    }
-    .youtube-meta {
-      max-width: 800px; margin: 20px auto 0;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .youtube-channel-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: #ff0000; color: #fff;
-      border-radius: var(--radius-full); padding: 5px 14px;
-      font-size: 12px; font-weight: 700;
-    }
-    .youtube-channel-badge svg { width: 14px; height: 14px; fill: #fff; }
-    .youtube-info { font-size: 13px; color: var(--color-text-sub); }
-    .youtube-info strong { color: var(--color-text); font-weight: 700; }
-
     /* ── 블로그 카드 그리드 ── */
     .blog-grid {
       display: grid;
@@ -128,7 +99,6 @@
     }
     .platform-naver { background: rgba(3,199,90,0.92); color: #fff; }
     .platform-tistory { background: rgba(255,102,0,0.92); color: #fff; }
-    .platform-youtube { background: rgba(255,0,0,0.92); color: #fff; }
 
     /* 바디 */
     .blog-card-body { padding: 16px 18px 18px; flex: 1; display: flex; flex-direction: column; }
@@ -255,50 +225,15 @@
   <div class="container">
     <div class="hero-badge">🌿 Real Customer Reviews</div>
     <h1>고객들이 직접 쓴<br><em>솔직한 후기</em></h1>
-    <p>블로그, 유튜브에서 직접 찾아온 헬로우가든마켓 실구매 후기 모음</p>
+    <p>블로그에서 직접 찾아온 헬로우가든마켓 실구매 후기 모음</p>
     <div class="hero-stats">
       <div class="hero-stat">
         <span class="hero-stat-num">5</span>
         <div class="hero-stat-label">블로그 후기</div>
       </div>
       <div class="hero-stat">
-        <span class="hero-stat-num">1</span>
-        <div class="hero-stat-label">유튜브 영상</div>
-      </div>
-      <div class="hero-stat">
         <span class="hero-stat-num">100%</span>
         <div class="hero-stat-label">자발적 후기</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 유튜브 영상 -->
-<section class="youtube-section">
-  <div class="container">
-    <div class="section-head">
-      <div>
-        <div class="section-label">📹 YouTube Review</div>
-        <div class="section-title">영상으로 보는 매장 후기</div>
-        <div class="section-desc">직접 방문하신 고객분이 촬영한 매장 리뷰 영상입니다</div>
-      </div>
-    </div>
-
-    <div class="youtube-embed-wrap">
-      <iframe
-        src="https://www.youtube.com/embed/D6_DQvtWN74"
-        title="헬로우가든마켓 유튜브 후기"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-    </div>
-    <div class="youtube-meta">
-      <span class="youtube-channel-badge">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><polygon points="9.545,15.568 15.818,12 9.545,8.432" fill="#ff0000"/></svg>
-        YouTube
-      </span>
-      <div class="youtube-info">
-        <strong>헬로우가든마켓 매장 방문 후기</strong> · 실제 방문 고객 촬영
       </div>
     </div>
   </div>
