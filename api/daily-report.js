@@ -1,5 +1,5 @@
 // Vercel Serverless Function — 일일 판매 리포트 텔레그램 발송
-// Vercel Cron: 매일 22:00 KST (13:00 UTC) 자동 실행
+// Vercel Cron: 매일 10:30 KST (01:30 UTC) 자동 실행
 // GET /api/daily-report  (Cron 호출 또는 수동 호출 모두 지원)
 
 import { createClient } from '@supabase/supabase-js'
