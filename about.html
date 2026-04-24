@@ -58,11 +58,15 @@
 
     /* 지도 */
     .map-section { padding: 0 0 80px; background: #fff; }
-    #kakao-map {
+    .map-iframe-wrap {
       width: 100%; height: 380px;
       border-radius: var(--radius-md);
       overflow: hidden;
       box-shadow: var(--shadow-md);
+    }
+    .map-iframe-wrap iframe {
+      width: 100%; height: 100%;
+      border: none; display: block;
     }
     .map-address-bar {
       display: flex; align-items: center; gap: 8px;
@@ -257,12 +261,20 @@
 <!-- 지도 -->
 <section class="map-section">
   <div class="container">
-    <div id="kakao-map"></div>
+    <div class="map-iframe-wrap">
+      <iframe
+        src="https://www.google.com/maps?q=경기+고양시+덕양구+큰골길+61&output=embed&hl=ko"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="헬로우가든마켓 위치"
+      ></iframe>
+    </div>
     <div class="map-address-bar">
       <span>📍</span>
       <span><strong>헬로우가든마켓</strong> &nbsp;경기 고양시 덕양구 큰골길 61</span>
       <a class="btn-navi"
-         href="https://map.kakao.com/link/search/경기 고양시 덕양구 큰골길 61"
+         href="https://map.kakao.com/link/search/경기%20고양시%20덕양구%20큰골길%2061"
          target="_blank" rel="noopener">
         🗺️ 카카오맵으로 보기
       </a>
@@ -305,34 +317,6 @@
   })
   updateNavAuth()
   updateCartBadge()
-</script>
-<script>
-  // 카카오맵 SDK 동적 로드 후 초기화
-  function initKakaoMap() {
-    const container = document.getElementById('kakao-map')
-    const options = { center: new kakao.maps.LatLng(37.6370, 126.8850), level: 4 }
-    const map = new kakao.maps.Map(container, options)
-
-    const geocoder = new kakao.maps.services.Geocoder()
-    geocoder.addressSearch('경기 고양시 덕양구 큰골길 61', function(result, status) {
-      if (status === kakao.maps.services.Status.OK) {
-        const coords = new kakao.maps.LatLng(result[0].y, result[0].x)
-        map.setCenter(coords)
-        const marker = new kakao.maps.Marker({ map, position: coords })
-        const infowindow = new kakao.maps.InfoWindow({
-          content: '<div style="padding:10px 14px;font-size:13px;font-weight:700;color:#2d5a3d;white-space:nowrap;">🌻 헬로우가든마켓</div>'
-        })
-        infowindow.open(map, marker)
-      }
-    })
-  }
-
-  const script = document.createElement('script')
-  script.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=6677fdfbb0481ed7f679a12f804ccf7b&libraries=services&autoload=false'
-  script.onload = function() {
-    kakao.maps.load(initKakaoMap)
-  }
-  document.head.appendChild(script)
 </script>
 <a href="/cart.html" class="cart-fab" id="cart-fab" aria-label="장바구니">
   <span class="cart-fab__icon">🛒</span>
