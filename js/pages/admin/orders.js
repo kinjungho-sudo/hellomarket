@@ -3,7 +3,7 @@ import { requireAdminAuth, adminLogout } from '/js/utils/admin-auth.js'
 import { supabase } from '/js/config.js'
 import { getAllOrders, updateOrderStatus } from '/js/api/orders.js'
 
-requireAdminAuth()
+await requireAdminAuth()
 
 try {
   const { data: { user } } = await supabase.auth.getUser()

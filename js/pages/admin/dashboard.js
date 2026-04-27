@@ -6,8 +6,8 @@ import { getUserCount } from '/js/api/users.js'
 import { getTodayVisitors, getWeeklyRevenueStats, getCategoryStats, getHourlyOrderStats, getProductSalesStats } from '/js/api/analytics.js'
 import { getQnaList } from '/js/api/qna.js'
 
-// 관리자 접근 제어 — 비인증 시 admin/login.html로 리다이렉트
-requireAdminAuth()
+// 관리자 접근 제어 — 비인증/비허가 UID 시 admin/login.html로 리다이렉트
+await requireAdminAuth()
 
 // 로그아웃 버튼
 document.getElementById('btn-logout')?.addEventListener('click', () => {

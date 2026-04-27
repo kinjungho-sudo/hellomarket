@@ -4,7 +4,7 @@ import { supabase } from '/js/config.js'
 import { toggleReviewPublish, deleteReview } from '/js/api/reviews.js'
 
 // 관리자 접근 제어
-requireAdminAuth()
+await requireAdminAuth()
 
 try {
   const { data: { user } } = await supabase.auth.getUser()

@@ -22,106 +22,58 @@
       border-radius: var(--radius-lg);
       border: 1.5px solid rgba(0,0,0,0.07);
       box-shadow: var(--shadow-md);
-      padding: 44px 40px 40px;
+      padding: 48px 40px 40px;
       max-width: 400px; width: 100%;
       text-align: center;
     }
-    @media (max-width: 480px) { .login-card { padding: 32px 24px 28px; } }
+    @media (max-width: 480px) { .login-card { padding: 36px 24px 32px; } }
 
     .login-logo {
       font-family: var(--font-main);
       font-size: 22px; font-weight: 800;
-      color: var(--color-green-dark);
+      color: var(--color-primary);
       text-decoration: none;
       display: inline-block;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .login-welcome {
       font-size: 15px; color: var(--color-text-sub);
-      margin-bottom: 36px; line-height: 1.6;
+      margin-bottom: 36px; line-height: 1.65;
     }
 
-    /* ── 탭 ── */
-    .auth-tabs { display: flex; border-bottom: 2px solid rgba(0,0,0,0.07); margin-bottom: 28px; }
-    .auth-tab {
-      flex: 1; height: 44px; background: none; border: none;
-      font-size: 15px; font-weight: 700; color: var(--color-text-sub);
-      cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
-      transition: all 0.18s;
-    }
-    .auth-tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
-
-    .auth-panel { display: none; }
-    .auth-panel.active { display: block; }
-
-    /* ── 소셜 버튼 ── */
-    .social-buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    /* 소셜 버튼 */
+    .social-buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
     .btn-social {
       display: flex; align-items: center; justify-content: center; gap: 12px;
-      height: 48px; border-radius: var(--radius-sm);
+      height: 52px; border-radius: var(--radius-sm);
       font-size: 15px; font-weight: 700; cursor: pointer;
       transition: all 0.2s; text-decoration: none; border: none; width: 100%;
     }
     .btn-google { background: #fff; border: 1.5px solid rgba(0,0,0,0.18); color: #3c3c3c; }
     .btn-google:hover { background: #f7f7f7; box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+    .btn-google:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .btn-naver { background: #03c75a; color: #fff; }
     .btn-naver:hover { background: #02b350; box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+    .btn-naver:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .social-icon { width: 20px; height: 20px; flex-shrink: 0; }
 
-    /* ── OR 구분선 ── */
-    .or-divider {
-      display: flex; align-items: center; gap: 10px; margin: 18px 0;
-      color: var(--color-text-light); font-size: 12px; font-weight: 600;
-    }
-    .or-divider::before, .or-divider::after {
-      content: ''; flex: 1; height: 1px; background: rgba(0,0,0,0.09);
-    }
-
-    /* ── 이메일 폼 ── */
-    .form-field { margin-bottom: 14px; text-align: left; }
-    .form-field label { display: block; font-size: 13px; font-weight: 700; color: var(--color-text); margin-bottom: 6px; }
-    .form-field label .req { color: var(--color-danger); margin-left: 2px; }
-    .form-input {
-      width: 100%; height: 44px; padding: 0 14px;
-      border: 1.5px solid rgba(0,0,0,0.15); border-radius: var(--radius-sm);
-      font-size: 14px; font-family: var(--font-main); color: var(--color-text);
-      box-sizing: border-box; transition: border-color 0.2s;
-    }
-    .form-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(45,90,61,0.1); }
-    .form-input::placeholder { color: var(--color-text-light); }
-    .form-hint { font-size: 12px; color: var(--color-text-light); margin-top: 4px; }
-    .form-error { font-size: 13px; color: var(--color-danger); margin-bottom: 12px; min-height: 18px; text-align: left; }
-
-    .btn-submit {
-      width: 100%; height: 48px; border: none; border-radius: var(--radius-sm);
-      background: var(--color-primary); color: #fff;
-      font-size: 15px; font-weight: 800; cursor: pointer;
-      transition: background 0.2s, transform 0.15s; margin-top: 4px;
-    }
-    .btn-submit:hover:not(:disabled) { background: var(--color-primary-dark); transform: translateY(-1px); }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .tab-switch-hint {
-      font-size: 13px; color: var(--color-text-sub); margin-top: 18px;
-    }
-    .tab-switch-hint button {
-      background: none; border: none; cursor: pointer;
-      color: var(--color-primary); font-weight: 700; font-size: 13px;
-      text-decoration: underline; padding: 0;
-    }
-
-    .divider { border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 8px 0 16px; }
+    .divider { border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 4px 0 20px; }
     .login-terms { font-size: 12px; color: var(--color-text-light); line-height: 1.65; }
     .login-terms a { color: var(--color-primary); text-decoration: underline; }
 
-    /* 비밀번호 토글 */
-    .pw-wrap { position: relative; }
-    .pw-toggle {
-      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-      background: none; border: none; cursor: pointer; font-size: 16px;
-      color: var(--color-text-light); padding: 0; line-height: 1;
+    .login-info {
+      background: var(--color-bg-section);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--color-text-sub);
+      line-height: 1.6;
+      margin-bottom: 28px;
+      text-align: left;
     }
+    .login-info strong { color: var(--color-primary); }
 
+    /* 장바구니 뱃지 */
     .cart-badge {
       position: absolute; top: -6px; right: -8px;
       background: var(--color-danger); color: #fff;
@@ -134,7 +86,7 @@
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-    /* ── 추가 정보 입력 모달 ── */
+    /* 추가 정보 입력 모달 (소셜 최초 로그인 시) */
     .reg-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.55); z-index: 500;
@@ -206,128 +158,48 @@
       <li><a href="/blog-reviews.html">블로그 후기</a></li>
       <li><a href="/about.html">매장 소개</a></li>
     </ul>
-      <div class="mobile-auth" id="mobile-auth"></div>
-    </div>
+    <div class="mobile-auth" id="mobile-auth"></div>
   </div>
-
 </header>
 
 <main class="login-page">
   <div class="login-card">
     <a href="/index.html" class="login-logo"><span class="logo-icon">🌻</span> Hello Garden Market</a>
 
-    <!-- 탭 -->
-    <div class="auth-tabs">
-      <button class="auth-tab active" data-panel="login">로그인</button>
-      <button class="auth-tab" data-panel="signup">회원가입</button>
+    <p class="login-welcome">
+      구글 또는 네이버 계정으로<br>간편하게 시작하세요
+    </p>
+
+    <div class="login-info">
+      <strong>소셜 계정으로 1초 로그인</strong><br>
+      별도 회원가입 없이 기존 계정을 연동해 바로 이용하실 수 있어요.
+      최초 로그인 시 배송에 필요한 이름과 연락처만 입력해주세요.
     </div>
 
-    <!-- ① 로그인 패널 -->
-    <div class="auth-panel active" id="panel-login">
-      <div class="social-buttons">
-        <button class="btn-social btn-google" id="btn-google" type="button">
-          <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          <span>구글로 로그인</span>
-        </button>
-        <button class="btn-social btn-naver" id="btn-naver" type="button">
-          <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z" fill="#fff"/>
-          </svg>
-          <span>네이버로 로그인</span>
-        </button>
-      </div>
+    <div class="social-buttons">
+      <button class="btn-social btn-google" id="btn-google" type="button">
+        <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        <span>구글로 계속하기</span>
+      </button>
 
-      <div class="or-divider">또는 이메일로 로그인</div>
-
-      <form id="form-login" novalidate>
-        <div class="form-field">
-          <label for="login-email">이메일 <span class="req">*</span></label>
-          <input type="email" class="form-input" id="login-email" placeholder="example@email.com" autocomplete="email" />
-        </div>
-        <div class="form-field">
-          <label for="login-password">비밀번호 <span class="req">*</span></label>
-          <div class="pw-wrap">
-            <input type="password" class="form-input" id="login-password" placeholder="비밀번호 입력" autocomplete="current-password" style="padding-right:40px;" />
-            <button type="button" class="pw-toggle" data-target="login-password">👁</button>
-          </div>
-        </div>
-        <p class="form-error" id="login-error"></p>
-        <button type="submit" class="btn-submit" id="btn-login-submit">이메일로 로그인</button>
-      </form>
-
-      <p class="tab-switch-hint">계정이 없으신가요? <button type="button" data-goto="signup">회원가입</button></p>
-
-      <hr class="divider" style="margin-top:20px;" />
-      <p class="login-terms">
-        계속하면 헬로우가든마켓의 <a href="#">이용약관</a> 및<br>
-        <a href="#">개인정보처리방침</a>에 동의하는 것으로 간주합니다.
-      </p>
+      <button class="btn-social btn-naver" id="btn-naver" type="button">
+        <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z" fill="#fff"/>
+        </svg>
+        <span>네이버로 계속하기</span>
+      </button>
     </div>
 
-    <!-- ② 회원가입 패널 -->
-    <div class="auth-panel" id="panel-signup">
-      <div class="social-buttons">
-        <button class="btn-social btn-google" id="btn-google-signup" type="button">
-          <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          <span>구글로 가입</span>
-        </button>
-      </div>
-
-      <div class="or-divider">또는 이메일로 가입</div>
-
-      <form id="form-signup" novalidate>
-        <div class="form-field">
-          <label for="signup-name">이름 <span class="req">*</span></label>
-          <input type="text" class="form-input" id="signup-name" placeholder="홍길동" maxlength="20" autocomplete="name" />
-        </div>
-        <div class="form-field">
-          <label for="signup-phone">휴대폰 번호 <span class="req">*</span></label>
-          <input type="tel" class="form-input" id="signup-phone" placeholder="010-0000-0000" maxlength="13" autocomplete="tel" />
-          <p class="form-hint">주문 배송 알림에 사용됩니다</p>
-        </div>
-        <div class="form-field">
-          <label for="signup-email">이메일 <span class="req">*</span></label>
-          <input type="email" class="form-input" id="signup-email" placeholder="example@email.com" autocomplete="email" />
-        </div>
-        <div class="form-field">
-          <label for="signup-password">비밀번호 <span class="req">*</span></label>
-          <div class="pw-wrap">
-            <input type="password" class="form-input" id="signup-password" placeholder="8자 이상" maxlength="64" autocomplete="new-password" style="padding-right:40px;" />
-            <button type="button" class="pw-toggle" data-target="signup-password">👁</button>
-          </div>
-          <p class="form-hint">영문+숫자 조합 8자 이상</p>
-        </div>
-        <div class="form-field">
-          <label for="signup-password-confirm">비밀번호 확인 <span class="req">*</span></label>
-          <div class="pw-wrap">
-            <input type="password" class="form-input" id="signup-password-confirm" placeholder="비밀번호 재입력" maxlength="64" autocomplete="new-password" style="padding-right:40px;" />
-            <button type="button" class="pw-toggle" data-target="signup-password-confirm">👁</button>
-          </div>
-        </div>
-        <div class="form-field" style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">
-          <input type="checkbox" id="signup-agree" style="margin-top:3px;width:16px;height:16px;accent-color:var(--color-primary);flex-shrink:0;" />
-          <label for="signup-agree" style="font-size:12px;color:var(--color-text-sub);cursor:pointer;font-weight:400;">
-            <a href="#" style="color:var(--color-primary);text-decoration:underline;">이용약관</a> 및
-            <a href="#" style="color:var(--color-primary);text-decoration:underline;">개인정보처리방침</a>에 동의합니다 <span class="req">*</span>
-          </label>
-        </div>
-        <p class="form-error" id="signup-error"></p>
-        <button type="submit" class="btn-submit" id="btn-signup-submit">회원가입</button>
-      </form>
-
-      <p class="tab-switch-hint">이미 계정이 있으신가요? <button type="button" data-goto="login">로그인</button></p>
-    </div>
-
+    <hr class="divider" />
+    <p class="login-terms">
+      계속하면 헬로우가든마켓의 <a href="#">이용약관</a> 및<br>
+      <a href="#">개인정보처리방침</a>에 동의하는 것으로 간주합니다.
+    </p>
   </div>
 </main>
 
@@ -343,10 +215,39 @@
   </div>
 </footer>
 
+<!-- 최초 소셜 로그인 시 추가 정보 입력 모달 -->
+<div class="reg-overlay" id="reg-overlay">
+  <div class="reg-modal">
+    <div class="reg-modal__icon">🌿</div>
+    <div class="reg-modal__title">반갑습니다!</div>
+    <div class="reg-modal__desc">
+      처음 오셨군요. 배송 및 서비스 이용을 위해<br>
+      이름과 연락처를 한 번만 입력해주세요.
+    </div>
+
+    <div class="reg-field">
+      <label for="reg-name">이름 <span>*</span></label>
+      <input type="text" id="reg-name" placeholder="홍길동" maxlength="20" autocomplete="name" />
+    </div>
+    <div class="reg-field">
+      <label for="reg-phone">휴대폰 번호 <span>*</span></label>
+      <input type="tel" id="reg-phone" placeholder="010-0000-0000" maxlength="13" autocomplete="tel" />
+      <p class="reg-field__hint">주문 배송 알림에 사용됩니다</p>
+    </div>
+
+    <p class="reg-error" id="reg-error"></p>
+    <button class="btn-reg-submit" id="btn-reg-submit">시작하기</button>
+  </div>
+</div>
+
+<a href="/cart.html" class="cart-fab" id="cart-fab" aria-label="장바구니">
+  <span class="cart-fab__icon">🛒</span>
+  <span class="cart-fab__badge" id="cart-fab-count">0</span>
+</a>
+
 <script type="module">
   import { updateCartBadge } from '/js/utils/cart.js'
-  import { signInWithGoogle, signInWithNaver, signInWithEmail, signUpWithEmail,
-           onAuthStateChange, getSession, isAdmin, upsertUserProfile } from '/js/auth.js'
+  import { signInWithGoogle, signInWithNaver, onAuthStateChange, getSession, upsertUserProfile } from '/js/auth.js'
   import { supabase } from '/js/config.js'
 
   document.getElementById('hamburger').addEventListener('click', () => {
@@ -355,57 +256,38 @@
   })
   updateCartBadge()
 
-  // ── 탭 전환 ──────────────────────────────────────
-  function switchTab(name) {
-    document.querySelectorAll('.auth-tab').forEach(t =>
-      t.classList.toggle('active', t.dataset.panel === name))
-    document.querySelectorAll('.auth-panel').forEach(p =>
-      p.classList.toggle('active', p.id === 'panel-' + name))
-  }
-  document.querySelectorAll('.auth-tab').forEach(t =>
-    t.addEventListener('click', () => switchTab(t.dataset.panel)))
-  document.querySelectorAll('[data-goto]').forEach(btn =>
-    btn.addEventListener('click', () => switchTab(btn.dataset.goto)))
-
-  // URL hash로 직접 탭 열기 (?tab=signup)
-  const urlTab = new URLSearchParams(location.search).get('tab')
-  if (urlTab === 'signup') switchTab('signup')
-
-  // ── 비밀번호 보기/숨기기 ─────────────────────────
-  document.querySelectorAll('.pw-toggle').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const input = document.getElementById(btn.dataset.target)
-      if (!input) return
-      const isText = input.type === 'text'
-      input.type = isText ? 'password' : 'text'
-      btn.textContent = isText ? '👁' : '🙈'
-    })
-  })
-
-  // ── 전화번호 자동 하이픈 ─────────────────────────
-  document.getElementById('signup-phone').addEventListener('input', function() {
-    let v = this.value.replace(/\D/g, '')
-    if (v.length <= 3) this.value = v
-    else if (v.length <= 7) this.value = v.slice(0,3) + '-' + v.slice(3)
-    else this.value = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11)
-  })
-
-  // ── 공통: 리다이렉트 ─────────────────────────────
+  // 로그인 후 리다이렉트
   async function doRedirect() {
-    const admin = await isAdmin()
-    if (admin) { window.location.href = '/admin/index.html'; return }
     const redirectTo = sessionStorage.getItem('loginRedirect') || '/mypage.html'
     sessionStorage.removeItem('loginRedirect')
     window.location.href = redirectTo
   }
 
-  // ── 소셜 로그인 후 처리 (신규면 phone 이미 등록됨 → 바로 이동) ──
+  // 소셜 로그인 후 처리 — phone 없으면 추가 정보 모달 표시
+  let pendingUser = null
   async function handleAfterSocialLogin(user) {
     await upsertUserProfile(user)
-    await doRedirect()
+
+    const { data } = await supabase
+      .from('hgm_users')
+      .select('phone, name')
+      .eq('id', user.id)
+      .single()
+
+    if (!data?.phone) {
+      pendingUser = user
+      // 소셜 계정 이름이 있으면 미리 채워두기
+      const nameInput = document.getElementById('reg-name')
+      if (nameInput && (data?.name || user.user_metadata?.full_name)) {
+        nameInput.value = data?.name || user.user_metadata?.full_name || ''
+      }
+      document.getElementById('reg-overlay').classList.add('open')
+    } else {
+      await doRedirect()
+    }
   }
 
-  // ── 초기 세션 / OAuth 콜백 ───────────────────────
+  // 초기 세션 확인 (OAuth 콜백 포함)
   const { session } = await getSession()
   if (session) { await handleAfterSocialLogin(session.user) }
 
@@ -415,108 +297,62 @@
     }
   })
 
-  // ── 구글 로그인 (로그인 탭) ───────────────────────
-  function bindGoogleBtn(id) {
-    document.getElementById(id)?.addEventListener('click', async function() {
-      this.disabled = true
-      const span = this.querySelector('span')
-      if (span) span.textContent = '연결 중...'
-      const { error } = await signInWithGoogle()
-      if (error) {
-        this.disabled = false
-        if (span) span.textContent = id.includes('signup') ? '구글로 가입' : '구글로 로그인'
-      }
-    })
-  }
-  bindGoogleBtn('btn-google')
-  bindGoogleBtn('btn-google-signup')
+  // 구글 로그인
+  document.getElementById('btn-google').addEventListener('click', async function() {
+    this.disabled = true
+    const span = this.querySelector('span')
+    if (span) span.textContent = '연결 중...'
+    const { error } = await signInWithGoogle()
+    if (error) {
+      this.disabled = false
+      if (span) span.textContent = '구글로 계속하기'
+    }
+  })
 
-  // ── 네이버 로그인 ─────────────────────────────────
-  document.getElementById('btn-naver')?.addEventListener('click', async function() {
+  // 네이버 로그인
+  document.getElementById('btn-naver').addEventListener('click', async function() {
     this.disabled = true
     const span = this.querySelector('span')
     if (span) span.textContent = '연결 중...'
     const { error } = await signInWithNaver()
     if (error) {
       this.disabled = false
-      if (span) span.textContent = '네이버로 로그인'
+      if (span) span.textContent = '네이버로 계속하기'
     }
   })
 
-  // ── 이메일 로그인 폼 ──────────────────────────────
-  document.getElementById('form-login').addEventListener('submit', async (e) => {
-    e.preventDefault()
-    const email    = document.getElementById('login-email').value.trim()
-    const password = document.getElementById('login-password').value
-    const errEl    = document.getElementById('login-error')
-    const btn      = document.getElementById('btn-login-submit')
-    errEl.textContent = ''
-
-    if (!email) { errEl.textContent = '이메일을 입력해주세요.'; return }
-    if (!password) { errEl.textContent = '비밀번호를 입력해주세요.'; return }
-
-    btn.disabled = true; btn.textContent = '로그인 중...'
-    const { error } = await signInWithEmail(email, password)
-    if (error) {
-      const msg = error.message?.includes('Invalid login') || error.message?.includes('invalid')
-        ? '이메일 또는 비밀번호가 올바르지 않아요.'
-        : (error.message || '로그인 중 오류가 발생했어요.')
-      errEl.textContent = msg
-      btn.disabled = false; btn.textContent = '이메일로 로그인'
-    }
-    // 성공 시 onAuthStateChange → doRedirect
+  // 전화번호 자동 하이픈
+  document.getElementById('reg-phone').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '')
+    if (v.length <= 3) this.value = v
+    else if (v.length <= 7) this.value = v.slice(0,3) + '-' + v.slice(3)
+    else this.value = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11)
   })
 
-  // ── 이메일 회원가입 폼 ────────────────────────────
-  document.getElementById('form-signup').addEventListener('submit', async (e) => {
-    e.preventDefault()
-    const name     = document.getElementById('signup-name').value.trim()
-    const phone    = document.getElementById('signup-phone').value.trim()
-    const email    = document.getElementById('signup-email').value.trim()
-    const pw       = document.getElementById('signup-password').value
-    const pwConfirm= document.getElementById('signup-password-confirm').value
-    const agreed   = document.getElementById('signup-agree').checked
-    const errEl    = document.getElementById('signup-error')
-    const btn      = document.getElementById('btn-signup-submit')
+  // 추가 정보 저장
+  document.getElementById('btn-reg-submit').addEventListener('click', async function() {
+    const name  = document.getElementById('reg-name').value.trim()
+    const phone = document.getElementById('reg-phone').value.trim()
+    const errEl = document.getElementById('reg-error')
     errEl.textContent = ''
 
-    if (!name)    { errEl.textContent = '이름을 입력해주세요.'; return }
+    if (!name) { errEl.textContent = '이름을 입력해주세요.'; return }
     if (!phone || phone.replace(/\D/g,'').length < 10) {
       errEl.textContent = '올바른 휴대폰 번호를 입력해주세요.'; return
     }
-    if (!email)   { errEl.textContent = '이메일을 입력해주세요.'; return }
-    if (pw.length < 8) { errEl.textContent = '비밀번호는 8자 이상 입력해주세요.'; return }
-    if (pw !== pwConfirm) { errEl.textContent = '비밀번호가 일치하지 않아요.'; return }
-    if (!agreed)  { errEl.textContent = '이용약관에 동의해주세요.'; return }
 
-    btn.disabled = true; btn.textContent = '가입 중...'
-    const { data, error } = await signUpWithEmail(email, pw, name, phone)
+    this.disabled = true; this.textContent = '저장 중...'
 
-    if (error) {
-      let msg = error.message || '회원가입 중 오류가 발생했어요.'
-      if (msg.includes('already registered') || msg.includes('already been registered') || msg.includes('User already'))
-        msg = '이미 사용 중인 이메일이에요. 로그인 탭을 이용해주세요.'
-      else if (msg.includes('Password should'))
-        msg = '비밀번호는 영문+숫자 조합 8자 이상으로 설정해주세요.'
-      errEl.textContent = msg
-      btn.disabled = false; btn.textContent = '회원가입'
-      return
+    const userId = pendingUser?.id
+    if (userId) {
+      await supabase
+        .from('hgm_users')
+        .update({ name, phone })
+        .eq('id', userId)
     }
 
-    // Supabase 기본 설정에 따라 이메일 인증 필요 여부 분기
-    if (data?.user?.identities?.length === 0 || !data?.session) {
-      btn.textContent = '가입 완료!'
-      errEl.style.color = 'var(--color-success)'
-      errEl.textContent = '✅ 가입 완료! 이메일을 확인해 인증 후 로그인해주세요.'
-    } else {
-      // 이메일 인증 불필요 설정 시 바로 이동
-      await doRedirect()
-    }
+    await doRedirect()
   })
 </script>
-<a href="/cart.html" class="cart-fab" id="cart-fab" aria-label="장바구니">
-  <span class="cart-fab__icon">🛒</span>
-  <span class="cart-fab__badge" id="cart-fab-count">0</span>
-</a>
 </body>
 </html>

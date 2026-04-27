@@ -6,7 +6,7 @@ import { sendNewArrivalAlert } from '/js/api/notifications.js'
 import { getNotifyUsers } from '/js/api/users.js'
 
 // 관리자 접근 제어
-requireAdminAuth()
+await requireAdminAuth()
 
 try {
   const { data: { user } } = await supabase.auth.getUser()

@@ -4,7 +4,7 @@ import { supabase } from '/js/config.js'
 import { getNotificationSettings, saveNotificationSettings, testTelegramConnection, sendHourlyReport } from '/js/api/notifications.js'
 
 // 관리자 접근 제어
-requireAdminAuth()
+await requireAdminAuth()
 
 document.getElementById('btn-logout')?.addEventListener('click', async () => {
   adminLogout(); window.location.href = '/admin/login.html'

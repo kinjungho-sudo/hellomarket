@@ -5,7 +5,7 @@ import { getProducts, createProduct, updateProduct, deleteProduct } from '/js/ap
 import { sendNewProductEmail } from '/js/api/orders.js'
 
 // 관리자 접근 제어
-requireAdminAuth()
+await requireAdminAuth()
 
 try {
   const { data: { user } } = await supabase.auth.getUser()
