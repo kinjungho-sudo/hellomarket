@@ -15,7 +15,7 @@ try {
 } catch (e) { console.error('[reviews] 유저 정보 조회 실패:', e) }
 
 document.getElementById('btn-logout')?.addEventListener('click', async () => {
-  adminLogout(); window.location.href = '/admin/login.html'
+  await adminLogout()
 })
 document.getElementById('menu-toggle')?.addEventListener('click', () => {
   document.getElementById('admin-sidebar')?.classList.toggle('open')

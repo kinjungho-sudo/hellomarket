@@ -1,1169 +1,664 @@
-# CLAUDE.md — 헬로우가든마켓 독립몰 개발 지침서
+# CLAUDE.md — Co-Mind Works 개발 컨텍스트
 
-> 이 파일은 Claude Code가 처음부터 끝까지 자율적으로 읽고 개발을 완성하기 위한 지침서입니다.
-> 별도 확인 없이 이 문서만으로 전체 프로젝트를 완성하세요.
-> 작성일: 2026-04-23 / 버전: v1.0
-
----
-
-## 0. 개발 철학 & 규칙
-
-1. **이 파일 하나만 읽고 전체를 완성한다** — 중간에 확인 요청 최소화
-2. **단계별 순서를 반드시 지킨다** — 환경 세팅 → DB → 백엔드 → 프론트 순서
-3. **RLS는 사용하지 않는다** — 권한 체크는 서버사이드 로직으로 처리
-4. **hgm_ prefix를 모든 테이블에 반드시 사용한다** — 기존 Supabase DB 충돌 방지
-5. **가상 시드 데이터를 반드시 입력한다** — MVP 시연용, 식물 상품 10종 이상
-6. **모든 파일은 한국어 주석을 포함한다**
-7. **에러 처리를 빠뜨리지 않는다** — 모든 API 호출에 try/catch 적용
-8. **완료 후 README.md를 자동 생성한다** — 실행 방법, 환경변수 목록 포함
-9. **각 STEP 완료 후 반드시 자가 검증을 실행한다** — 섹션 15 체크리스트 참조
-10. **에러/실수 발생 시 즉시 MISTAKES.md에 기록한다** — 섹션 16 참조
-11. **병렬 처리 가능한 작업은 서브에이전트로 분리한다** — 섹션 17 참조
+> **프로젝트:** Co-Mind Works (코마인드웍스)  
+> **버전:** v3.0  
+> **업데이트:** 2026-04-14  
+> **설계서:** comindworks_mvp_v2.md | **KPI:** KPI.md | **계획:** PLAN.md
 
 ---
 
-## 1. 프로젝트 개요
+## 제품 한 줄 정의
 
-### 배경
-- 헬로우가든마켓(건민농원)은 **오프라인 메인 매장** 운영 중 (식물/묘목 판매)
-- 네이버 스마트스토어 병행 운영 중이나 구조적 한계로 **독립몰 전환** 결정
-- 스마트스토어 온라인 판매 20종 미만 / 실제 매장 보유 식물 수백 종
-- 고객이 온라인에서 20종만 보고 이탈 → 매장 방문 유도 수단 없음
+> "한 줄 명령으로 AI 팀이 자율적으로 프로젝트를 완성한다. 막히면 알림만 온다."
 
-### 핵심 가치 제안
-```
-스마트스토어: 20종만 보고 이탈
-독립몰: 수백 종 갤러리 구경 → 매장 방문 CTA → 오프라인 구매 → 재방문
-수수료 0% + 고객 데이터 직접 소유
-```
-
-### 타겟 사용자
-- **구매 패턴**: 탐색형 (구경하다가 마음에 들면 구매)
-- **주 고객층**: 홈가드닝 관심 20~40대
-- **유입 경로**: 인스타그램, 네이버 블로그
+사용자는 의뢰인, Chief PM은 대리인, 나머지 에이전트는 실행팀.  
+컨펌 한 번 이후 자율 실행. 쓸수록 우리 회사 전용 AI가 되어간다.
 
 ---
 
-## 1-1. MoSCoW 우선순위
-
-### Must Have (Phase 1 - MVP)
-- [ ] 메인 홈 랜딩페이지
-- [ ] 온라인 판매 상품 목록 / 상세 페이지 **(MVP: 10종 / 실제 52종은 Phase 2에서 확장)**
-- [ ] 매장 식물 갤러리 (오프라인 전시용, 구매 불가)
-- [ ] 신상품 입고 소식 페이지
-- [ ] 묻고 답하기 페이지 (게시판형)
-- [ ] 리뷰 이벤트 페이지 (블로그형)
-- [ ] 구글 소셜 로그인
-- [ ] 회원 기능 (주문 내역 조회, 위시리스트)
-- [ ] 관리자 페이지 (상품/갤러리/Q&A/리뷰/주문 관리)
-- [ ] 관리자 대시보드 (유입량, 판매량, 매출, 주문량)
-- [ ] 텔레그램 주문 즉시 알림
-- [ ] Vercel 배포
-
-### Should Have (Phase 2)
-- [ ] 온라인 판매 상품 52종 전체 등록 (스크린샷 → JSON 변환)
-- [ ] 네이버 소셜 로그인
-- [ ] 실제 결제 연동 (TossPayments)
-- [ ] 배송 관리 기능 (운송장 입력, 배송 상태 추적)
-- [ ] 시간대별 리포트 → 텔레그램 자동 전송
-- [ ] QR코드 구매 (오프라인 매장 내 온라인 결제)
-- [ ] 신상 입고 알림 수신 (회원 푸시/이메일)
-- [ ] 가드닝 가이드 페이지
-
-### Could Have (Phase 3)
-- [ ] RSS 뉴스레터 (신상품 등록 / 할인 이벤트 자동 발송)
-- [ ] 구매 완료 / 배송 진행 시 이메일 자동 발송
-- [ ] 배송 상태 조회 페이지
-- [ ] 오프라인 매장 판매 카운팅 (QR 기반 POS 연동)
-- [ ] 회원 적립금 / 쿠폰 시스템
-
-### Won't Have (현재 범위 외)
-- 디스코드 연동
-- 앱(iOS/Android) 네이티브 개발
-- 해외 결제 / 글로벌 배송
-- 다중 판매자 입점 구조
-
----
-
-## 2. 기술 스택
-
-| 영역 | 기술 | 비고 |
-|---|---|---|
-| 프론트엔드 | HTML / CSS / Vanilla JS | 반응형, 프레임워크 없이 구현 |
-| 배포 | Vercel | GitHub 연동 자동 배포 |
-| DB | Supabase | URL: https://gqynptpjomcqzxyykqic.supabase.co |
-| 인증 | Supabase Auth | 네이버 / 구글 소셜 로그인 |
-| 이미지 스토리지 | Supabase Storage | 버킷명: hgm-images |
-| 알림 | Telegram Bot | 주문 즉시 알림 |
-| 리포트 | Telegram Bot | 시간대별 자동 리포트 (Phase 2) |
-
----
-
-## 3. 프로젝트 파일 구조
-
-아래 구조를 그대로 생성하라:
+## 제품 핵심 철학
 
 ```
-hellogarden/
-├── CLAUDE.md                  # 이 파일
-├── README.md                  # 자동 생성
-├── .env                       # 환경변수 (빈칸, 사용자가 채움)
-├── .env.example               # 환경변수 예시
-├── .gitignore
-├── vercel.json                # Vercel 배포 설정
-│
-├── index.html                 # 홈 (랜딩)
-├── shop.html                  # 쇼핑하기 (상품 목록)
-├── product.html               # 상품 상세
-├── new.html                   # 새로 들어왔어요 (입고 소식)
-├── gallery.html               # 매장 구경하기 (오프라인 갤러리)
-├── about.html                 # 매장 소개
-├── qna.html                   # 묻고 답하기 (게시판)
-├── review-event.html          # 리뷰 이벤트 (블로그형)
-├── login.html                 # 로그인
-├── mypage.html                # 마이페이지
-│
-├── admin/
-│   ├── index.html             # 관리자 대시보드
-│   ├── products.html          # 상품 관리
-│   ├── gallery.html           # 갤러리 관리
-│   ├── orders.html            # 주문 관리
-│   ├── posts.html             # 입고 소식 관리
-│   ├── qna.html               # 묻고 답하기 관리
-│   ├── reviews.html           # 리뷰 이벤트 관리
-│   └── settings.html          # 알림 설정
-│
-├── css/
-│   ├── reset.css
-│   ├── variables.css          # CSS 변수 (컬러, 폰트)
-│   ├── common.css             # 공통 스타일
-│   ├── components.css         # 버튼, 카드, 모달 등
-│   └── admin.css              # 관리자 전용 스타일
-│
-├── js/
-│   ├── config.js              # Supabase 클라이언트 초기화
-│   ├── auth.js                # 인증 관련 함수
-│   ├── api/
-│   │   ├── products.js        # 상품 CRUD
-│   │   ├── gallery.js         # 갤러리 CRUD
-│   │   ├── orders.js          # 주문 처리
-│   │   ├── posts.js           # 입고 소식 CRUD
-│   │   ├── users.js           # 회원 관련
-│   │   ├── analytics.js       # 유입/조회 통계
-│   │   └── notifications.js   # 텔레그램/디스코드 알림
-│   ├── pages/
-│   │   ├── home.js
-│   │   ├── shop.js
-│   │   ├── product.js
-│   │   ├── new.js
-│   │   ├── gallery.js
-│   │   ├── qna.js
-│   │   ├── review-event.js
-│   │   ├── login.js
-│   │   ├── mypage.js
-│   │   └── admin/
-│   │       ├── dashboard.js
-│   │       ├── products.js
-│   │       ├── gallery.js
-│   │       ├── orders.js
-│   │       ├── posts.js
-│   │       ├── qna.js
-│   │       ├── reviews.js
-│   │       └── settings.js
-│   └── utils/
-│       ├── format.js          # 가격 포맷, 날짜 포맷 등
-│       ├── storage.js         # 이미지 업로드 헬퍼
-│       └── cart.js            # 장바구니 (localStorage)
-│
-├── sql/
-│   ├── 01_create_tables.sql   # 테이블 생성
-│   └── 02_seed_data.sql       # 가상 시드 데이터
-│
-└── assets/
-    ├── logo/                  # 브랜드 로고 (빈 폴더, 추후 추가)
-    ├── icons/
-    └── images/
-        └── placeholder.svg    # 이미지 없을 때 기본 이미지
+1. 자율 완료율이 곧 제품 가치
+   블로커 없이 완료된 프로젝트 비율이 올라갈수록 좋은 제품
+
+2. 지식 누적이 Lock-in
+   프로젝트가 쌓일수록 회사 맞춤화 → 다른 서비스로 못 옮김
+
+3. 사용자 시간을 산다
+   Claude 직접 쓸 때 = 매번 설명 + 기다림
+   이 제품 쓸 때 = 컨펌 한 번 + 아침에 결과물
 ```
 
 ---
 
-## 4. 환경변수 (.env)
+## 기술 스택
 
-`.env` 파일을 아래 형식으로 생성하고 값은 모두 빈칸으로 두라:
+| 영역 | 기술 | 버전 | 비고 |
+|------|------|------|------|
+| Frontend | React + Vite | 18.3.1 | SPA |
+| State | Zustand + React Query | 5.0.3 / 5.66.0 | |
+| Styling | Tailwind CSS + Framer Motion | 3.4.17 / 12.6.5 | |
+| Rich Text | Tiptap | 3.22.3 | 아티팩트 편집 |
+| Code Editor | Monaco Editor | 4.7.0 | 코드 아티팩트 |
+| Backend | Vercel Edge Functions | Node.js | 서버리스 |
+| Database | Supabase PostgreSQL 15+ | | pgvector 포함 |
+| Realtime | Supabase Realtime | | WebSocket |
+| Auth | Supabase Auth | | JWT |
+| AI | Claude API | claude-sonnet-4-6 | Tool Use + SSE |
+| Storage | Supabase Storage | | 파일 업로드 |
+| Hosting | Vercel | | 자동 배포 |
 
-```env
-# Supabase
-SUPABASE_URL=https://gqynptpjomcqzxyykqic.supabase.co
-SUPABASE_ANON_KEY=
-
-# Telegram
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_CHAT_ID=
-
-# Admin
-ADMIN_PASSWORD=
-
-# OAuth (Supabase Dashboard에서 설정)
-# GOOGLE_CLIENT_ID=
-# GOOGLE_CLIENT_SECRET=
-```
-
-`.env.example`도 동일하게 생성하라 (값 빈칸 유지).
+**⚠️ 절대 추가하지 말 것:** Phaser.js (제거됨), React Flow (불필요)
 
 ---
 
-## 5. 디자인 시스템
+## 핵심 개념
 
-### 컬러 팔레트 (variables.css에 정의)
-```css
-:root {
-  /* 브랜드 메인 */
-  --color-primary: #2d5a3d;       /* 딥 그린 - 메인 */
-  --color-primary-light: #4a7c59; /* 미디엄 그린 */
-  --color-primary-dark: #1a3d28;  /* 다크 그린 */
+### 오케스트레이션 플로우
+```
+사용자 "프로젝트 시작"
+    ↓
+Chief PM 질문 수집 (기술/비즈니스/환경 — 한 번에)
+    ↓
+기획서(PRD) 생성 → 사용자 컨펌
+    ↓
+팀 구성 → 에이전트들 자율 실행 (사용자 개입 없음)
+    ↓
+완료 → 결과 전달  /  블로커 → 인앱 알림 → 재개
+```
 
-  /* 배경 */
-  --color-bg: #faf7f0;            /* 크림 화이트 */
-  --color-bg-card: #ffffff;
-  --color-bg-section: #f5f0e8;    /* 크림 베이지 */
+### 에이전트 타입 3종
+```
+Persistent  우리 회사에서 계속 일한 직원. 기억 + 학습 축적.
+Template    검증된 범용 에이전트. 기억 없음, 스킬만 있음.
+Ephemeral   이번 프로젝트만 쓰는 임시 전문가.
+```
 
-  /* 포인트 */
-  --color-accent: #f5c842;        /* 옐로우 (해바라기 캐릭터) */
-  --color-accent-dark: #d4a82a;
+### 에이전트 = 3레이어
+```
+Persona     이름, 성격, 말투, 가치관
+Skills      잘하는 것, 못하는 것, 핸드오프 대상
+Knowledge   .md 파일 (템플릿, 지침서) + memory/ (누적 경험)
+```
 
-  /* 텍스트 */
-  --color-text: #2c2c2c;
-  --color-text-sub: #666666;
-  --color-text-light: #999999;
+---
 
-  /* 상태 */
-  --color-success: #4caf50;
-  --color-warning: #ff9800;
-  --color-danger: #f44336;
-  --color-info: #2196f3;
+## 현재 개발 상태
 
-  /* 상품 상태 뱃지 */
-  --color-badge-sale: #2d5a3d;
-  --color-badge-new: #f5c842;
-  --color-badge-sold: #999999;
-  --color-badge-season: #ff9800;
+### ✅ 이미 구현됨
+- Supabase Auth (이메일 로그인)
+- Slack형 워크스페이스 UI (WorkspaceLayout, ChannelSidebar, MessageThread, MessageInput)
+- 에이전트 CRUD (AgentList, CreateAgentModal, AgentDetailModal)
+- 단일 에이전트 작업 실행 (taskService, useTaskStore)
+- Claude API SSE 스트리밍 (ThinkingStream, useStreamStore)
+- 능력 카드 시스템 (AbilityCard, dnd-kit)
+- 아티팩트 패널 (Tiptap + Monaco)
+- pgvector 메모리 구조
+- Supabase Realtime 기반 메시지 동기화
 
-  /* 폰트 */
-  --font-main: 'Noto Sans KR', sans-serif;
-  --font-serif: 'Noto Serif KR', serif;
+### ❌ 미구현 (개발 대상)
+- 프로젝트 단위 구조 (projects 테이블)
+- Chief PM 오케스트레이터 (api/projects/orchestrate.js)
+- 에이전트 간 자율 협업 (inter-agent messaging)
+- 블로커 감지 + 인앱 알림 (blockers 테이블 + Realtime)
+- 회사 지식베이스 누적 (knowledge_base 테이블)
+- 에이전트 타입 3종 구조 (agent_type 컬럼)
+- 작업 현황 대시보드
+- API 키 관리 UI
 
-  /* 그림자 */
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+---
 
-  /* 반경 */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-full: 9999px;
+## 개발 우선순위
+
+### P0 — 지금 (프로젝트 구조 기반)
+```
+1. DB 마이그레이션: projects / blockers / knowledge_base 테이블 추가
+2. agents 테이블: agent_type, knowledge_config 컬럼 추가
+3. 프로젝트 생성 UI + 사이드바
+```
+
+### P1 — 핵심 차별점 (오케스트레이션)
+```
+4. Chief PM 오케스트레이터 API (api/projects/orchestrate.js)
+5. 에이전트 간 통신 (inter_agent 메시지)
+6. 블로커 감지 + Supabase Realtime 알림
+```
+
+### P2 — 완성도
+```
+7. 작업 현황 대시보드
+8. 지식베이스 자동 기록
+9. 에이전트 3레이어 구조 완성
+```
+
+### P3 — 제품화
+```
+10. API 키 관리 UI (암호화 저장)
+11. 온보딩 개선
+12. 멀티테넌트 검증
+```
+
+---
+
+## DB 스키마 현황
+
+### 기존 테이블 (변경 없음)
+- `users` — 사용자 계정
+- `workspaces` — 워크스페이스 (= 오피스)
+- `agents` — AI 에이전트
+- `ability_cards` — 능력 카드 템플릿
+- `channels` — Slack형 채널
+- `messages` — 채팅 메시지
+- `artifacts` — 생성 결과물 (문서/코드)
+- `agent_memories` — pgvector 메모리
+- `agent_skill_docs` — 에이전트 자기 기록 .md
+
+### 추가 필요 테이블 (v3.0)
+- `projects` — 프로젝트 (status, spec_doc, team_config)
+- `blockers` — 블로커 알림 (type, message, resolution, status)
+- `knowledge_base` — 회사 지식 누적 (category, embedding)
+- `agent_templates` — 템플릿 에이전트 정의
+
+### agents 테이블 추가 컬럼
+```sql
+agent_type VARCHAR(20) DEFAULT 'persistent'
+  CHECK (agent_type IN ('persistent', 'template', 'ephemeral'))
+knowledge_config JSONB DEFAULT '{}'
+  -- { rag_files: [], memory_path: '', skill_doc: '' }
+```
+
+---
+
+## 코딩 컨벤션
+
+### API (Vercel Edge Functions)
+```js
+// api/[resource]/[action].js
+export default async function handler(req, res) {
+  // 1. JWT 인증 먼저
+  const { data: { user }, error } = await supabase.auth.getUser(token)
+  if (error || !user) return res.status(401).json({ error: 'Unauthorized' })
+
+  // 2. RLS가 있어도 서비스 키는 service role로만
+  // 3. 에러: { error: message } 형식 통일
+  // 4. SSE: Content-Type: text/event-stream
 }
 ```
 
-### 폰트
-```html
-<!-- 모든 HTML 파일 <head>에 포함 -->
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
+### Claude API 호출 패턴
+```js
+// model은 항상 claude-sonnet-4-6 (claude-sonnet-4-20250514 아님)
+// Chief PM: claude-sonnet-4-6 (판단 필요)
+// Worker Agent: claude-haiku-4-5-20251001 (비용 효율)
+
+const stream = await anthropic.messages.stream({
+  model: 'claude-sonnet-4-6',
+  max_tokens: 4096,
+  system: buildSystemPrompt(agent),  // persona + skills + knowledge
+  messages,
+  tools,
+})
 ```
 
-### 브랜드 로고
-- `assets/logo/` 폴더에 로고 파일이 없을 경우 텍스트 로고로 대체
-- 텍스트 로고: `Hello Garden Market` (Noto Serif KR, 딥그린)
-- 해바라기 이모지(🌻)를 로고 옆에 임시 배치
-
-### 공통 네비게이션
-모든 페이지에 동일한 네비게이션 적용:
+### System Prompt 구성 순서
 ```
-[로고] 홈 | 쇼핑하기 | 새로 들어왔어요 | 매장 구경하기 | 묻고 답하기 | 리뷰 이벤트 | 매장 소개    [로그인] [장바구니🛒]
+1. Agent Persona (이름, 역할, 성격, 말투)
+2. Agent Skills (잘하는 것, 못하는 것)
+3. Knowledge Files (RAG .md 파일 내용)
+4. Top 5 Memories (pgvector 검색 결과)
+5. Skill Doc (에이전트 자기 기록 .md)
+6. Current Task (현재 지시사항)
 ```
-- 모바일: 햄버거 메뉴
-- 로그인 후: [로그인] → [마이페이지] + [로그아웃]
-- 관리자 로그인 후: 상단에 [관리자 페이지] 버튼 추가
 
----
+### Supabase 규칙
+```
+- 모든 테이블 RLS 필수
+- 클라이언트: anon key
+- 서버(API): service role key
+- Realtime: supabase_realtime 퍼블리케이션에 추가
+- .env 파일은 터미널 echo 명령으로만 생성 (Write 툴 금지)
+```
 
-## 6. DB 스키마 (sql/01_create_tables.sql)
+### Frontend 컴포넌트
+```jsx
+// Zustand store에서 필요한 것만 선택적으로 구독 (무한 렌더링 방지)
+const agents = useAgentStore(state => state.agents)    // ✅
+const store = useAgentStore()                          // ❌
 
-아래 SQL을 그대로 `sql/01_create_tables.sql`에 작성하라:
-
-```sql
--- =============================================
--- 헬로우가든마켓 DB 스키마
--- 모든 테이블명 hgm_ prefix 사용 (기존 DB 충돌 방지)
--- RLS 미사용 - 서버사이드 권한 체크로 대체
--- =============================================
-
--- 1. 온라인 판매 상품
-CREATE TABLE IF NOT EXISTS hgm_products (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  name          text NOT NULL,
-  category      text NOT NULL,
-  status        text DEFAULT '판매중' CHECK (status IN ('판매중','품절','시즌한정')),
-  description   text,
-  detail        text,
-  price         int4 NOT NULL,
-  delivery      int4 DEFAULT 3000,
-  image_url     text,
-  is_new        boolean DEFAULT false,
-  is_best       boolean DEFAULT false,
-  is_published  boolean DEFAULT true,
-  lighting      text,
-  water         text,
-  sort_order    int4 DEFAULT 0,
-  view_count    int4 DEFAULT 0,
-  created_at    timestamptz DEFAULT now(),
-  updated_at    timestamptz DEFAULT now()
-);
-
--- 2. 매장 전시 식물 (오프라인 갤러리)
-CREATE TABLE IF NOT EXISTS hgm_gallery (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  name          text NOT NULL,
-  category      text,
-  status        text DEFAULT '판매중' CHECK (status IN ('판매중','품절','시즌한정')),
-  price         int4,
-  show_price    boolean DEFAULT false,
-  image_url     text,
-  description   text,
-  is_published  boolean DEFAULT true,
-  sort_order    int4 DEFAULT 0,
-  created_at    timestamptz DEFAULT now(),
-  updated_at    timestamptz DEFAULT now()
-);
-
--- 3. 회원
-CREATE TABLE IF NOT EXISTS hgm_users (
-  id            uuid PRIMARY KEY,
-  email         text UNIQUE,
-  name          text,
-  phone         text,
-  provider      text CHECK (provider IN ('naver','google','email')),
-  role          text DEFAULT 'user' CHECK (role IN ('user','admin')),
-  notify_new    boolean DEFAULT false,
-  notify_sale   boolean DEFAULT false,
-  created_at    timestamptz DEFAULT now(),
-  updated_at    timestamptz DEFAULT now()
-);
-
--- 4. 주문
-CREATE TABLE IF NOT EXISTS hgm_orders (
-  id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  order_number    text UNIQUE,
-  user_id         uuid REFERENCES hgm_users(id),
-  total_price     int4,
-  status          text DEFAULT '주문완료' CHECK (
-                    status IN ('주문완료','결제완료','배송준비','배송중','배송완료','취소')
-                  ),
-  payment_method  text,
-  payment_status  text DEFAULT '미결제' CHECK (payment_status IN ('미결제','결제완료','환불')),
-  -- 배송 정보 (Phase 2 준비)
-  receiver_name   text,
-  receiver_phone  text,
-  address         text,
-  address_detail  text,
-  zipcode         text,
-  delivery_memo   text,
-  tracking_number text,
-  shipped_at      timestamptz,
-  delivered_at    timestamptz,
-  created_at      timestamptz DEFAULT now(),
-  updated_at      timestamptz DEFAULT now()
-);
-
--- 5. 주문 상품
-CREATE TABLE IF NOT EXISTS hgm_order_items (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  order_id      uuid REFERENCES hgm_orders(id) ON DELETE CASCADE,
-  product_id    uuid REFERENCES hgm_products(id),
-  product_name  text,
-  quantity      int4 DEFAULT 1,
-  price         int4,
-  created_at    timestamptz DEFAULT now()
-);
-
--- 6. 위시리스트
-CREATE TABLE IF NOT EXISTS hgm_wishlist (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id       uuid REFERENCES hgm_users(id) ON DELETE CASCADE,
-  product_id    uuid REFERENCES hgm_products(id) ON DELETE CASCADE,
-  created_at    timestamptz DEFAULT now(),
-  UNIQUE(user_id, product_id)
-);
-
--- 7. 입고 소식 / 가드닝 가이드 포스트
-CREATE TABLE IF NOT EXISTS hgm_posts (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  type          text NOT NULL CHECK (type IN ('new_arrival','guide')),
-  title         text NOT NULL,
-  content       text,
-  image_url     text,
-  product_id    uuid REFERENCES hgm_products(id),
-  is_published  boolean DEFAULT false,
-  view_count    int4 DEFAULT 0,
-  created_at    timestamptz DEFAULT now(),
-  updated_at    timestamptz DEFAULT now()
-);
-
--- 8. 유입/조회 통계
-CREATE TABLE IF NOT EXISTS hgm_analytics (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  event_type    text CHECK (
-                  event_type IN ('page_view','product_view','gallery_view',
-                                 'add_to_cart','purchase','wishlist_add')
-                ),
-  product_id    uuid REFERENCES hgm_products(id),
-  user_id       uuid REFERENCES hgm_users(id),
-  session_id    text,
-  page          text,
-  referrer      text,
-  created_at    timestamptz DEFAULT now()
-);
-
--- 9. 알림 설정
-CREATE TABLE IF NOT EXISTS hgm_notification_settings (
-  id                    uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  telegram_bot_token    text,
-  telegram_chat_id      text,
-  discord_webhook_url   text,
-  notify_on_order       boolean DEFAULT true,
-  notify_hourly_report  boolean DEFAULT false,
-  report_hours          text DEFAULT '09,12,18,22',
-  updated_at            timestamptz DEFAULT now()
-);
-
--- 인덱스
-CREATE INDEX IF NOT EXISTS idx_hgm_products_category ON hgm_products(category);
-CREATE INDEX IF NOT EXISTS idx_hgm_products_status ON hgm_products(status);
-CREATE INDEX IF NOT EXISTS idx_hgm_orders_user_id ON hgm_orders(user_id);
-CREATE INDEX IF NOT EXISTS idx_hgm_orders_status ON hgm_orders(status);
-CREATE INDEX IF NOT EXISTS idx_hgm_analytics_event_type ON hgm_analytics(event_type);
-CREATE INDEX IF NOT EXISTS idx_hgm_analytics_created_at ON hgm_analytics(created_at);
-CREATE INDEX IF NOT EXISTS idx_hgm_posts_type ON hgm_posts(type);
-
--- 10. 묻고 답하기 (Q&A)
-CREATE TABLE IF NOT EXISTS hgm_qna (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id       uuid REFERENCES hgm_users(id),
-  title         text NOT NULL,
-  content       text NOT NULL,
-  is_secret     boolean DEFAULT false,       -- 비밀글 여부
-  is_answered   boolean DEFAULT false,       -- 답변 완료 여부
-  answer        text,                        -- 관리자 답변
-  answered_at   timestamptz,                 -- 답변 일시
-  view_count    int4 DEFAULT 0,
-  created_at    timestamptz DEFAULT now(),
-  updated_at    timestamptz DEFAULT now()
-);
-
--- 11. 리뷰 이벤트
-CREATE TABLE IF NOT EXISTS hgm_reviews (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id       uuid REFERENCES hgm_users(id),
-  order_id      uuid REFERENCES hgm_orders(id),
-  product_id    uuid REFERENCES hgm_products(id),
-  title         text NOT NULL,
-  content       text NOT NULL,
-  image_url     text,
-  like_count    int4 DEFAULT 0,
-  is_published  boolean DEFAULT true,
-  created_at    timestamptz DEFAULT now(),
-  updated_at    timestamptz DEFAULT now()
-);
-
--- 12. 리뷰 좋아요
-CREATE TABLE IF NOT EXISTS hgm_review_likes (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  review_id     uuid REFERENCES hgm_reviews(id) ON DELETE CASCADE,
-  user_id       uuid REFERENCES hgm_users(id) ON DELETE CASCADE,
-  created_at    timestamptz DEFAULT now(),
-  UNIQUE(review_id, user_id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_hgm_qna_user_id ON hgm_qna(user_id);
-CREATE INDEX IF NOT EXISTS idx_hgm_qna_is_answered ON hgm_qna(is_answered);
-CREATE INDEX IF NOT EXISTS idx_hgm_reviews_product_id ON hgm_reviews(product_id);
+// Tailwind만 사용, 인라인 style 최소화
+// Framer Motion은 주요 전환 애니메이션에만 사용
 ```
 
 ---
 
-## 7. 시드 데이터 (sql/02_seed_data.sql)
+## 에이전트 Tool 목록
 
-MVP 시연용 가상 데이터를 아래와 같이 생성하라:
+### 기존 Tool (유지)
+| Tool | 역할 |
+|------|------|
+| `request_approval` | HITL 승인 요청 |
+| `save_memory` | 메모리 저장 |
+| `write_document` | 문서 아티팩트 생성 |
+| `generate_code` | 코드 아티팩트 생성 |
+| `update_skill_doc` | 에이전트 자기 기록 .md 업데이트 |
 
-```sql
--- =============================================
--- 헬로우가든마켓 MVP 시드 데이터
--- =============================================
+### 신규 Tool (v3.0 추가 필요)
+| Tool | 역할 |
+|------|------|
+| `dispatch_task` | Chief PM → Worker에게 태스크 하달 |
+| `send_blocker` | 블로커 감지 → blockers 테이블 INSERT |
+| `update_knowledge` | 완료 후 knowledge_base에 학습 내용 기록 |
+| `request_api_key` | 필요한 API 키 사용자에게 요청 |
 
--- 온라인 판매 상품 (10종)
-INSERT INTO hgm_products (name, category, status, description, detail, price, delivery, is_new, is_best, lighting, water) VALUES
-('몬스테라 델리시오사', '관엽식물', '판매중', '넓은 잎이 특징인 인기 관엽식물', '공기정화 효과가 뛰어나며 반음지에서도 잘 자랍니다. 실내 인테리어로 가장 인기 있는 식물 중 하나입니다.', 28000, 3000, true, true, '간접광', '주 1회'),
-('스파티필럼 대품', '관엽식물', '판매중', '공기정화 1위 식물', '나사(NASA) 선정 공기정화식물 1위. 음지에서도 잘 자라며 꽃도 피웁니다.', 35000, 3000, false, true, '저광량 가능', '주 1~2회'),
-('에케베리아 3종 세트', '다육식물', '판매중', '물을 자주 안 줘도 되는 다육이', '초보자도 쉽게 키울 수 있는 다육식물 세트입니다.', 19900, 3000, true, false, '직사광선', '2주 1회'),
-('행운목', '관엽식물', '판매중', '행운을 가져다주는 인테리어 식물', '집들이 선물로 인기 있는 행운목입니다. 키우기 쉽고 오래 삽니다.', 22000, 3000, false, true, '간접광', '주 1회'),
-('미니 장미 화분', '꽃나무', '판매중', '향기로운 미니 장미', '핑크/레드/화이트 색상 선택 가능. 베란다 가드닝에 최적입니다.', 15000, 3000, false, false, '직사광선', '주 2~3회'),
-('북유럽 세라믹 화분 3P', '화분/용기', '판매중', '감성 인테리어 세라믹 화분', '크기별 3개 세트. 심플한 디자인으로 어떤 식물과도 잘 어울립니다.', 42000, 3000, true, false, NULL, NULL),
-('필로덴드론 핑크 프린세스', '희귀식물', '시즌한정', '핑크 무늬가 아름다운 희귀 식물', '입고 수량이 매우 제한적입니다. 핑크빛 무늬잎이 특징입니다.', 89000, 3000, true, false, '간접광', '주 1회'),
-('식물 전용 배양토 5L', '토양/비료', '판매중', '식물 생육에 최적화된 배양토', '배수성과 통기성이 뛰어난 프리미엄 배양토입니다.', 12900, 3000, false, false, NULL, NULL),
-('스투키 (산세베리아)', '공기정화', '판매중', '밤에도 산소를 내뿜는 식물', '침실에 두기 좋은 공기정화식물. 물을 거의 안 줘도 됩니다.', 18000, 3000, false, true, '저광량 가능', '월 1회'),
-('수경재배 히아신스 구근', '구근식물', '시즌한정', '봄 향기 가득한 히아신스', '수경재배로 쉽게 꽃을 피울 수 있습니다. 봄 시즌 한정 상품입니다.', 9900, 3000, true, false, '간접광', '수경재배');
+---
 
--- 매장 갤러리 (15종 - 오프라인 전시용)
-INSERT INTO hgm_gallery (name, category, status, price, show_price, description) VALUES
-('올리브나무 대품', '나무류', '판매중', 120000, true, '지중해 감성의 올리브나무'),
-('벵갈고무나무', '관엽식물', '판매중', 45000, true, '잎이 두껍고 윤기있는 고무나무'),
-('극락조화', '꽃나무', '판매중', 55000, true, '열대식물의 여왕'),
-('떡갈잎고무나무', '관엽식물', '판매중', 38000, true, '넓은 잎이 특징'),
-('율마', '침엽수', '판매중', 25000, true, '향기로운 침엽수'),
-('공중식물 틸란드시아', '공중식물', '판매중', NULL, false, '흙 없이도 자라는 신기한 식물'),
-('아레카야자', '야자류', '판매중', 65000, true, '열대 분위기 연출'),
-('파키라', '관엽식물', '판매중', 32000, true, '돈나무라고도 불리는 행운의 식물'),
-('디펜바키아', '관엽식물', '품절', NULL, false, '무늬가 아름다운 관엽식물'),
-('칼라데아 오나타', '희귀식물', '판매중', 78000, true, '핑크 줄무늬가 특징'),
-('황금죽', '대나무류', '판매중', 29000, true, '인테리어용 황금죽'),
-('수국 대품', '꽃나무', '시즌한정', 38000, true, '봄 시즌 한정 수국'),
-('거베라 모둠', '꽃나무', '판매중', 15000, true, '화사한 색상의 거베라'),
-('행잉플랜트 하트아이비', '행잉식물', '판매중', 18000, true, '하트 모양 잎이 귀여운 아이비'),
-('레몬나무 소품', '과실수', '판매중', 35000, true, '실내에서도 레몬이 열리는 나무');
+## 환경변수
 
--- 입고 소식 포스트 (3개)
-INSERT INTO hgm_posts (type, title, content, is_published) VALUES
-('new_arrival', '🌿 봄 시즌 신상 입고 완료!', '따뜻한 봄을 맞아 새로운 식물들이 입고되었습니다. 히아신스, 수국, 미니 장미 등 봄꽃 식물들이 가득합니다. 매장을 방문하시면 훨씬 다양한 봄 식물들을 만나보실 수 있어요!', true),
-('new_arrival', '🌵 희귀 다육식물 한정 입고', '필로덴드론 핑크 프린세스와 칼라데아 오나타가 한정 수량으로 입고되었습니다. 수량이 매우 적으니 서둘러 주세요!', true),
-('guide', '🌱 초보자를 위한 식물 물주기 가이드', '식물을 처음 키우시는 분들이 가장 많이 실패하는 이유가 바로 물주기입니다. 식물별 올바른 물주기 방법을 알려드립니다.', true);
+```bash
+# Supabase
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_KEY=        # 서버 전용, 클라이언트 번들 포함 금지
 
--- 알림 설정 기본값
-INSERT INTO hgm_notification_settings (notify_on_order, notify_hourly_report) VALUES (true, false);
+# AI
+ANTHROPIC_API_KEY=           # 서버 전용
 
--- Q&A 샘플 데이터
-INSERT INTO hgm_qna (title, content, is_secret, is_answered, answer, answered_at) VALUES
-('몬스테라 배송 시 혹시 잎이 상하지 않나요?', '처음 식물을 온라인으로 구매하는데 배송 중에 잎이 상할까 걱정이에요.', false, true, '안녕하세요! 저희는 식물 전용 완충재와 박스로 꼼꼼하게 포장하여 발송합니다. 혹시 배송 중 손상이 발생하면 사진 첨부 후 문의 주시면 바로 처리해드립니다 🌿', now()),
-('다육이 물주기 질문이요', '에케베리아 3종 세트 구매했는데 물은 얼마나 자주 줘야 하나요?', false, false, NULL, NULL),
-('선물 포장 가능한가요?', '생일 선물로 구매하려는데 선물 포장 서비스 있나요?', false, true, '네, 선물 포장 요청 시 예쁘게 포장해서 보내드립니다! 주문 시 배송 메모란에 "선물 포장 요청"이라고 적어주세요 🎁', now());
-
--- 리뷰 이벤트 샘플 데이터 (user_id, order_id 없이 MVP 시연용)
-INSERT INTO hgm_reviews (title, content, is_published) VALUES
-('몬스테라 너무 예뻐요! 🌿', '포장도 꼼꼼하고 식물 상태도 완벽했어요. 집에 두니까 인테리어가 확 살아났습니다. 다음엔 스파티필럼도 사려고요!', true),
-('다육이 세트 강추!', '물 자주 안 줘도 되는 식물 찾다가 구매했는데 너무 만족해요. 사무실에 두니까 동료들도 다 탐낸답니다 😄', true),
-('선물용으로 완벽해요', '부모님 선물로 행운목 구매했는데 선물 포장도 해주시고 정말 감동이었어요. 부모님도 너무 좋아하셨습니다!', true);
+# 옵션
+VITE_APP_ENV=development     # development | production
 ```
 
 ---
 
-## 8. JS 모듈 명세
+## 파일 구조
 
-### js/config.js
-```javascript
-// Supabase 클라이언트 초기화
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-const SUPABASE_URL = 'https://gqynptpjomcqzxyykqic.supabase.co'
-const SUPABASE_ANON_KEY = '' // .env에서 주입
-
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-```
-
-### js/api/products.js 주요 함수
-```javascript
-// 구현할 함수 목록
-getProducts({ category, status, isNew, isBest, limit, offset })  // 상품 목록
-getProductById(id)                                                // 상품 상세
-createProduct(data)                                               // 상품 등록 (관리자)
-updateProduct(id, data)                                           // 상품 수정 (관리자)
-deleteProduct(id)                                                 // 상품 삭제 (관리자)
-incrementViewCount(id)                                            // 조회수 증가
-```
-
-### js/api/orders.js 주요 함수
-```javascript
-createOrder(userId, items, receiverInfo)    // 주문 생성
-getOrdersByUser(userId)                     // 회원별 주문 목록
-getOrderById(orderId)                       // 주문 상세
-updateOrderStatus(orderId, status)          // 주문 상태 변경 (관리자)
-generateOrderNumber()                       // 주문번호 생성 (HGM-YYYYMMDD-XXX)
-```
-
-### js/api/notifications.js 주요 함수
-```javascript
-sendTelegramOrderAlert(order)              // 주문 즉시 텔레그램 알림
-sendDailyReport(stats)                     // 일일 리포트 전송
-```
-
-### js/utils/cart.js (localStorage 기반)
-```javascript
-addToCart(product, quantity)
-removeFromCart(productId)
-getCart()
-clearCart()
-getCartCount()
-getCartTotal()
-```
-
----
-
-## 9. 페이지별 기능 명세
-
-### index.html (홈 랜딩)
-```
-섹션 순서:
-1. 히어로 배너
-   - 브랜드 로고 + 슬로건: "일상에 초록을, 헬로우가든마켓"
-   - 배경: 딥그린 그라디언트
-   - CTA 버튼: "쇼핑하기" → /shop.html
-
-2. 신상 입고 하이라이트
-   - is_new=true 상품 최대 4개
-   - "새로 들어왔어요 더보기" → /new.html
-
-3. 온라인 베스트셀러
-   - is_best=true 상품 최대 6개
-   - 상품 카드 클릭 → /product.html?id=xxx
-
-4. 매장 방문 유도 배너 (핵심 CTA)
-   - "온라인에 없는 수백 종이 매장에 있어요"
-   - 배경: 크림/베이지
-   - CTA: "매장 구경하기" → /gallery.html
-
-5. 가드닝 가이드 미리보기
-   - 최근 포스트 3개 (type='guide')
-
-6. 인스타그램 연결 배너
-   - "@hellogarden_official 팔로우하기"
-   - 인스타그램 외부 링크
-
-7. 매장 정보
-   - 운영시간, 주소, 지도 (카카오맵 또는 네이버 지도 iframe)
-```
-
-### shop.html (쇼핑하기)
-```
-기능:
-- 카테고리 필터 탭 (전체/관엽식물/다육식물/꽃나무/화분·용기/희귀식물/토양·비료)
-- 상태 필터 (판매중/품절/시즌한정)
-- 정렬 (최신순/인기순/낮은가격순/높은가격순)
-- 상품 카드 그리드 (3열 → 모바일 2열 → 최소 1열)
-- 위시리스트 하트 버튼 (로그인 필요)
-- 장바구니 담기 버튼
-- 무한 스크롤 또는 페이지네이션
-```
-
-### product.html (상품 상세)
-```
-기능:
-- 상품 이미지 (없으면 placeholder)
-- 상품명, 카테고리, 가격, 배송비
-- 상품 상태 뱃지
-- 광량/물주기 정보 아이콘
-- 상세 설명
-- 수량 선택 (+/-)
-- 장바구니 담기 버튼
-- 위시리스트 버튼
-- 관련 상품 (같은 카테고리 4개)
-- 조회수 자동 증가 (hgm_analytics insert)
-```
-
-### new.html (새로 들어왔어요)
-```
-기능:
-- 입고 소식 포스트 목록 (type='new_arrival')
-- 포스트 클릭 시 상세 내용 모달 또는 상세 페이지
-- 연결 상품 있으면 "바로 구매하기" 버튼 표시
-- 최신순 정렬
-```
-
-### gallery.html (매장 구경하기)
-```
-기능:
-- 오프라인 전시 식물 갤러리 (hgm_gallery)
-- 카테고리 필터
-- 상태 뱃지 (판매중/품절/시즌한정)
-- 가격 공개 여부에 따라 가격 표시/숨김
-- 구매 버튼 없음 (온라인 판매 아님)
-- 하단 고정 CTA 배너: "이 식물들을 직접 보러 오세요 📍 매장 위치 보기"
-- 이미지 없을 때 식물 이모지 placeholder
-```
-
-### login.html (로그인)
-```
-기능:
-- 구글 로그인 버튼 (Supabase OAuth) — Phase 1
-- 네이버 로그인 버튼 — Phase 2 (현재 비활성화, UI만 표시)
-- 로그인 후 이전 페이지로 리다이렉트
-- 이미 로그인 상태면 mypage.html로 리다이렉트
-```
-
-### mypage.html (마이페이지)
-```
-기능:
-- 회원 정보 표시 (이름, 이메일, 가입일)
-- 주문 내역 목록 (최신순)
-- 주문 상태별 탭 (전체/주문완료/배송중/배송완료)
-- 위시리스트 목록 (상품 카드)
-- 알림 설정 토글 (신상 입고 알림, 할인 이벤트 알림)
-- 로그아웃 버튼
-```
-
-### qna.html (묻고 답하기)
-```
-구조: 게시판형
-기능:
-- 글 목록 (번호 / 제목 / 작성자 / 작성일 / 답변여부)
-- 답변 완료된 글은 뱃지 표시 [답변완료]
-- 글 상세 보기 (모달 또는 상세 페이지)
-- 글쓰기 버튼 (로그인 필요)
-- 비밀글 설정 가능 (작성자 + 관리자만 열람)
-- 페이지네이션 (10건씩)
-- 관리자 답변 표시 (답변 영역 별도 구분)
-```
-
-### review-event.html (리뷰 이벤트)
-```
-구조: 블로그형 (카드 그리드)
-기능:
-- 리뷰 카드 목록 (썸네일 이미지 + 제목 + 작성자 + 날짜)
-- 카드 클릭 시 상세 페이지 또는 모달
-- 상세 내용: 이미지 + 텍스트 + 구매 상품 태그
-- 이벤트 안내 배너 (상단 고정)
-  - "리뷰 작성 시 다음 구매 5% 할인 쿠폰 증정"
-- 리뷰 작성 버튼 (로그인 + 구매 이력 필요)
-- 최신순 / 인기순 정렬
-- 좋아요 버튼
-```
-
----
-
-## 10. 관리자 페이지 명세 (/admin)
-
-### 접근 제어
-- URL: `/admin/index.html`
-- `hgm_users.role = 'admin'` 인 경우만 접근 허용
-- 비로그인 또는 일반 회원 접근 시 → `/login.html` 리다이렉트
-- JS에서 세션 확인 후 role 체크
-
-### admin/index.html (대시보드)
-```
-카드 섹션:
-- 오늘 주문 수 / 오늘 매출
-- 이번 주 주문 수 / 이번 주 매출
-- 이번 달 주문 수 / 이번 달 매출
-- 총 회원 수 / 오늘 신규 회원
-
-차트 섹션:
-- 시간대별 주문 수 (24시간 바 차트)
-- 카테고리별 판매량 (파이 차트)
-- 최근 7일 매출 추이 (라인 차트)
-- Chart.js 사용
-
-최근 주문 테이블:
-- 최근 10건
-- 주문번호 / 상품명 / 금액 / 상태 / 주문시각
-
-실시간 재고 현황:
-- 품절 임박 / 품절 상품 목록
-```
-
-### admin/products.html (상품 관리)
-```
-기능:
-- 상품 목록 테이블
-- 상품 등록 폼 (모달)
-  - 이미지 업로드 (Supabase Storage → hgm-images 버킷)
-  - 이름/카테고리/가격/배송비/상태/설명/상세/광량/물주기
-  - 신상품/베스트 체크박스
-  - 발행/임시저장 토글
-- 상품 수정 (인라인 또는 모달)
-- 상품 삭제 (확인 다이얼로그)
-- 상태 일괄 변경
-```
-
-### admin/orders.html (주문 관리)
-```
-기능:
-- 주문 목록 테이블 (상태별 탭)
-- 주문 상세 모달
-- 주문 상태 변경 드롭다운
-- 운송장 번호 입력 필드 (Phase 2용, 비활성화 표시)
-- 주문 검색 (주문번호, 회원명)
-- 날짜 범위 필터
-```
-
-### admin/settings.html (알림 설정)
-```
-기능:
-- 텔레그램 Bot Token 입력
-- 텔레그램 Chat ID 입력
-- 텔레그램 연결 테스트 버튼
-- 주문 즉시 알림 ON/OFF 토글
-- 저장 버튼
-```
-
-### admin/qna.html (묻고 답하기 관리)
-```
-기능:
-- Q&A 목록 테이블 (미답변/답변완료 탭)
-- 미답변 글 상단 강조 표시
-- 답변 작성 모달 (텍스트 에디터)
-- 답변 완료 시 is_answered = true 자동 변경
-- 비밀글 내용 관리자는 열람 가능
-- 글 삭제 (확인 다이얼로그)
-```
-
-### admin/reviews.html (리뷰 이벤트 관리)
-```
-기능:
-- 리뷰 목록 테이블
-- 발행/숨김 토글
-- 리뷰 삭제 (확인 다이얼로그)
-- 이벤트 배너 문구 수정
-```
-
----
-
-## 11. 텔레그램 알림 포맷
-
-### 주문 즉시 알림
-```
-🛒 새 주문이 들어왔어요!
-
-📋 주문번호: HGM-20260423-001
-👤 주문자: 홍길동
-📦 상품:
-  - 몬스테라 델리시오사 x1 (28,000원)
-  - 식물 배양토 5L x2 (25,800원)
-💰 총 결제금액: 53,800원
-📍 배송지: 서울시 은평구 xxx
-⏰ 주문시각: 2026-04-23 14:32
-```
-
-### 일일 리포트
-```
-📊 헬로우가든 일일 리포트
-📅 2026-04-23
-
-─────────────────
-🌅 오전 (06~12): 3건 / 84,000원
-☀️ 오후 (12~18): 7건 / 196,000원
-🌙 저녁 (18~24): 2건 / 56,000원
-─────────────────
-📦 오늘 총 주문: 12건
-💰 오늘 총 매출: 336,000원
-👥 오늘 방문자: 142명
-🔥 오늘 인기상품: 몬스테라 델리시오사
-```
-
----
-
-## 12. 개발 착수 순서 (자율 완성형)
-
-Claude Code는 아래 순서대로 개발을 진행하라. 각 단계 완료 후 다음 단계로 이동:
-
-```
-STEP 1. 프로젝트 폴더 구조 생성
-STEP 2. .env / .env.example / .gitignore / vercel.json 생성
-STEP 3. css/variables.css + reset.css + common.css 작성
-STEP 4. sql/01_create_tables.sql + sql/02_seed_data.sql 작성
-STEP 5. js/config.js + js/utils/* 작성
-STEP 6. js/api/* 전체 작성
-STEP 7. 공통 네비게이션/푸터 컴포넌트 작성
-STEP 8. index.html (홈 랜딩) 완성
-STEP 9. shop.html + product.html 완성
-STEP 10. new.html + gallery.html + about.html 완성
-STEP 11. login.html + mypage.html 완성
-STEP 12. admin/* 전체 완성
-STEP 13. 텔레그램/디스코드 알림 연동 완성
-STEP 14. 전체 반응형 점검
-STEP 15. README.md 자동 생성
-```
-
----
-
-## 13. README.md 자동 생성 내용
-
-개발 완료 후 아래 내용으로 README.md를 생성하라:
-
-```markdown
-# 🌿 헬로우가든마켓 독립몰
-
-## 시작하기
-
-### 1. 환경변수 설정
-.env 파일을 열고 아래 값을 채워주세요:
-- SUPABASE_ANON_KEY: Supabase 대시보드 → Settings → API
-- TELEGRAM_BOT_TOKEN: @BotFather에서 발급
-- TELEGRAM_CHAT_ID: @userinfobot에서 확인
-- DISCORD_WEBHOOK_URL: 디스코드 채널 설정 → 연동
-
-### 2. DB 테이블 생성
-Supabase 대시보드 → SQL Editor에서 아래 파일 순서대로 실행:
-1. sql/01_create_tables.sql
-2. sql/02_seed_data.sql
-
-### 3. Supabase Storage 버킷 생성
-Supabase 대시보드 → Storage → New Bucket
-- 버킷명: hgm-images
-- Public: true
-
-### 4. 소셜 로그인 설정
-Supabase 대시보드 → Authentication → Providers
-- Google: 활성화 후 Client ID/Secret 입력
-- Naver: 커스텀 OAuth 설정
-
-### 5. Vercel 배포
-GitHub에 푸시 후 Vercel에서 Import
-환경변수를 Vercel 대시보드에도 동일하게 설정
-
-### 6. 관리자 계정 설정
-Supabase SQL Editor에서 실행:
-UPDATE hgm_users SET role = 'admin' WHERE email = '관리자이메일';
-```
-
----
-
-## 15. STEP별 자가 검증 체크리스트
-
-> 각 STEP 완료 후 아래 체크리스트를 실행하라.
-> 하나라도 FAIL이면 수정 후 재검증. PASS 확인 후 다음 STEP 진행.
-
-### STEP 1-2 (환경 세팅) 검증
-```
-[ ] 폴더 구조가 섹션 3과 100% 일치하는가
-[ ] .env 파일에 SUPABASE_URL이 정확히 입력되었는가
-[ ] .env가 .gitignore에 포함되어 있는가
-[ ] .env.example이 존재하는가
-[ ] vercel.json이 존재하는가
-```
-
-### STEP 3 (CSS) 검증
-```
-[ ] variables.css에 섹션 5의 모든 CSS 변수가 정의되어 있는가
-[ ] --color-primary: #2d5a3d 값이 정확한가
-[ ] reset.css가 box-sizing: border-box를 포함하는가
-[ ] 모바일 breakpoint (768px, 480px)가 정의되어 있는가
-```
-
-### STEP 4 (DB) 검증
-```
-[ ] 모든 테이블명에 hgm_ prefix가 붙어 있는가
-[ ] hgm_products 테이블의 필수 컬럼 (id, name, category, price)이 존재하는가
-[ ] CHECK 제약조건이 올바르게 정의되었는가
-[ ] 인덱스가 생성되었는가
-[ ] 시드 데이터가 10종 이상 입력되었는가
-[ ] 기존 DB 테이블과 이름 충돌이 없는가 (hgm_ prefix 확인)
-```
-
-### STEP 5-6 (JS 모듈) 검증
-```
-[ ] config.js에 Supabase URL이 올바르게 설정되었는가
-[ ] 모든 API 함수에 try/catch가 적용되었는가
-[ ] 모든 함수에 한국어 주석이 있는가
-[ ] cart.js가 localStorage를 사용하는가
-[ ] auth.js에 관리자 role 체크 로직이 있는가
-```
-
-### STEP 7-11 (프론트 페이지) 검증
 ```
-[ ] 모든 HTML 파일에 공통 네비게이션이 포함되어 있는가
-[ ] 모든 페이지가 모바일 반응형인가 (768px 이하)
-[ ] 로그인 페이지에서 비로그인 상태 감지 후 리다이렉트가 작동하는가
-[ ] 관리자 페이지 접근 시 role 체크가 작동하는가
-[ ] 이미지 없을 때 placeholder가 표시되는가
-[ ] 장바구니 카운트가 네비게이션에 표시되는가
-[ ] 모든 CTA 버튼의 링크가 올바른가
-```
-
-### STEP 12 (관리자) 검증
-```
-[ ] 대시보드 차트가 Chart.js로 렌더링되는가
-[ ] 상품 등록 폼에서 이미지 업로드가 작동하는가 (Supabase Storage)
-[ ] 상품 삭제 시 확인 다이얼로그가 표시되는가
-[ ] 주문 상태 변경이 DB에 반영되는가
-[ ] 알림 설정 저장이 hgm_notification_settings에 반영되는가
-```
-
-### STEP 13 (알림) 검증
-```
-[ ] 텔레그램 테스트 메시지 전송이 성공하는가
-[ ] 주문 생성 시 텔레그램 알림이 발송되는가
-[ ] 알림 포맷이 섹션 11과 일치하는가
-[ ] Q&A 답변 등록 시 알림이 발송되는가
-```
-
-### STEP 14 (반응형) 검증
-```
-[ ] 모든 페이지를 480px 너비에서 확인 — 가로 스크롤 없음
-[ ] 모든 페이지를 768px 너비에서 확인 — 레이아웃 정상
-[ ] 네비게이션 햄버거 메뉴가 모바일에서 작동하는가
-[ ] 상품 카드 그리드가 모바일에서 1~2열로 변경되는가
-[ ] 관리자 대시보드가 모바일에서 읽을 수 있는가
-```
-
-### 최종 검증 (STEP 15 전)
-```
-[ ] 모든 페이지에서 콘솔 에러가 없는가
-[ ] 모든 내부 링크가 작동하는가 (404 없음)
-[ ] Supabase 연결이 정상인가
-[ ] 시드 데이터가 프론트에 정상 표시되는가
-[ ] README.md가 생성되었는가
-[ ] MISTAKES.md가 생성되었는가
-```
-
----
-
-## 16. Mistakes Ledger (MISTAKES.md)
-
-> 개발 중 발생하는 모든 에러/실수를 아래 형식으로 `MISTAKES.md`에 기록하라.
-> 동일한 실수를 반복하지 않기 위한 학습 저장소.
-> 작업 시작 시 이 파일을 먼저 읽고 과거 실수를 확인하라.
-
-### MISTAKES.md 파일 초기 생성 내용
-```markdown
-# MISTAKES.md — 헬로우가든마켓 에러 및 실수 기록
-
-> 작업 시작 전 반드시 이 파일을 읽어 과거 실수를 확인할 것.
-> 에러/실수 발생 즉시 아래 형식으로 추가할 것.
-
----
-
-## 기록 형식
-
-### [날짜] 에러/실수 제목
-- **발생 위치**: 파일명 또는 STEP 번호
-- **증상**: 어떤 문제가 발생했는가
-- **원인**: 왜 발생했는가
-- **해결**: 어떻게 해결했는가
-- **재발 방지**: 앞으로 어떻게 예방할 것인가
-
----
-
-## 사전 등록 — 자주 발생하는 실수 패턴
-
-### [공통] hgm_ prefix 누락
-- **발생 위치**: SQL 작성 시
-- **증상**: 기존 DB 테이블과 이름 충돌
-- **원인**: prefix 없이 테이블명 작성
-- **해결**: 모든 테이블명 앞에 hgm_ 추가
-- **재발 방지**: SQL 작성 전 체크리스트 확인
-
-### [공통] .env 값 하드코딩
-- **발생 위치**: JS 파일
-- **증상**: API Key가 소스코드에 노출
-- **원인**: 환경변수 대신 직접 값 입력
-- **해결**: 반드시 환경변수 또는 config.js 통해서만 참조
-- **재발 방지**: config.js 외 파일에서 직접 키 입력 금지
-
-### [공통] try/catch 누락
-- **발생 위치**: API 호출 함수
-- **증상**: 런타임 에러 시 앱 전체 중단
-- **원인**: 에러 처리 코드 미작성
-- **해결**: 모든 async 함수에 try/catch 추가
-- **재발 방지**: API 함수 작성 후 try/catch 존재 여부 즉시 확인
-
-### [공통] 관리자 role 체크 누락
-- **발생 위치**: admin/*.html
-- **증상**: 일반 회원이 관리자 페이지 접근 가능
-- **원인**: 페이지 로드 시 role 검증 코드 미작성
-- **해결**: 모든 admin 페이지 최상단에 role 체크 로직 추가
-- **재발 방지**: admin 페이지 생성 즉시 접근 제어 코드 먼저 작성
-
-### [Supabase] anon key 미설정 시 무한 로딩
-- **발생 위치**: js/config.js
-- **증상**: 페이지가 로딩만 되고 데이터 미표시
-- **원인**: SUPABASE_ANON_KEY가 빈칸인 상태로 요청
-- **해결**: .env에 anon key 입력 후 재시작
-- **재발 방지**: 초기 실행 시 환경변수 유효성 체크 함수 실행
-```
-
-### 에러 발생 시 처리 흐름
-```
-에러 발생
-  ↓
-1. MISTAKES.md에 즉시 기록
-2. 기존 기록 중 동일/유사 패턴 있는지 확인
-3. 해결책 적용
-4. 재발 방지 항목 업데이트
-5. 해당 STEP 검증 체크리스트 재실행
-```
-
----
-
-## 17. 서브에이전트 병렬 개발 전략
-
-> 독립적으로 작업 가능한 모듈은 서브에이전트로 분리하여 병렬 처리한다.
-> 의존성이 있는 작업은 반드시 순서를 지킨다.
-
-### 병렬 처리 가능한 작업 그룹
-
-```
-[메인 에이전트] 전체 조율 및 통합 담당
-
-병렬 그룹 A — 기반 작업 (STEP 1~4 완료 후 동시 시작)
-├── [서브에이전트 A1] CSS 시스템 구축
-│   └── reset.css / variables.css / common.css / components.css / admin.css
+comindworks/
+├── CLAUDE.md                 ← 이 파일 (개발 컨텍스트)
+├── KPI.md                    ← KPI 문서
+├── PLAN.md                   ← 개발 계획서
+├── comindworks_mvp_v2.md     ← 전체 설계서 v3.0
 │
-├── [서브에이전트 A2] JS API 모듈 구축
-│   └── js/api/* 전체 (products, gallery, orders, posts, users, analytics, notifications)
+├── api/
+│   ├── auth/                 ← 인증 API
+│   ├── agents/               ← 에이전트 CRUD
+│   ├── tasks/[id]/stream.js  ← Claude SSE 스트리밍 (핵심)
+│   ├── projects/
+│   │   └── orchestrate.js    ← ★ Chief PM 오케스트레이터 (미구현)
+│   ├── blockers/             ← ★ 블로커 API (미구현)
+│   └── knowledge/            ← ★ 지식베이스 API (미구현)
 │
-└── [서브에이전트 A3] JS 유틸 & 설정
-    └── js/config.js / js/auth.js / js/utils/*
-
-병렬 그룹 B — 페이지 개발 (그룹 A 완료 후 동시 시작)
-├── [서브에이전트 B1] 고객 페이지 (상단 퍼널)
-│   └── index.html / shop.html / product.html
+├── src/
+│   ├── components/
+│   │   ├── layout/           ← WorkspaceLayout, ChannelSidebar 등
+│   │   ├── agents/           ← AgentList, CreateAgentModal 등
+│   │   ├── tasks/            ← ThinkingStream, TaskTimeline 등
+│   │   ├── abilities/        ← AbilityCard, AbilityCardInventory
+│   │   ├── projects/         ← ★ 프로젝트 UI (미구현)
+│   │   └── dashboard/        ← ★ 작업 현황 대시보드 (미구현)
+│   ├── stores/               ← Zustand 스토어
+│   ├── services/             ← API 호출 레이어
+│   └── hooks/                ← 커스텀 훅
 │
-├── [서브에이전트 B2] 고객 페이지 (콘텐츠/회원)
-│   └── new.html / gallery.html / about.html / qna.html / review-event.html / login.html / mypage.html
+├── supabase/
+│   └── migrations/           ← SQL 마이그레이션 (순서 중요)
 │
-└── [서브에이전트 B3] 관리자 페이지 전체
-    └── admin/index.html ~ admin/settings.html (qna.html, reviews.html 포함)
-
-병렬 그룹 C — 마무리 (그룹 B 완료 후 동시 시작)
-├── [서브에이전트 C1] 텔레그램 연동 완성 및 테스트
-└── [서브에이전트 C2] 전체 반응형 점검 및 크로스 브라우저 테스트
-```
-
-### 서브에이전트 공통 지침
-```
-1. 작업 시작 전 MISTAKES.md를 반드시 읽는다
-2. 작업 완료 후 섹션 15의 해당 STEP 체크리스트를 실행한다
-3. 에러 발생 시 MISTAKES.md에 즉시 기록한다
-4. 다른 서브에이전트의 작업 영역을 침범하지 않는다
-5. 공통 파일(config.js, variables.css) 수정 시 메인 에이전트에 보고한다
-6. 완료 보고 형식: "STEP X 완료 — 검증 결과: 전체 PASS / N개 FAIL (수정 완료)"
-```
-
-### 의존성 맵
-```
-STEP 1,2 (환경)
-    ↓
-STEP 3,4 (CSS + DB) ← 병렬 가능
-    ↓
-STEP 5,6 (JS 모듈) ← config.js 먼저, 나머지 병렬
-    ↓
-STEP 7 (공통 컴포넌트) ← 단독 실행 필수
-    ↓
-STEP 8~12 (페이지들) ← 그룹별 병렬 가능
-    ↓
-STEP 13,14 (알림 + 반응형) ← 병렬 가능
-    ↓
-STEP 15 (README + 최종 검증) ← 단독 실행 필수
+└── .claude/
+    └── agents/               ← Sub-agent 정의
+        ├── chief-pm.md       ← ★ Chief PM 오케스트레이터
+        ├── frontend.md
+        ├── backend.md
+        ├── ai-engine.md
+        └── qa.md
 ```
 
 ---
 
-## 14. 미결 사항 (판매자 협의 후 업데이트)
+## 반복 실수 방지
 
-- [ ] 브랜드 로고 파일 수령 → `assets/logo/`에 추가
-- [ ] 매장 위치 / 운영시간 확정
-- [ ] 매장 갤러리 가격 공개 여부 최종 결정
-- [ ] 인스타그램 계정명 확정 (@hellogarden_official 추정)
-- [ ] 실제 상품 이미지 및 데이터 수집 완료 후 시드 데이터 교체
-- [ ] 네이버 OAuth 개발자 센터 앱 등록 (Client ID/Secret 발급)
-- [ ] 구글 OAuth Cloud Console 앱 등록
-- [ ] 텔레그램 Bot 생성 및 Token 발급
-- [ ] Vercel 도메인 연결 (커스텀 도메인 구매 여부)
+```
+❌ Phaser.js 관련 코드 절대 추가하지 말 것 (제거됨)
+❌ ANTHROPIC_API_KEY를 클라이언트 번들에 포함하지 말 것
+❌ .env 파일을 Write 툴로 생성하지 말 것 (echo 명령 사용)
+❌ Zustand store 전체를 구독하지 말 것 (무한 렌더링)
+❌ agent_type 없이 에이전트를 생성하지 말 것 (기본값: persistent)
+❌ RLS 없이 테이블 생성하지 말 것
+❌ Chief PM을 Haiku로 실행하지 말 것 (Sonnet 필수)
+```
+
+---
+
+## 검증 트리거
+
+```
+"검증 해줘"        → 전체 검증 (빌드 + 타입 + 보안 + 요청 반영)
+"빌드 검증 해줘"   → npm run build 실행
+"스키마 검증"      → migrations 순서 + RLS 정책 확인
+"보안 검증"        → API 키 노출 + .env .gitignore 확인
+```
+
+---
+
+## KPI 핵심 3가지
+
+```
+① 프로젝트 자율 완료율  (North Star — 목표: 50%+)
+② WAU                  (재방문 — 목표: 40%+)
+③ NPS                  (만족도 — 목표: 30+)
+```
+
+## 절대 규칙 (이 규칙을 어기면 멈추고 알려주세요)
+
+아래 규칙과 충돌하는 요청이 들어오면, 멈추고 사용자에게 먼저 확인하세요.
+
+---
+
+### 1. 기술 스택은 바꾸지 마세요
+
+| 역할 | 사용할 기술 | 다른 거 쓰면 안 됨 |
+|------|------------|------------------|
+| 프레임워크 | React + Vite + TypeScript | Next.js, Vue, Angular 안 됨 |
+| UI | Tailwind CSS | Bootstrap, MUI 안 됨 |
+| 데이터/로그인/파일저장 | Supabase | Firebase, AWS 안 됨 |
+| 런타임 | Node.js | Deno, Bun 안 됨 |
+| 웹에 올리기 | Vercel | Netlify, 다른 거 안 됨 |
+
+사용자가 다른 기술을 요청하면 이렇게 물어보세요:
+> "이 도구는 React + Vite + Supabase + Vercel 조합에 맞춰져 있어요.
+> 다른 걸 쓰면 제가 제대로 도와드리기 어려워요.
+> 일단 이 조합으로 빨리 만들어볼까요?"
+
+---
+
+### 2. 항상 한국어로, 쉽게 설명하세요
+
+- 모든 대답은 한국어로 합니다
+- 사용자는 코딩과 바이브 코딩에 익숙하지 않습니다.
+- 어려운 말이 나오면, 바로 뒤에 쉬운 말로 다시 설명하세요
+  - 예: "터미널(명령어를 입력하는 검은 창)"
+  - 예: "환경변수(비밀 설정값을 저장하는 파일)"
+- "알아서 해보세요", "패턴을 보고 응용하세요" 같은 말 하면 안 됨
+- 복사-붙여넣기 가능한 코드를 주세요
+- 어디에 붙여넣을지 정확히 알려주세요
+- 어떤 일이 벌어졌는지 항상 요약 설명해주세요.
+
+---
+
+### 3. 효율적으로 진행하세요
+
+코드를 만들기 전에 계획을 먼저 보여주고, 확인을 기다리지 않고 바로 작업을 진행합니다:
+
+1. "이렇게 할 거예요" - 계획 보여주기
+2. 바로 코드 만들기 (사용자의 허락을 기다리지 않음)
+3. 다 했으면 - 뭘 했는지 정리해주기
+
+한 번에 5개 파일 이상 바꾸지 마세요.
+
+---
+
+### 4. 비밀 정보는 보여주지도, 일반 파일에 적지도 마세요
+
+- `.env` 파일의 실제 값은 절대 화면에 출력하지 마세요
+- 예시가 필요하면 이렇게 쓰세요:
+  - `YOUR_SUPABASE_URL` (실제 값 대신)
+  - `YOUR_API_KEY` (실제 값 대신)
+- **비밀값(API 키, 토큰, Webhook URL, 비밀번호)을 `memo.md`, `note.md`, `scratch/`, `*test*.js` 같은 일반 파일에 절대 적지 마세요.** 이 파일들은 `vercel deploy` 시 함께 업로드되어 외부에 노출됩니다. `.gitignore`로는 막지 못합니다 (Vercel CLI는 `.vercelignore`를 따로 봅니다).
+- 비밀값을 적을 곳은 두 군데뿐입니다:
+  - 로컬 작업: `.env` 파일 (반드시 `.gitignore`와 `.vercelignore`에 등록)
+  - 배포 환경: Vercel 대시보드 -> Settings -> Environment Variables
+- 사용자가 메모 파일에 비밀값을 적어달라고 하면, 멈추고 이렇게 안내하세요:
+  > "이 메모는 `vercel deploy` 시 같이 올라가서 외부에 노출될 수 있어요.
+  > 비밀값은 `.env`에만 적고, 메모에는 `YOUR_DISCORD_WEBHOOK_URL` 같은 자리표시자만 적을게요."
+
+---
+
+### 5. 필요한 경우 과감하게 수정하세요
+
+파일을 삭제하거나 크게 바꾸는 것도 사용자의 확인 없이 필요하다고 판단되면 바로 진행하세요. 단, 작업 후에는 어떤 파일을 왜 수정/삭제했는지 명확히 알려주세요.
+
+---
+
+### 6. 설정할 때는 클릭 경로까지 알려주세요
+
+Supabase, Vercel 같은 사이트 설정을 안내할 때:
+- 어디를 클릭해야 하는지
+- 버튼 이름이 뭔지
+- 화면에 뭐가 보이는지
+구체적으로 알려주세요.
+
+---
+
+### 7. 환경 세팅은 자동으로 처리하세요
+
+사용자가 "시작해줘"라고 하면 다음을 순서대로 실행하세요:
+
+1. Node.js 설치 확인 (`node -v`). 없으면:
+   - Mac: `brew install node` 또는 nodejs.org에서 다운로드 안내
+   - Windows: 아래 순서대로 시도하세요
+     1. `winget install OpenJS.NodeJS.LTS` 실행
+     2. winget이 안 되면 ("winget을 찾을 수 없습니다" 에러), nodejs.org에서 LTS 버전 다운로드 안내
+     3. 설치 완료 후, 반드시 터미널을 완전히 껐다가 다시 열기 (닫기 버튼 클릭 후 새 터미널 열기)
+     4. 새 터미널에서 `node -v`로 확인. 여전히 안 되면 컴퓨터를 재시작하라고 안내
+2. 프로젝트 생성 (`npm create vite@latest [프로젝트이름] -- --template react-ts`)
+3. 의존성 설치 (`cd [프로젝트이름] && npm install`)
+4. Tailwind CSS 설치 (`npm install -D tailwindcss @tailwindcss/vite`)
+5. Supabase 클라이언트 설치 (`npm install @supabase/supabase-js`)
+6. **`.gitignore` + `.vercelignore` 자동 생성 (규칙 8 참고)**
+7. 로컬 서버 실행 (`npm run dev`)
+
+각 단계에서 에러가 나면 멈추고 에러 메시지를 보여주세요.
+사용자에게 "다음 단계로 넘어갈까요?"라고 물어보세요.
+
+Windows 사용자라면, 위 단계 시작 전에 아래를 먼저 점검하세요:
+- 터미널 종류 확인: PowerShell을 사용하세요. cmd(명령 프롬프트)는 쓰지 마세요. 사용자가 cmd를 쓰고 있으면 PowerShell로 바꾸라고 안내하세요. PowerShell 여는 방법: 키보드에서 Windows 키를 누르고 "PowerShell" 입력 후 클릭.
+- 프로젝트 폴더 경로에 한글이 있으면 에러가 날 수 있어요. 반드시 `C:\dev\` 같은 영어 경로에 프로젝트를 만드세요. 바탕화면이나 문서 폴더에서 작업하지 마세요. 사용자가 시작하면 제일 먼저 `mkdir C:\dev` -> `cd C:\dev`를 실행하세요.
+- PowerShell 실행 정책 차단: npm 첫 실행 시 "스크립트를 실행할 수 없습니다" 에러가 나면 `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`를 먼저 실행하세요.
+- `npm` 명령이 안 될 때: "npm은(는) 내부 또는 외부 명령이 아닙니다"라고 나오면, Node.js 설치 후 터미널을 껐다 열지 않은 것입니다. 터미널을 완전히 닫고 새로 여세요.
+
+---
+
+### 8. .gitignore와 .vercelignore를 항상 함께 만들고 점검하세요
+
+`git push`는 `.gitignore`에 안 적힌 모든 파일을 GitHub 등 원격 저장소에 올립니다.
+`vercel deploy`는 `.vercelignore`에 안 적힌 모든 파일을 Vercel 서버에 업로드합니다.
+**둘은 서로 다른 파일이고, 한쪽만 있어서는 막지 못합니다.** Vercel CLI는 두 파일을 따로 보기 때문에, `.gitignore`에 적었어도 `.vercelignore`에 없으면 그대로 올라갑니다.
+
+프로젝트 시작 시 두 파일을 모두 자동으로 만드세요. **두 파일 내용은 동일하게 유지합니다** (학생이 헷갈리지 않도록).
+
+`.gitignore` 또는 `.vercelignore`가 없거나 부실하면 아래 내용으로 새로 만들거나 보강하세요. **두 파일에 동일한 내용을 넣습니다**:
+
+```
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment & Secrets (절대 외부 노출 금지)
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Vercel
+.vercel/
+
+# Memo / Scratch / Test files (비밀값 노출 위험)
+memo.md
+memo*.md
+note.md
+note*.md
+scratch/
+tmp/
+*.test.js
+*.test.ts
+*.local.*
+*.bak
+*.old
+
+# AI agent instruction (외부 노출 방지)
+GEMINI.md
+GEMINI*.md
+CLAUDE.md
+```
+
+`/deploy` 직전에도 두 파일이 위 패턴을 모두 포함하는지 점검하고, 빠진 항목이 있으면 자동 추가 후 진행하세요. 두 파일 중 하나라도 없으면 먼저 만든 다음 배포를 진행하세요.
+
+---
+
+## 대화 스타일
+
+1. 먼저 지금 상황을 한 줄로 알려주세요
+   - 예: "지금은 퀴즈 앱을 React로 바꾸는 단계예요."
+
+2. 그 다음 선택지 2-3개를 보여주세요
+   - 각 선택지마다 시간과 난이도를 적어주세요
+   - 예: "A) 퀴즈 데이터만 바꾸기 (5분, 쉬움)"
+   - 예: "B) 디자인도 바꾸기 (10분, 보통)"
+
+3. 사용자가 선택하면 한 단계씩 진행하세요
+
+---
+
+## 워크플로우
+
+### /start - 프로젝트 시작
+
+1. Node.js 설치 확인 + 설치
+2. React + Vite + TypeScript 프로젝트 생성
+3. Tailwind CSS 설정
+4. Supabase 클라이언트 설정
+5. `.gitignore` + `.vercelignore` 자동 생성 (규칙 8 패턴)
+6. 기존 퀴즈 앱 HTML을 React 컴포넌트로 변환
+7. `npm run dev`로 로컬 실행 확인
+
+### /deploy - Vercel 배포
+
+**0. 배포 전 비밀값 노출 검사 (필수, 건너뛰지 마세요)**
+
+먼저 `.gitignore`와 `.vercelignore`가 규칙 8의 패턴을 모두 포함하는지 확인하고, 둘 중 하나라도 없거나 빠진 항목이 있으면 자동으로 만들고 추가하세요.
+
+다음으로 프로젝트 루트에서 비밀값 평문 노출 검사를 실행하세요:
+
+```bash
+grep -rE "(discord(app)?\.com/api/webhooks/[0-9]+/|sk-[A-Za-z0-9]{20,}|xoxb-[0-9A-Za-z-]+|AKIA[0-9A-Z]{16}|eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,})" \
+  --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git --exclude-dir=.vercel \
+  -l . 2>/dev/null
+```
+
+매치된 파일이 1건이라도 나오면 **배포를 즉시 중단**하고 사용자에게 이렇게 안내하세요:
+
+> "배포를 멈췄어요. 다음 파일에 비밀값(Webhook URL, API 키, 토큰)이 평문으로 들어 있어요:
+> [파일 목록]
+> 이 비밀값들을 즉시 발급처(Discord, Supabase, OpenAI 등)에서 무효화(revoke)하고,
+> 새 값을 `.env`와 Vercel 대시보드 Environment Variables에 옮긴 다음 다시 배포할게요."
+
+1. 먼저 로컬에서 빌드가 되는지 확인: `npm run build`. 여기서 에러가 나면 배포도 안 되니 에러를 먼저 고치세요.
+2. Vercel 로그인: `npx vercel login` (브라우저가 열리면 Google 계정으로 로그인. 수업용 계정으로 로그인했는지 확인.)
+3. 배포 실행: `npx vercel --yes` (질문 없이 자동으로 배포됩니다. URL이 나타나면 성공.)
+4. URL을 클릭해서 브라우저에서 확인
+5. 핸드폰으로 접속 테스트 (카카오톡 나에게 보내기로 URL 전송)
+
+주의: `npm install -g vercel`은 사용하지 마세요. `npx vercel`이 설치 없이 바로 실행되고, 권한 문제도 없습니다.
+
+배포가 안 되면:
+- 빌드 에러: `npm run build`에서 나온 에러 메시지를 읽고 고치세요
+- Vercel 로그인 실패: 브라우저에서 vercel.com에 직접 접속해서 Google 계정으로 가입 후 다시 시도
+- 빌드는 되는데 배포가 안 되면: `npm run build` 후 dist 폴더를 app.netlify.com/drop 에 드래그앤드롭 (Vercel 대안)
+
+### /add-data - Supabase 연결
+
+1. Supabase 프로젝트 생성 안내 (supabase.com)
+2. `.env` 파일에 키 설정
+3. Supabase 클라이언트 초기화
+4. 퀴즈 데이터를 Supabase에 저장
+5. 앱에서 Supabase 데이터 불러오기
+
+---
+
+## 모델을 위한 참고사항
+
+- 이 파일은 자동으로 읽혀요. 다른 규칙보다 이 파일을 우선하세요.
+- 규칙끼리 충돌하면, 뭘 포기했는지 사용자에게 솔직하게 말하세요.
+- React + Vite 구조를 사용하세요 (`src/` 디렉토리, `App.tsx`, `main.tsx`).
+- 파일 확장자는 `.tsx` / `.ts`를 사용하세요.
+- 환경변수 접두사는 `VITE_`를 사용하세요. 단 `VITE_` 접두사는 **클라이언트 번들에 평문으로 박힙니다** - 브라우저 devtools에서 누구나 볼 수 있습니다. 따라서 Webhook URL, Service Role Key 같은 진짜 비밀값에는 절대 사용하지 마세요. 진짜 비밀값은 `api/` 폴더의 서버리스 함수에서 일반 환경변수(`process.env.X`)로만 읽으세요.
+- 개발 서버 주소는 `localhost:5173`이에요.
+- vite.config.ts에 `server: { host: '127.0.0.1' }`을 넣으면 Windows 방화벽 팝업이 안 뜹니다. 프로젝트 생성 시 자동으로 넣어주세요.
+- 파일 저장은 Supabase Storage를 사용하세요.
+- npm 명령어를 체인하지 마세요 (`&&`로 연결 금지). 한 줄씩 실행하고 결과를 확인한 뒤 다음으로 넘어가세요.
+- 배포는 `npx vercel --yes`를 사용하세요. `npm install -g vercel`은 사용하지 마세요.
+
+---
+
+## Windows 문제 해결
+
+사용자가 Windows를 쓰고 있고 에러가 나면, 아래에서 해당하는 증상을 찾아 안내하세요.
+
+### "winget을 찾을 수 없습니다"
+
+winget이 설치 안 된 컴퓨터예요. nodejs.org 사이트에 접속해서 LTS 버전 다운로드 버튼을 클릭하고, 설치 파일을 실행하라고 안내하세요. 설치할 때 뜨는 옵션은 전부 기본값으로 "Next"만 누르면 됩니다.
+
+### "node(npm)은(는) 내부 또는 외부 명령이 아닙니다"
+
+Node.js를 설치했는데 터미널을 안 껐다 켠 거예요. 해결 방법:
+1. 지금 열려 있는 터미널(PowerShell)을 X 버튼으로 완전히 닫기
+2. 새로 PowerShell 열기
+3. `node -v` 다시 입력
+4. 그래도 안 되면 컴퓨터를 재시작하라고 안내
+
+### "이 시스템에서 스크립트를 실행할 수 없습니다" (실행 정책 에러)
+
+PowerShell의 보안 설정 때문이에요. 해결 방법:
+1. PowerShell을 오른쪽 클릭해서 "관리자 권한으로 실행"
+2. `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` 입력
+3. "Y" 입력
+4. 관리자 PowerShell을 닫고, 일반 PowerShell에서 다시 시도
+
+### npm install 중 "EPERM" 또는 "permission denied"
+
+관리자 권한이 필요한 거예요. 해결 방법:
+1. 지금 터미널을 닫기
+2. PowerShell을 오른쪽 클릭 -> "관리자 권한으로 실행"
+3. `cd` 명령으로 프로젝트 폴더로 이동한 뒤 다시 시도
+4. 글로벌 설치(`-g`)에서 에러가 나면 `npx`로 대체 (예: `npm install -g vercel` 대신 `npx vercel`)
+
+### npm install 중 경로에 한글이 있어서 에러
+
+에러 메시지에 깨진 글자(?????)나 "Invalid character" 같은 게 보이면 폴더 이름에 한글이 있는 거예요. 해결 방법:
+1. `C:\Projects\` 폴더를 새로 만들기 (영어로)
+2. 그 안에서 프로젝트를 다시 시작
+
+사용자에게 이렇게 안내하세요:
+> "프로젝트 폴더를 영어 이름으로 바꿔야 해요. C 드라이브 바로 아래에 Projects 폴더를 만들고 거기서 시작할까요?"
+
+### localhost:5173에 접속이 안 됨
+
+`npm run dev`는 성공했는데 브라우저에서 localhost:5173이 안 열리는 경우:
+1. Windows 방화벽 팝업이 떴는데 "차단"을 눌렀을 수 있어요. 해결: `npm run dev`를 Ctrl+C로 멈추고 다시 실행. 팝업이 뜨면 "허용"을 클릭.
+2. 팝업이 안 뜨면: 브라우저 주소창에 `http://127.0.0.1:5173`을 직접 입력해보세요 (localhost 대신 127.0.0.1).
+3. 그래도 안 되면: 다른 프로그램이 5173 포트를 쓰고 있을 수 있어요. `npm run dev -- --port 3000`으로 포트를 바꿔서 실행하세요.
+
+### 위 목록에 없는 에러
+
+에러 메시지를 그대로 복사해서 보여달라고 하세요. 에러 메시지 전체를 읽고, 원인을 추측해서 안내하세요. 추측이 안 되면 솔직하게 이렇게 말하세요:
+> "이 에러는 제가 바로 해결하기 어려워요. 에러 메시지를 강사님께 보여드리세요."
+
+### .env 파일규칙
+.env 파일을 만들거나 수정할 때 반드시 터미널 명령어를 사용한다.
+에이전트 파일 생성 도구(file write)로 .env를 만들지 않는다.

@@ -10,9 +10,8 @@ import { getQnaList } from '/js/api/qna.js'
 await requireAdminAuth()
 
 // 로그아웃 버튼
-document.getElementById('btn-logout')?.addEventListener('click', () => {
-  adminLogout()
-  window.location.href = '/admin/login.html'
+document.getElementById('btn-logout')?.addEventListener('click', async () => {
+  await adminLogout()
 })
 
 // 모바일 사이드바 토글

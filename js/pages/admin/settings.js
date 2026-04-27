@@ -7,7 +7,7 @@ import { getNotificationSettings, saveNotificationSettings, testTelegramConnecti
 await requireAdminAuth()
 
 document.getElementById('btn-logout')?.addEventListener('click', async () => {
-  adminLogout(); window.location.href = '/admin/login.html'
+  await adminLogout()
 })
 document.getElementById('menu-toggle')?.addEventListener('click', () => {
   document.getElementById('admin-sidebar')?.classList.toggle('open')

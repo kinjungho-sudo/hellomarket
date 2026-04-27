@@ -1,0 +1,205 @@
+{
+  "name": "헬로우가든마켓 — 회원가입 환영 이메일",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hgm-welcome",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "회원가입 Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "hgm-welcome-email"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 웹훅으로 들어온 데이터 파싱 및 유효성 검사\nconst body = $input.first().json.body || $input.first().json;\n\nconst name  = (body.name  || '').trim();\nconst email = (body.email || '').trim();\n\nif (!email || !email.includes('@')) {\n  throw new Error('유효한 이메일이 없습니다: ' + JSON.stringify(body));\n}\n\nconst displayName = name || email.split('@')[0];\n\nreturn [{\n  json: {\n    name:  displayName,\n    email: email,\n    provider: body.provider || 'google',\n    joinedAt: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })\n  }\n}];"
+      },
+      "id": "parse-input",
+      "name": "입력 파싱 및 검증",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 환영 이메일 HTML 생성 (기존 send-notify.js 디자인 시스템 동일하게 적용)\nconst { name, email, joinedAt } = $input.first().json;\n\nconst html = `\n<!DOCTYPE html>\n<html lang=\"ko\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\n  <title>헬로우가든마켓에 오신 것을 환영해요!</title>\n</head>\n<body style=\"margin:0;padding:0;background:#faf7f0;font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#faf7f0;padding:40px 20px;\">\n    <tr><td align=\"center\">\n      <table width=\"100%\" style=\"max-width:520px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);\">\n\n        <!-- 헤더 -->\n        <tr><td style=\"background:linear-gradient(135deg,#1a3d28,#2d5a3d);padding:40px 36px;text-align:center;\">\n          <div style=\"font-size:40px;margin-bottom:12px;\">🌻</div>\n          <div style=\"color:#fff;font-size:24px;font-weight:900;letter-spacing:-0.03em;\">헬로우가든마켓</div>\n          <div style=\"color:rgba(255,255,255,0.65);font-size:13px;margin-top:6px;letter-spacing:0.05em;\">Hello Garden Market</div>\n        </td></tr>\n\n        <!-- 환영 메시지 -->\n        <tr><td style=\"padding:40px 36px 28px;\">\n          <p style=\"color:#2d5a3d;font-size:13px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 8px;\">WELCOME</p>\n          <h1 style=\"color:#2c2c2c;font-size:22px;font-weight:900;margin:0 0 16px;letter-spacing:-0.03em;line-height:1.4;\">\n            ${name}님, 가든에 오신 걸<br>환영해요! 🌿\n          </h1>\n          <p style=\"color:#666;font-size:15px;line-height:1.75;margin:0 0 28px;\">\n            헬로우가든마켓 회원이 되어주셔서 감사해요.<br>\n            온라인에서 고르고, 매장에서 직접 만나는<br>\n            특별한 식물 쇼핑을 경험해보세요 🌱\n          </p>\n\n          <!-- 혜택 카드 3개 -->\n          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:28px;\">\n            <tr>\n              <td style=\"background:#f5f0e8;border-radius:12px;padding:18px 16px;text-align:center;width:30%;\">\n                <div style=\"font-size:24px;margin-bottom:6px;\">🛒</div>\n                <div style=\"font-size:12px;font-weight:800;color:#2c2c2c;margin-bottom:4px;\">온라인 쇼핑</div>\n                <div style=\"font-size:11px;color:#888;line-height:1.5;\">엄선된 식물을<br>편하게 주문</div>\n              </td>\n              <td style=\"width:4%;\"></td>\n              <td style=\"background:#f5f0e8;border-radius:12px;padding:18px 16px;text-align:center;width:30%;\">\n                <div style=\"font-size:24px;margin-bottom:6px;\">🏡</div>\n                <div style=\"font-size:12px;font-weight:800;color:#2c2c2c;margin-bottom:4px;\">매장 갤러리</div>\n                <div style=\"font-size:11px;color:#888;line-height:1.5;\">수백 종 식물을<br>직접 구경</div>\n              </td>\n              <td style=\"width:4%;\"></td>\n              <td style=\"background:#f5f0e8;border-radius:12px;padding:18px 16px;text-align:center;width:30%;\">\n                <div style=\"font-size:24px;margin-bottom:6px;\">🔔</div>\n                <div style=\"font-size:12px;font-weight:800;color:#2c2c2c;margin-bottom:4px;\">신상 알림</div>\n                <div style=\"font-size:11px;color:#888;line-height:1.5;\">새 식물 입고<br>알림 수신</div>\n              </td>\n            </tr>\n          </table>\n\n          <!-- CTA 버튼 -->\n          <div style=\"text-align:center;margin-bottom:12px;\">\n            <a href=\"https://hellowgardenmarket.vercel.app/shop.html\"\n               style=\"display:inline-block;background:#2d5a3d;color:#fff;font-size:15px;font-weight:800;padding:16px 36px;border-radius:10px;text-decoration:none;letter-spacing:-0.02em;\">\n              식물 구경하러 가기 →\n            </a>\n          </div>\n          <p style=\"text-align:center;color:#aaa;font-size:12px;margin:0;\">\n            가입 완료 · ${joinedAt}\n          </p>\n        </td></tr>\n\n        <!-- 구분선 -->\n        <tr><td style=\"padding:0 36px;\"><hr style=\"border:none;border-top:1px solid #f0ebe0;margin:0;\"></td></tr>\n\n        <!-- 매장 정보 -->\n        <tr><td style=\"padding:24px 36px;\">\n          <p style=\"color:#999;font-size:12px;font-weight:800;letter-spacing:0.06em;margin:0 0 12px;\">📍 매장 안내</p>\n          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n            <tr>\n              <td style=\"color:#666;font-size:13px;line-height:1.8;\">\n                <div>🕐 <strong>운영시간</strong>&nbsp;&nbsp;평일·주말 09:00 – 18:00</div>\n                <div>📞 <strong>문의</strong>&nbsp;&nbsp;매장으로 직접 방문하거나 SNS 문의</div>\n                <div>📱 <strong>인스타그램</strong>&nbsp;&nbsp;@hellogarden_official</div>\n              </td>\n            </tr>\n          </table>\n        </td></tr>\n\n        <!-- 푸터 -->\n        <tr><td style=\"background:#f5f0e8;padding:20px 36px;text-align:center;border-top:1px solid rgba(0,0,0,0.06);\">\n          <p style=\"color:#999;font-size:12px;margin:0 0 4px;\">\n            헬로우가든마켓 · 건민농원\n          </p>\n          <p style=\"color:#bbb;font-size:11px;margin:0;\">\n            본 메일은 회원가입 완료 안내 메일입니다. 수신 거부는 마이페이지에서 설정할 수 있습니다.\n          </p>\n        </td></tr>\n\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    to: email,\n    subject: `[헬로우가든마켓] ${name}님, 가든에 오신 걸 환영해요! 🌿`,\n    html: html\n  }\n}];"
+      },
+      "id": "build-email",
+      "name": "환영 이메일 HTML 생성",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer re_DEffwJed_BWjB3Hb3GMT136tEJWYbSwuY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ from: 'Hello Garden Market <kinjungho@gmail.com>', to: [$json.to], subject: $json.subject, html: $json.html }) }}",
+        "options": {}
+      },
+      "id": "send-resend",
+      "name": "Resend 이메일 발송",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"환영 이메일 발송 완료\",\n  \"to\": \"{{ $('환영 이메일 HTML 생성').item.json.to }}\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "success-response",
+      "name": "성공 응답",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1120, 220]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"{{ $json.message }}\"\n}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "error-response",
+      "name": "에러 응답",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1120, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-status",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-result",
+      "name": "발송 성공 여부 확인",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1040, 300]
+    }
+  ],
+  "connections": {
+    "회원가입 Webhook": {
+      "main": [
+        [
+          {
+            "node": "입력 파싱 및 검증",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "입력 파싱 및 검증": {
+      "main": [
+        [
+          {
+            "node": "환영 이메일 HTML 생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "환영 이메일 HTML 생성": {
+      "main": [
+        [
+          {
+            "node": "Resend 이메일 발송",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resend 이메일 발송": {
+      "main": [
+        [
+          {
+            "node": "발송 성공 여부 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "발송 성공 여부 확인": {
+      "main": [
+        [
+          {
+            "node": "성공 응답",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "에러 응답",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2026-04-24T00:00:00.000Z",
+      "updatedAt": "2026-04-24T00:00:00.000Z",
+      "id": "hgm-tag",
+      "name": "헬로우가든마켓"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-04-24T00:00:00.000Z",
+  "versionId": "1"
+}
