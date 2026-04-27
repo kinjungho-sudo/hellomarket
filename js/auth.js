@@ -177,6 +177,7 @@ export async function isAdmin() {
 export async function requireLogin() {
   const { session } = await getSession()
   if (!session) {
+    sessionStorage.setItem('loginRedirect', window.location.pathname + window.location.search)
     window.location.href = '/login.html'
   }
 }
@@ -251,6 +252,9 @@ export async function updateNavAuth() {
         loginLink.href = '/login.html'
         loginLink.className = 'btn btn-primary'
         loginLink.textContent = '로그인'
+        loginLink.addEventListener('click', () => {
+          sessionStorage.setItem('loginRedirect', window.location.pathname + window.location.search)
+        })
         navAuthEl.appendChild(loginLink)
       }
     }
@@ -275,6 +279,9 @@ export async function updateNavAuth() {
         const loginLink = document.createElement('a')
         loginLink.href = '/login.html'
         loginLink.textContent = '🔑 로그인'
+        loginLink.addEventListener('click', () => {
+          sessionStorage.setItem('loginRedirect', window.location.pathname + window.location.search)
+        })
         mobileAuthEl.appendChild(loginLink)
       }
     }
